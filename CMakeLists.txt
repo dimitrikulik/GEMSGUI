@@ -63,6 +63,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Find other dependencies
 include(GEMSGUIFindDeps)
 
+if(TARGET GEMS3K::GEMS3K)
+    get_target_property(GEMS3K_INC GEMS3K::GEMS3K INTERFACE_INCLUDE_DIRECTORIES)
+    if(GEMS3K_INC)
+        include_directories(BEFORE ${GEMS3K_INC})
+    endif()
+endif()
+
 # Find Qt dependencies
 if(BUILD_APP)
   find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Charts Concurrent PrintSupport Svg Help Sql)
@@ -133,7 +140,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
     )
 endif()
 
-if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" AND NOT DEFINED ENV{CONDA_PREFIX})
    include_directories("/usr/local/include")
    link_directories("/usr/local/lib")
 endif()
