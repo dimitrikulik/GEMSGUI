@@ -114,12 +114,12 @@ typedef struct {         /* Packed system state description */
                    // eqstate(res)[sy.Fik]
   // Adsorption / EDL models     default OFF
   /* DC parameters */
-  char (*SATC)[MCAS];   // SACT method codes & allocations of surface species
+  char (*SATC)[MNCAS];  // SACT method codes & allocations of surface species
                         // [sy.Lsor][MCAS]
   float (*MaSdj)[DFCN]; // Density, Frumkin, CD-MUSIC params new [sy.Lsor][DFCN]
   /* Phase parameters */
   char (
-      *SCMT)[MNST]; /* Classifier of EDL models for surface types [sy.Fia][6] */
+      *SCMT)[MNST]; /* Classifier of EIL models for surface types [sy.Fia][6] */
   float (*Nfsp)[MNST];  // Fraction of surface types relative to carrier
                         // components [sy.Fia][6]
   float (*MaSdt)[MNST]; // Max.total reactive species density 1/nm2 [sy.Fia][6]
