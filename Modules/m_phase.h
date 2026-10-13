@@ -200,12 +200,6 @@ typedef struct {        // Description of PHASE record (old part)
       IEC,   // new: ion exchange capacity (eq/kg), default: 0 unused
       fRes2, // new: reserved
 
-      // old stuff for sorption models
-      // *FsiT, // Fraction of surface type relative to carrier
-      // (components)[NsuT]
-
-      *XfIEC, // Constant surface charge density or IEC on surface type, mkeq/g
-              // [NsuT]
       // TSolMod stuff
       *pnc,   // Array of phase-related coefficients of non-ideality model
               // [ncpN][ncpM]
@@ -265,39 +259,44 @@ typedef struct {        // Description of PHASE record (old part)
                /// [i][2] C3 - outer EIL capacitance density, F/m2 (4LM),
                /// def.0.2 [i][3] f_zeta - location parameter for slip plane for
                /// zeta potential, fraction of Debye length (default 0.5) Stern
+  float *XfIEC; // Constant surface charge density or IEC on surface type,
+                // mkeq/g [NsuT]
 
-  // Data in nSiT rows for nSiT surface site types from 0 to 7, all surf species
-  // related to given site(s) must link to on the same surface type (patch)
-  float (*FsiT)[NFSIT]; /// | Density of sites of this site type, 1/nm2 [nSiT=8]
-                        /// | Capacity of sites of this type, mol/(kg sorbent)
+  // Data in nSiT rows for surface site types from 0 to 7, all surf species
+  // related to given site(s) must link to the same surface type (patch)
+  float (
+      *FsiT)[NFSIT]; /// [nSiT=8][NFSIT] | Density of sites of this site type,
+                     /// 1/nm2 | Capacity of sites of this type, mol/(kg
+                     /// sorbent) | Index of surface type owning (linked to)
+                     /// this site type | Reserved input property of site type
 
   // Data for surface species (protolysis, surf complexes, exchange ions)
   char (
-      *xSmD)[NSURFSITE]; // new: denticity allocation of surface species (per
-                         // row) to up to 8 surface site types (number of bonds
-                         // 1 2 3 4 or 0 if no binding to this site type).
-  char (*SATC)[MNCAS]; // SACT method codes & allocations of individual surface
-                       // species [nDC][MNCAS=4] [0] Allocation of surface
-                       // species to surface type (patch) { 0 1 2 3 4 5 max }
-                       // [1] Surface species: individual SACT code { L Q 1 2 3
-                       // 4 F R N I } [2] Allocation of surface species to
-                       // sorbent (or its end-members) { I V 0 1 2 3 4 5 } [3]
-                       // Units in which surface density is given in MaSDj { n }
-                       // ( {  m M g } reserved ) ",
+      *xSmD)[NSURFSITE]; /// new: denticity allocation of surface species (per
+                         /// row) to up to 8 surface site types (number of bonds
+                         /// 1 2 3 4 or 0 if no binding to a given site type).
+  char (*SATC)[MNCAS]; /// SACT method codes & allocations of individual surface
+                       /// species [nDC][MNCAS=4] [0] Allocation index of
+                       /// surface species to surface type (patch) { 0 1 2 3 4 5
+                       /// max } [1] Surface species: individual SACT code { L Q
+                       /// 1 2 3 4 F R N I } [2] Allocation of surface species
+                       /// to sorbent (or its end-members) { I V 0 1 2 3 4 5 }
+                       /// [3] Units in which surface density is given in MaSDj
+                       /// { n } ( {  m M g } reserved ) ",
   float (
-      *MaSdj)[DNFCN]; // Max. density, CD-music and isotherm params
-                      // [nDC][DNFCN=4] Parameters for surface activity
-                      // coefficent terms SACT: | [j][0] Surface species
-                      // complete coverage density (1/nm2)_ | [j][1] SACT
-                      // isotherm parameter 1 (interaction parameter alpha in
-                      // Frumkin (FFG), <0 repulsion, >0 attraction)_ | [j][2]
-                      // SACT isotherm parameter 2 (e.g. QCA, BET SACT)_ |
-                      // [j][3] SACT isotherm parameter 3, e.g. b in BET SACT
+      *MaSdj)[DNFCN]; /// Max. density, CD-music and isotherm params
+                      /// [nDC][DNFCN=4] Parameters for surface activity
+                      /// coefficent terms SACT: | [j][0] Surface species
+                      /// complete coverage density (1/nm2)_ | [j][1] SACT
+                      /// isotherm parameter 1 (interaction parameter alpha in
+                      /// Frumkin (FFG), <0 repulsion, >0 attraction)_ | [j][2]
+                      /// SACT isotherm parameter 2 (e.g. QCA, BET SACT)_ |
+                      /// [j][3] SACT isotherm parameter 3, e.g. b in BET SACT
 
-  float (*mCDc)[DMCDC]; // new: Array of per-formula charges of surface species:
-                        // [0] A (0) plane charge; [1] B (1) plane charge; [2] C
-                        // (2) plane charge; [3] charge balance for this species
-                        // [nDC][DMCDC]
+  float (*mCDc)[DMCDC]; /// new: Array of per-formula charges of surface
+                        /// species: [0] A (0) plane charge; [1] B (1) plane
+                        /// charge; [2] C (2) plane charge; [3] charge balance
+                        /// for this species [nDC][DMCDC]
 
   // DC list
   char (*SM)[DC_RKLEN];  // List of DC record keys included into this phase[nDC]
