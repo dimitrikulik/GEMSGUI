@@ -84,7 +84,7 @@ void TPhase::ods_link(int q) {
   aObj[o_phscmc]->SetPtr(ph[q].SCMC);
   aObj[o_phscmc]->SetDim(ph[q].NsuT, NSCMC);
   aObj[o_phxfiec]->SetPtr(ph[q].XfIEC);
-  aObj[o_phxfiec]->SetDim(ph[q].NsuT, 1);
+  aObj[o_phxfiec]->SetDim(ph[q].NsuT, NCIEC);
   aObj[o_phmsdt]->SetPtr(ph[q].MSDT);
   aObj[o_phmsdt]->SetDim(ph[q].NsuT, NMSDT);
   aObj[o_phcapt]->SetPtr(ph[q].CapT);
@@ -247,7 +247,7 @@ void TPhase::dyn_set(int q) {
   memcpy(php->pst_, rt[nRT]->UnpackKey(), PH_RKLEN);
   ph[q].SCMC = static_cast<char (*)[NSCMC]>(aObj[o_phscmc]->GetPtr());
   ph[q].FsiT = static_cast<float (*)[NFSIT]>(aObj[o_phfsit]->GetPtr());
-  ph[q].XfIEC = static_cast<float *>(aObj[o_phxfiec]->GetPtr());
+  ph[q].XfIEC = static_cast<float (*)[NCIEC]>(aObj[o_phxfiec]->GetPtr());
   ph[q].MSDT = static_cast<float (*)[NMSDT]>(aObj[o_phmsdt]->GetPtr());
   ph[q].CapT = static_cast<float (*)[NCAZP]>(aObj[o_phcapt]->GetPtr());
   ph[q].SATC = static_cast<char (*)[MNCAS]>(aObj[o_phsatc]->GetPtr());
@@ -335,7 +335,7 @@ void TPhase::dyn_kill(int q) {
           "E02PHrem: Invalid access to ph in dyn_kill()");
   ph[q].SCMC = static_cast<char (*)[NSCMC]>(aObj[o_phscmc]->Free());
   ph[q].FsiT = static_cast<float (*)[NFSIT]>(aObj[o_phfsit]->Free());
-  ph[q].XfIEC = static_cast<float *>(aObj[o_phxfiec]->Free());
+  ph[q].XfIEC = static_cast<float (*)[NCIEC]>(aObj[o_phxfiec]->Free());
   ph[q].MSDT = static_cast<float (*)[NMSDT]>(aObj[o_phmsdt]->Free());
   ph[q].CapT = static_cast<float (*)[NCAZP]>(aObj[o_phcapt]->Free());
   ph[q].SATC = static_cast<char (*)[MNCAS]>(aObj[o_phsatc]->Free());
@@ -452,8 +452,8 @@ void TPhase::dyn_new(int q) {
         aObj[o_phscmc]->Alloc(ph[q].NsuT, NSCMC, A_));
     ph[q].FsiT = static_cast<float (*)[NFSIT]>(
         aObj[o_phfsit]->Alloc(ph[q].nSiT, NFSIT, F_));
-    ph[q].XfIEC =
-        static_cast<float *>(aObj[o_phxfiec]->Alloc(ph[q].NsuT, 1, F_));
+    ph[q].XfIEC = static_cast<float (*)[NCIEC]>(
+        aObj[o_phxfiec]->Alloc(ph[q].NsuT, NCIEC, F_));
     ph[q].MSDT = static_cast<float (*)[NMSDT]>(
         aObj[o_phmsdt]->Alloc(ph[q].NsuT, NMSDT, F_));
     ph[q].CapT = static_cast<float (*)[NCAZP]>(
@@ -467,7 +467,7 @@ void TPhase::dyn_new(int q) {
   } else {
     ph[q].SCMC = static_cast<char (*)[NSCMC]>(aObj[o_phscmc]->Free());
     ph[q].FsiT = static_cast<float (*)[NFSIT]>(aObj[o_phfsit]->Free());
-    ph[q].XfIEC = static_cast<float *>(aObj[o_phxfiec]->Free());
+    ph[q].XfIEC = static_cast<float (*)[NCIEC]>(aObj[o_phxfiec]->Free());
     ph[q].MSDT = static_cast<float (*)[NMSDT]>(aObj[o_phmsdt]->Free());
     ph[q].CapT = static_cast<float (*)[NCAZP]>(aObj[o_phcapt]->Free());
     ph[q].SATC = static_cast<char (*)[MNCAS]>(aObj[o_phsatc]->Free());

@@ -6990,10 +6990,10 @@
         "type": "A_"
     },
     {
-        "dimM": 1,
+        "dimM": 2,
         "dimN": 3,
         "dyna": true,
-        "hint": "Density of permanent surface charge, mkeq/m2 (for electrostatic SCMs) ",
+        "hint": "| Permanent surface charge [NsuT][NCIEC=2] (for electrostatic SCMs): density in 1/nm2\n | permanent charge capacity IEC in meq/g",
         "id": "o_phxfiec",
         "label": "XfIEC",
         "ndxs": "N",

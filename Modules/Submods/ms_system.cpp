@@ -160,7 +160,7 @@ void TSyst::ods_link(int /*q*/) {
       sy.XcapZ); // New: f_zeta electrokinetic slip plane parameter
   aObj[o_syxcapf]->SetDim(mup->Fis, sy.NsTm);
   aObj[o_syxfiec]->SetPtr(sy.XfIEC);
-  aObj[o_syxfiec]->SetDim(mup->Fis, sy.NsTm);
+  aObj[o_syxfiec]->SetDim(mup->Fis, NCIEC);
   aObj[o_syscmt]->SetPtr(sy.SCMT);
   aObj[o_syscmt]->SetDim(mup->Fis, sy.NsTm);
   aObj[o_syxlam]->SetPtr(sy.Xlam);

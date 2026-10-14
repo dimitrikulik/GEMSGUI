@@ -131,13 +131,13 @@ typedef struct {         /* Packed system state description */
   float (
       *XcapA)[MNST]; // Inner-layer capacitance density C1 (TLM,CCM,BSM,3LM,4LM)
                      // for surface types, F/m2 [sy.Fia][MNST]
-  float (*XcapB)[MNST]; // Outer-layer capacitance density C2 (TLM,3LM,4LM) for
-                        // surface types, F/m2 [sy.Fia][MNST]
-  float (*XcapC)[MNST]; // New: Outer-layer capacitance density C3 (4LM) for
-                        // surface types, F/m2 [sy.Fia][MNST]
-  float (*XcapZ)[MNST]; // New: Parameter f_zeta to locate slip plane for zeta
-                        // potential (fraction of Debye length) [sy.Fia][MNST]
-  float (*XfIEC)[MNST]; // Fix surf charge density or IEC mkeq/m2    [sy.Fia][6]
+  float (*XcapB)[MNST];  // Outer-layer capacitance density C2 (TLM,3LM,4LM) for
+                         // surface types, F/m2 [sy.Fia][MNST]
+  float (*XcapC)[MNST];  // New: Outer-layer capacitance density C3 (4LM) for
+                         // surface types, F/m2 [sy.Fia][MNST]
+  float (*XcapZ)[MNST];  // New: Parameter f_zeta to locate slip plane for zeta
+                         // potential (fraction of Debye length) [sy.Fia][MNST]
+  float (*XfIEC)[NCIEC]; // Fix surf charge density or IEC mkeq/m2 [sy.Fia][6]
   float (
       *Xlam)[MNST]; // Factor of discretnes IDL 0 < 1 - in PHASE  [sy.Fia][6] */
 

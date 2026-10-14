@@ -100,7 +100,8 @@ enum std_object {
 
 #ifndef M_CONST_BASE_H
 const int MAXPARAMKEY = 24, MNST = 6, DMCDC = 4, DNFCN = 4, MNCAS = 4,
-          NNCAZP = 4, NNMSDT = 4, NSURFSITE = 8, NSCMC = 2, NFSIT = 4;
+          NNCAZP = 4, NNMSDT = 4, NSURFSITE = 8, NSCMC = 2, NFSIT = 4,
+          NCIEC = 2;
 // New: Column index in SCMC array (rows for surface types/patches)
 const int SCMC_EILM_CODE = 0, SCMC_SACT_CODE = 1,
           // New: Column index in MSDT array (rows for surface types/patches)

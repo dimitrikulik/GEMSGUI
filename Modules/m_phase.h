@@ -259,8 +259,11 @@ typedef struct {        // Description of PHASE record (old part)
                /// [i][2] C3 - outer EIL capacitance density, F/m2 (4LM),
                /// def.0.2 [i][3] f_zeta - location parameter for slip plane for
                /// zeta potential, fraction of Debye length (default 0.5) Stern
-  float *XfIEC; // Constant surface charge density or IEC on surface type,
-                // mkeq/g [NsuT]
+
+  float (*XfIEC)[NCIEC]; // Constant charge density or IEC on 0-plane on surface
+                         // type, meq/g or eq/kg [NsuT]  what about having this
+                         // as second column, while first column would be perm.
+                         // charge density in 1/nm2?
 
   // Data in nSiT rows for surface site types from 0 to 7, all surf species
   // related to given site(s) must link to the same surface type (patch)
