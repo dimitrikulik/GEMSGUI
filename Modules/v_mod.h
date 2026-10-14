@@ -98,6 +98,7 @@ enum std_object {
 // Param
 //---------------------------------
 
+#ifndef M_CONST_BASE_H
 const int MAXPARAMKEY = 24, MNST = 6, DMCDC = 4, DNFCN = 4, MNCAS = 4,
           NNCAZP = 4, NNMSDT = 4, NSURFSITE = 8, NSCMC = 2, NFSIT = 4;
 // New: Column index in SCMC array (rows for surface types/patches)
@@ -107,6 +108,9 @@ const int SCMC_EILM_CODE = 0, SCMC_SACT_CODE = 1,
           CAPT_A_CAPD = 0, CAPT_B_CAPD = 1, CAPT_C_CAPD = 2, CAPT_F_ZETA = 3,
           // New: column index in FsiT array (rows for site types)
     FSIT_S_DENSITY = 0, FSIT_S_CAPACITY = 1;
+#else
+const int MAXPARAMKEY = 24, NNCAZP = 4, NNMSDT = 4, NSURFSITE = 8;
+#endif
 
 enum param_objects {       // work objects
   o_paver = o_lms_paf + 1, // o_rttime+1,
@@ -278,8 +282,9 @@ enum param_objects {       // work objects
   o_syxcapa,
   o_syxcapb,
   o_syxcapc,
+  o_syxcapf, // Restored: f_zeta electrokinetic slip plane location parameter
+             // (XcapZ)
   o_syxfiec,
-  //  o_syxcapf,  added as o_syxcapc object
   o_syxlam,
   o_syscmt,
   o_syguns,

@@ -2013,6 +2013,16 @@
         "dimM": 3,
         "dimN": 3,
         "dyna": true,
+        "hint": "Parameter f_zeta to locate slip plane for zeta potential (fraction of Debye length) for surface types",
+        "id": "o_syxcapf",
+        "label": "LocZf_",
+        "ndxs": "A",
+        "type": "F_"
+    },
+    {
+        "dimM": 3,
+        "dimN": 3,
+        "dyna": true,
         "hint": "Density of permanent surface charge (mkeq/m2) ",
         "id": "o_syxfiec",
         "label": "XfIEC_",
@@ -8186,6 +8196,16 @@
         "hint": "Outer-layer capacitance sensity (TLM) for surface types, F/m2",
         "id": "o_ssxcapb",
         "label": "tXcapB",
+        "ndxs": "N",
+        "type": "F_"
+    },
+    {
+        "dimM": 3,
+        "dimN": 3,
+        "dyna": true,
+        "hint": "Outer-layer capacitance density parameter C3 (4LM) for surface types, F/m2",
+        "id": "o_ssxcapc",
+        "label": "tXcapC",
         "ndxs": "N",
         "type": "F_"
     },

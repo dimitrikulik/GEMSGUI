@@ -114,8 +114,7 @@ void TSysEq::ods_link(int q) {
   aObj[o_sspll]->SetPtr(ss[q].PLL);
   aObj[o_sspll]->SetDim(ss[q].DM[10], 1);
   aObj[o_sssatc]->SetPtr(ss[q].SATC);
-  //    aObj[o_sssatc]->SetDim(ss[q].DM[4], 2 );
-  aObj[o_sssatc]->SetDim(ss[q].DM[4], MCAS);
+  aObj[o_sssatc]->SetDim(ss[q].DM[4], MNCAS); // Modified: MNCAS=4
   aObj[o_ssmasdj]->SetPtr(ss[q].MaSdj);
   //    aObj[o_ssmasdj]->SetDim(ss[q].DM[4], 1 );
   aObj[o_ssmasdj]->SetDim(ss[q].DM[4], DFCN);
@@ -127,13 +126,18 @@ void TSysEq::ods_link(int q) {
   aObj[o_ssnfsp]->SetDim(ss[q].DM[20], ss[q].DM[17]);
   aObj[o_ssmasdt]->SetPtr(ss[q].MaSdt);
   aObj[o_ssmasdt]->SetDim(ss[q].DM[20], ss[q].DM[17]);
-  aObj[o_ssxcapa]->SetPtr(ss[q].XcapA);
+  // New: EIL capacitance densities and slip plane parameter bindings (split
+  // from Phase CapT)
+  aObj[o_ssxcapa]->SetPtr(
+      ss[q].XcapA); // C1 inner capacitance density (TLM,CCM,BSM,3LM,4LM)
   aObj[o_ssxcapa]->SetDim(ss[q].DM[20], ss[q].DM[17]);
-  aObj[o_ssxcapb]->SetPtr(ss[q].XcapB);
+  aObj[o_ssxcapb]->SetPtr(
+      ss[q].XcapB); // C2 outer capacitance density (TLM,3LM,4LM)
   aObj[o_ssxcapb]->SetDim(ss[q].DM[20], ss[q].DM[17]);
-  aObj[o_ssxcapc]->SetPtr(ss[q].XcapC);
+  aObj[o_ssxcapc]->SetPtr(ss[q].XcapC); // C3 4LM capacitance density
   aObj[o_ssxcapc]->SetDim(ss[q].DM[20], ss[q].DM[17]);
-  aObj[o_ssxcapf]->SetPtr(ss[q].XcapZ);
+  aObj[o_ssxcapf]->SetPtr(
+      ss[q].XcapZ); // f_zeta electrokinetic slip plane location parameter
   aObj[o_ssxcapf]->SetDim(ss[q].DM[20], ss[q].DM[17]);
   aObj[o_ssxfiec]->SetPtr(ss[q].XfIEC);
   aObj[o_ssxfiec]->SetDim(ss[q].DM[20], ss[q].DM[17]);
@@ -271,9 +275,9 @@ void TSysEq::dyn_set(int q) {
   else
     ss[q].XEpsC = (double (*)[2])aObj[o_ssxeps]->GetPtr();
 
-  ss[q].SATC = (char (*)[MCAS])aObj[o_sssatc]->GetPtr();
+  ss[q].SATC = (char (*)[MNCAS])aObj[o_sssatc]->GetPtr(); // Modified: MNCAS=4
   ss[q].MaSdj = (float (*)[DFCN])aObj[o_ssmasdj]->GetPtr();
-  s[q].McdC = (float (*)[DMCDC])aObj[o_ssmcdc]->GetPtr();
+  ss[q].McdC = (float (*)[DMCDC])aObj[o_ssmcdc]->GetPtr(); // New: McdC
   ss[q].SCMT = (char (*)[MNST])aObj[o_ssscmt]->GetPtr();
   ss[q].Nfsp = (float (*)[MNST])aObj[o_ssnfsp]->GetPtr();
   ss[q].MaSdt = (float (*)[MNST])aObj[o_ssmasdt]->GetPtr();
@@ -350,7 +354,7 @@ void TSysEq::dyn_kill(int q) {
   ss[q].DLL = (double *)aObj[o_ssdll]->Free();
   ss[q].PUL = (double *)aObj[o_sspul]->Free();
   ss[q].PLL = (double *)aObj[o_sspll]->Free();
-  ss[q].SATC = (char (*)[MCAS])aObj[o_sssatc]->Free();
+  ss[q].SATC = (char (*)[MNCAS])aObj[o_sssatc]->Free(); // Modified: MNCAS=4
   ss[q].MaSdj = (float (*)[DFCN])aObj[o_ssmasdj]->Free();
   ss[q].McdC = (float (*)[DMCDC])aObj[o_ssmcdc]->Free();
   ss[q].SCMT = (char (*)[MNST])aObj[o_ssscmt]->Free();
@@ -532,11 +536,12 @@ void TSysEq::dyn_new(int q) {
     ss[q].Pparc = (double *)aObj[o_sspparc]->Free();
 
   if (ss[q].switches[19] != S_OFF && ss[q].DM[4] > 0)
-    ss[q].SATC = (char (*)[MCAS])aObj[o_sssatc]->Alloc(ss[q].DM[4], MCAS, A_);
+    ss[q].SATC = (char (*)[MNCAS])aObj[o_sssatc]->Alloc(
+        ss[q].DM[4], MNCAS, A_); // Modified: MNCAS=4
   //      ss[q].SATC = (char (*)[2])aObj[ o_sssatc]->Alloc( ss[q].DM[4], 2, A_
   //      );
   else
-    ss[q].SATC = (char (*)[MCAS])aObj[o_sssatc]->Free();
+    ss[q].SATC = (char (*)[MNCAS])aObj[o_sssatc]->Free();
 
   if (ss[q].switches[20] != S_OFF && ss[q].DM[18] > 0)
     ss[q].GEX = (double *)aObj[o_ssgex]->Alloc(ss[q].DM[18], 1, D_);
@@ -554,7 +559,7 @@ void TSysEq::dyn_new(int q) {
     ss[q].McdC =
         (float (*)[DMCDC])aObj[o_ssmcdc]->Alloc(ss[q].DM[4], DMCDC, F_);
   else
-    ss[q].McDC = (float (*)[DMCDC])aObj[o_ssmcdc]->Free();
+    ss[q].McdC = (float (*)[DMCDC])aObj[o_ssmcdc]->Free();
 
   if (ss[q].switches[23] != S_OFF && ss[q].DM[18] > 0)
     ss[q].lnGmf = (double *)aObj[o_sslngmf]->Alloc(ss[q].DM[18], 1, D_);
@@ -761,13 +766,14 @@ void TSysEq::set_def(int q) {
   ss[q].PLL = 0;
   ss[q].SATC = 0;
   ss[q].MaSdj = 0;
+  ss[q].McdC = 0; // New: McdC EIL charge allocations
   ss[q].SCMT = 0;
   ss[q].Nfsp = 0;
   ss[q].MaSdt = 0;
   ss[q].XcapA = 0;
   ss[q].XcapB = 0;
-  ss[q].XcapC = 0;
-  // ss[q].XcapF =0;
+  ss[q].XcapC = 0; // New: EIL C3 capacitance density (4LM)
+  ss[q].XcapZ = 0; // New: EIL slip plane zeta parameter f_zeta
   ss[q].XfIEC = 0;
   ss[q].Xlam = 0;
   ss[q].sdref = 0;

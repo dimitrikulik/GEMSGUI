@@ -632,10 +632,10 @@ long int
             pm.LsUpt[k*2+1] = pm.L1[k]; // bugfix 04.03.2015 DK
                   //  aPH->php->nFaces;     // provisional 8.04.2013 DK
 
-// New stuff for TSorpMod
-if(phSorpMod[k])
-   delete phSorpMod[k];
-phSorpMod[k] = nullptr;
+// Postponed TSorpMod (branch no_tsorpmod_intermed)
+// if(phSorpMod[k])
+//    delete phSorpMod[k];
+// phSorpMod[k] = nullptr;
 /*
 long int
 *LsESmo, ///< new: number of EIL model layers; EIL params per layer; CD coefs per DC; reserved  [Fis][4]
@@ -931,6 +931,8 @@ void TMulti::ph_sur_param( int k, int kk )
             //    pm.MISDT[k][i] = FLOAT_EMPTY;
             pm.XcapA[k][i] = DOUBLE_EMPTY;
             pm.XcapB[k][i] = DOUBLE_EMPTY;
+            pm.XcapC[k][i] = DOUBLE_EMPTY; // New: C3 4LM capacitance density
+            pm.XcapZ[k][i] = DOUBLE_EMPTY; // New: f_zeta electrokinetic slip plane parameter
             pm.Xetaf[k][i] = DOUBLE_EMPTY;
             pm.SCM[k][i] = SC_NOT_USED;
             /*  pm.CSTS[k][i] = CCA_VOL; */
@@ -969,6 +971,17 @@ void TMulti::ph_sur_param( int k, int kk )
         if( syp->PXcapB != S_OFF )
             pm.XcapB[k][i] = syp->XcapB[kk][i];
         else pm.XcapB[k][i] = 0.;
+        // New: EIL C3 (4LM) capacitance density and slip plane parameter f_zeta
+        if( syp->PXcapF != S_OFF )
+        {
+            pm.XcapC[k][i] = syp->XcapC[kk][i];
+            pm.XcapZ[k][i] = syp->XcapZ[kk][i];
+        }
+        else
+        {
+            pm.XcapC[k][i] = 0.;
+            pm.XcapZ[k][i] = 0.;
+        }
 
         pm.XdlA[k][i] = 0.0;
         pm.XdlB[k][i] = 0.0;

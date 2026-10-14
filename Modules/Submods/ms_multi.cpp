@@ -417,7 +417,7 @@ void TMulti::ods_link(int) {
   aObj[o_wi_lsismo]->SetDim(pm.FIs, 4);
   aObj[o_wi_xsmd]->SetPtr(pm.xSMd);
   aObj[o_wi_eimc]->SetPtr(pm.EImc);
-  aObj[o_wi_mcdc]->SetPtr(pm.mCDc, DMCDC);
+  aObj[o_wi_mcdc]->SetPtr(pm.mCDc);
   aObj[o_wi_mcdc]->SetDim(pm.Ls, DMCDC);
   aObj[o_wi_isopc]->SetPtr(pm.IsoPc);
   aObj[o_wi_isosc]->SetPtr(pm.IsoSc);

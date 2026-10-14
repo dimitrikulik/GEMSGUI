@@ -114,24 +114,29 @@ typedef struct {         /* Packed system state description */
                    // eqstate(res)[sy.Fik]
   // Adsorption / EDL models     default OFF
   /* DC parameters */
-  char (*SATC)[MNCAS];  // SACT method codes & allocations of surface species
-                        // [sy.Lsor][MCAS]
-  float (*MaSdj)[DFCN]; // Density, Frumkin, CD-MUSIC params new [sy.Lsor][DFCN]
+  char (*SATC)[MNCAS]; // SACT method codes & allocations of surface species
+                       // [sy.Lsor][MNCAS=4]
+  float (
+      *MaSdj)[DNFCN]; // Density, Frumkin, CD-MUSIC params new [sy.Lsor][DNFCN]
+  float (*McdC)[DMCDC]; // New: Charges of surface species DC allocated to EIL
+                        // planes [sy.Lsor][DMCDC=4]
   /* Phase parameters */
   char (
       *SCMT)[MNST]; /* Classifier of EIL models for surface types [sy.Fia][6] */
   float (*Nfsp)[MNST];  // Fraction of surface types relative to carrier
                         // components [sy.Fia][6]
   float (*MaSdt)[MNST]; // Max.total reactive species density 1/nm2 [sy.Fia][6]
-  float (*XcapA)[MNST]; // Inner-layer capacitance density (TLM,CCM) for surface
-                        // types, F/m2 [sy.Fia][6]
-  float (*XcapB)[MNST]; // Outer-layer capacitance density (TLM) for surface
-                        // types, F/m2[sy.Fia][6]
-  float (*XcapC)[MNST]; // New Outer-layer capacitance sensity (4LM) for surface
-                        // types, F/m2[sy.Fia][6]
-  float (*XcapZ)[MNST]; // New Parameter to locate slip plane for zeta potential
-                        // (fraction of Debye length)
-  // sy.Fia][6]
+  // EIL capacitance densities and slip plane parameter (split per column
+  // transpose from CapT[NsuT][NCAZP=4])
+  float (
+      *XcapA)[MNST]; // Inner-layer capacitance density C1 (TLM,CCM,BSM,3LM,4LM)
+                     // for surface types, F/m2 [sy.Fia][MNST]
+  float (*XcapB)[MNST]; // Outer-layer capacitance density C2 (TLM,3LM,4LM) for
+                        // surface types, F/m2 [sy.Fia][MNST]
+  float (*XcapC)[MNST]; // New: Outer-layer capacitance density C3 (4LM) for
+                        // surface types, F/m2 [sy.Fia][MNST]
+  float (*XcapZ)[MNST]; // New: Parameter f_zeta to locate slip plane for zeta
+                        // potential (fraction of Debye length) [sy.Fia][MNST]
   float (*XfIEC)[MNST]; // Fix surf charge density or IEC mkeq/m2    [sy.Fia][6]
   float (
       *Xlam)[MNST]; // Factor of discretnes IDL 0 < 1 - in PHASE  [sy.Fia][6] */
