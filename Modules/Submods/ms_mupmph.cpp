@@ -71,7 +71,7 @@ void TMulti::MultiSystemInit( )
    else pm.E = 0;
 
    if( syp->NsTm > 0 && syp->PNfsp != S_OFF )
-       pm.FIat = MST;
+       pm.FIat = MNST; // SCM Modernization: MNST=6
    else pm.FIat = 0;
 
    pm.MBX = syp->MBX;
@@ -336,13 +336,21 @@ CH_FOUND:
 
         ja = (j-(pm.Ls-pm.Lads));
         jja = (jj-(mup->Ls-mup->Lads));
-// Loading MaSdj - max.sur.densities for non-competitive sorbates */
+// SCM Modernization: Loading MaSdj and McdC for surface species
         if( syp->PMaSdj != S_OFF )
         {
-            for( kk=0; kk<DFCN; kk++ )
+            for( kk=0; kk<DNFCN; kk++ )
                if( !IsFloatEmpty( syp->MaSdj[jja][kk] ) )
                    pm.MASDJ[ja][kk] = syp->MaSdj[jja][kk];
                else pm.MASDJ[ja][kk]= 0.0;
+
+            if( syp->McdC && pm.mCDc )
+            {
+                for( kk=0; kk<DMCDC; kk++ )
+                    if( !IsFloatEmpty( syp->McdC[jja][kk] ) )
+                        pm.mCDc[ja][kk] = syp->McdC[jja][kk];
+                    else pm.mCDc[ja][kk] = 0.0;
+            }
         }
         if( syp->PSATT != S_OFF )
         { // Loading SATC - codes of methods for SAT calculation
@@ -413,28 +421,18 @@ CH_FOUND:
                 break;
             }
 
-            // Loading allocation to surface sites
-            switch( syp->SATC[jja][SA_SITX] )
+            // SCM Modernization: Loading allocation to surface sites from xSmD
+            pm.SATX[ja][XL_SI] = 0;
+            if( syp->xSmD )
             {
-              default:
-              case CSI_0:
-                pm.SATX[ja][XL_SI] = 0;
-                break;
-              case CSI_1:
-                pm.SATX[ja][XL_SI] = 1;
-                break;
-              case CSI_2:
-                pm.SATX[ja][XL_SI] = 2;
-                break;
-              case CSI_3:
-                pm.SATX[ja][XL_SI] = 3;
-                break;
-              case CSI_4:
-                pm.SATX[ja][XL_SI] = 4;
-                break;
-              case CSI_5:
-                pm.SATX[ja][XL_SI] = 5;
-                break;
+                for( int s = 0; s < NSURFSITE; s++ )
+                {
+                    if( syp->xSmD[jja][s] > 0 )
+                    {
+                        pm.SATX[ja][XL_SI] = s;
+                        break;
+                    }
+                }
             }
             // Loading charge allocation to surface planes
             switch( syp->SATC[jja][SA_PLAX] )
@@ -916,63 +914,51 @@ PARLOAD: if( k < syp->Fis )
     }  /* k */
 }
 
-// Loading surface type parameters
+// SCM Modernization: Loading surface type and site parameters
 void TMulti::ph_sur_param( int k, int kk )
 {
     int i;
     SYSTEM *syp = TSyst::sm->GetSY();
 
-    for( i=0; i< syp->NsTm; i++ )
+    // Tier 1: Surface types / patches [MNST=6]
+    for( i=0; i< MNST; i++ )
     {
-        if( syp->SCMT[kk][i] == SC_NOT_USED || fabs(syp->Nfsp[kk][i])<1e-9 )
-        { /*this type surface of dont used*/
-            pm.Nfsp[k][i] =  DOUBLE_EMPTY;
-            pm.MASDT[k][i] = DOUBLE_EMPTY;
-            //    pm.MISDT[k][i] = FLOAT_EMPTY;
-            pm.XcapA[k][i] = DOUBLE_EMPTY;
-            pm.XcapB[k][i] = DOUBLE_EMPTY;
-            pm.XcapC[k][i] = DOUBLE_EMPTY; // New: C3 4LM capacitance density
-            pm.XcapZ[k][i] = DOUBLE_EMPTY; // New: f_zeta electrokinetic slip plane parameter
-            pm.Xetaf[k][i] = DOUBLE_EMPTY;
-            pm.SCM[k][i] = SC_NOT_USED;
-            /*  pm.CSTS[k][i] = CCA_VOL; */
+        pm.SCM[k][i][0] = syp->SCMT[kk][i][0];
+        pm.SCM[k][i][1] = syp->SCMT[kk][i][1];
+
+        if( syp->SCMT[kk][i][0] == SC_NOT_USED || syp->SCMT[kk][i][0] == '\0' )
+        { /* this type surface is not used */
+            pm.SCM[k][i][0] = SC_NOT_USED;
+            pm.SCM[k][i][1] = '\0';
+            for( int p=0; p<NMSDT; p++ )
+                pm.MASDT[k][i][p] = 0.0;
+            pm.XcapA[k][i] = 0.0;
+            pm.XcapB[k][i] = 0.0;
+            pm.XcapC[k][i] = 0.0;
+            pm.XcapZ[k][i] = 0.0;
+            pm.XcapD[k][i] = 0.0;
+            pm.XdlA[k][i] = 0.0;
+            pm.XdlB[k][i] = 0.0;
+            pm.XdlC[k][i] = 0.0;
+            pm.XdlD[k][i] = 0.0;
+            for( int p=0; p<NCIEC; p++ )
+                pm.Xetaf[k][i][p] = 0.0;
             continue;
         }
-        pm.SCM[k][i] = syp->SCMT[kk][i];
-        /*  pm.CSTS[k][i] = syp->CSTS[kk][i]; */
-        pm.Nfsp[k][i] = syp->Nfsp[kk][i];  /* fraction! */
 
-        /* (1e18/m2 m2/g)/(6.022e23 1/mol)=1.66054 mkmol/g */
+        // Tier 1 patch parameters: MSDT [NMSDT=4]
+        for( int p=0; p<NMSDT; p++ )
+            pm.MASDT[k][i][p] = syp->MaSdt[kk][i][p];
 
-        if( !syp->MaSdt || syp->MaSdt[kk][i] < 1e-9 )
-            pm.MASDT[k][i] = TProfil::pm->pa.p.DNS * 1.66054 * syp->Aalp[kk];
-        /* default, mkmol/g */
-        else pm.MASDT[k][i] = syp->MaSdt[kk][i]*syp->Aalp[kk]*1.66054;
-        /* max. in mkmol/g */
-
-        // if( !syp->MiSdt || syp->MiSdt[kk][i] < 1e-9 )
-        //     pm.MISDT[k][i] = 1.0; /* default, mkmol/g */
-        //  else pm.MISDT[k][i] = syp->MiSdt[kk][i]*syp->Aalp[kk]*1.66054;
-        /* min. in mkmol/g */
-        /*
-          pm.XCEC[k][i] = syp->Nsph[kk][i] * syp->Aalp[kk]*
-                               syp->Nfsp[kk][i]*1.6606;        mkmol/g */
-
-        if( syp->PXfIEC != S_OFF )
-        {  /* Permanent surface charge density Ion-exchange capacity */
-           // XfIEC[] in mkeq/m2; Xetaf[] in C/m2
-            if( fabs(syp->XfIEC[kk][i])>1e-9 )
-                pm.Xetaf[k][i] = syp->XfIEC[kk][i]*.09648531;
-            else pm.Xetaf[k][i] = 0.0;
-        }
         if( syp->PXcapA != S_OFF )
             pm.XcapA[k][i] = syp->XcapA[kk][i];
         else pm.XcapA[k][i] = 0.;
         if( syp->PXcapB != S_OFF )
             pm.XcapB[k][i] = syp->XcapB[kk][i];
         else pm.XcapB[k][i] = 0.;
-        // New: EIL C3 (4LM) capacitance density and slip plane parameter f_zeta
-        if( syp->PXcapF != S_OFF )
+
+        // EIL C3 (4LM) capacitance density and slip plane parameter f_zeta
+        if( syp->PXcapC != S_OFF )
         {
             pm.XcapC[k][i] = syp->XcapC[kk][i];
             pm.XcapZ[k][i] = syp->XcapZ[kk][i];
@@ -983,19 +969,30 @@ void TMulti::ph_sur_param( int k, int kk )
             pm.XcapZ[k][i] = 0.;
         }
 
+        if( syp->PXfIEC != S_OFF )
+        {  /* Permanent surface charge density / IEC */
+            for( int p=0; p<NCIEC; p++ )
+                pm.Xetaf[k][i][p] = syp->XfIEC[kk][i][p];
+        }
+        else
+        {
+            for( int p=0; p<NCIEC; p++ )
+                pm.Xetaf[k][i][p] = 0.0;
+        }
+
         pm.XdlA[k][i] = 0.0;
         pm.XdlB[k][i] = 0.0;
+        pm.XdlC[k][i] = 0.0;
         pm.XdlD[k][i] = 0.0;
         pm.XcapD[k][i] = 0.;
-        /*
-          if( syp->PXlam != S_OFF )
-            pm.XlamA[k][i] = syp->Xlam[kk][i];
-          else pm.XlamA[k][i] = 0.;
-          if( syp->PXetf != S_OFF )
-              pm.Xetaf[k][i] = syp->Xetaf[kk][i];
-          else pm.Xetaf[k][i] = 0.;
-        */
     } /* end for i */
+
+    // SCM Modernization: Tier 2: Surface Site Types [NSURFSITES=8][NFSIT=4]
+    for( int s=0; s<NSURFSITES; s++ )
+    {
+        for( int p=0; p<NFSIT; p++ )
+            pm.Nfsp[k][s][p] = syp->Nfsp[kk][s][p];
+    }
 }
 
 // Assigning surface types to carrier (DC) - added 5/13/97 DAK
@@ -1033,7 +1030,7 @@ pm.D[ist][isi] = 0.0;                    // cleanining the totals for sites
             //      if( pm.SATT[j] == SAT_SITE )
             //         pm.MASDJ[j] = pm.MASDT[k][ist] - pm.MISDT[k][ist] ;
             if( pm.SATT[ja] == SAT_NCOMP )
-                pm.MASDJ[ja][PI_DEN] = pm.MASDT[k][ist]; // Do we really need this?
+                pm.MASDJ[ja][PI_DEN] = pm.MASDT[k][ist][0]; // SCM Modernization: patch reactive area fraction
 //              pm.MASDJ[j] = pm.MASDT[k][ist];
             if( pm.SATT[ja] == SAT_COMP )
                 pm.MASDJ[ja][PI_DEN] = 1.0;

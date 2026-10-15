@@ -899,23 +899,33 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
           a0 = Z;
         if (fabs(bp) < 1e-20)
           bp = 0;
+        // SCM Modernization: MaSdj has DNFCN=4 (DEN, P1, P2, P3); charges are in mCDc
         if (!(php->DCC[i] == DC_SUR_CARRIER || php->DCC[i] == DC_SUR_MINAL ||
               php->DCC[i] == DC_PEL_CARRIER)) {
           php->MaSdj[i][PI_DEN] = Masdj0;
-          php->MaSdj[i][PI_CD0] = Z;
-          php->MaSdj[i][PI_CDB] = Z;
           php->MaSdj[i][PI_P1] = Fi;
           php->MaSdj[i][PI_P2] = cN;
+          php->MaSdj[i][PI_P3] = 0.0f;
+          if (php->mCDc) {
+            php->mCDc[i][0] = a0;
+            php->mCDc[i][1] = bp;
+            php->mCDc[i][2] = 0.0f;
+            php->mCDc[i][3] = Z;
+          }
         } else { //  Sorbent has no data for surface charges
-          php->MaSdj[i][PI_DEN] = 0;
-          php->MaSdj[i][PI_CD0] = 0;
-          php->MaSdj[i][PI_CDB] = 0;
-          php->MaSdj[i][PI_P1] = 0;
-          php->MaSdj[i][PI_P2] = 0;
+          php->MaSdj[i][PI_DEN] = 0.0f;
+          php->MaSdj[i][PI_P1] = 0.0f;
+          php->MaSdj[i][PI_P2] = 0.0f;
+          php->MaSdj[i][PI_P3] = 0.0f;
+          if (php->mCDc) {
+            php->mCDc[i][0] = 0.0f;
+            php->mCDc[i][1] = 0.0f;
+            php->mCDc[i][2] = 0.0f;
+            php->mCDc[i][3] = 0.0f;
+          }
         }
       }
-      // !!!!!!!!! Add an extension for transferring data to php->mCDc (charge
-      // allocation) array, check also PH_ADSORPT and PH_IONEX phase types
+      // SCM Modernization: transferred data to php->mCDc (charge allocation) array
     }
 
   } // i
@@ -942,7 +952,7 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
 // Re-written (for AutoPhaseWizard) by KD on 31.07.03
 void TPhase::newAqGasPhase(const std::string &akey, const std::string &gkey,
                            int file, const char amod, const char gmod,
-                           float apar[8], /*float gpar[4],*/
+                           float apar[4], /*float gpar[4],*/
                            bool useLst, TCStringArray lst) {
   //    TProfil *aPa= dynamic_cast<TProfil *>( aMod[RT_PARAM].get());
   const char *part;
@@ -1295,12 +1305,8 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
         php->SATC[i][SA_EMX] = CCA_VOL; /* Default! */
       if (!php->SATC[i][SA_STX] || php->SATC[i][SA_STX] == A_NUL)
         php->SATC[i][SA_STX] = CST_0;
-      if (!php->SATC[i][SA_PLAX] || php->SATC[i][SA_EMX] == A_NUL)
-        php->SATC[i][SA_EMX] = SPL_0; /* Default! */
-      if (!php->SATC[i][SA_SITX] || php->SATC[i][SA_MCA] == A_NUL)
-        php->SATC[i][SA_MCA] = CSI_0;
-      if (!php->SATC[i][SA_UNIT] || php->SATC[i][SA_EMX] == A_NUL)
-        php->SATC[i][SA_EMX] = SDU_N; /* Default! */
+      if (!php->SATC[i][SA_PLAX] || php->SATC[i][SA_PLAX] == A_NUL)
+        php->SATC[i][SA_PLAX] = SPL_0; /* Default! */
 
       /* Default MaSdj values TBD  */
       if (!php->MaSdj[i][0] || php->MaSdj[i][0] == A_NUL)
@@ -1320,7 +1326,7 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
       if (!php->mCDc[i][2] || php->mCDc[i][2] == A_NUL)
         php->mCDc[i][2] = 0.2f;
       if (!php->mCDc[i][3] || php->mCDc[i][3] == A_NUL)
-        php->mCDc[i][0] = 0.5f;
+        php->mCDc[i][3] = 0.5f;
     }
     php->PFsuT = S_ON;
   }

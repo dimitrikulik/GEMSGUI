@@ -113,33 +113,25 @@ typedef struct {         /* Packed system state description */
       *PLL;        // Vector of lower restrictions to phases X_a at
                    // eqstate(res)[sy.Fik]
   // Adsorption / EDL models     default OFF
-  /* DC parameters */
-  char (*SATC)[MNCAS]; // SACT method codes & allocations of surface species
-                       // [sy.Lsor][MNCAS=4]
-  float (
-      *MaSdj)[DNFCN]; // Density, Frumkin, CD-MUSIC params new [sy.Lsor][DNFCN]
-  float (*McdC)[DMCDC]; // New: Charges of surface species DC allocated to EIL
-                        // planes [sy.Lsor][DMCDC=4]
-  /* Phase parameters */
-  char (
-      *SCMT)[MNST]; /* Classifier of EIL models for surface types [sy.Fia][6] */
-  float (*Nfsp)[MNST];  // Fraction of surface types relative to carrier
-                        // components [sy.Fia][6]
-  float (*MaSdt)[MNST]; // Max.total reactive species density 1/nm2 [sy.Fia][6]
-  // EIL capacitance densities and slip plane parameter (split per column
-  // transpose from CapT[NsuT][NCAZP=4])
-  float (
-      *XcapA)[MNST]; // Inner-layer capacitance density C1 (TLM,CCM,BSM,3LM,4LM)
-                     // for surface types, F/m2 [sy.Fia][MNST]
-  float (*XcapB)[MNST];  // Outer-layer capacitance density C2 (TLM,3LM,4LM) for
-                         // surface types, F/m2 [sy.Fia][MNST]
-  float (*XcapC)[MNST];  // New: Outer-layer capacitance density C3 (4LM) for
-                         // surface types, F/m2 [sy.Fia][MNST]
-  float (*XcapZ)[MNST];  // New: Parameter f_zeta to locate slip plane for zeta
-                         // potential (fraction of Debye length) [sy.Fia][MNST]
-  float (*XfIEC)[NCIEC]; // Fix surf charge density or IEC mkeq/m2 [sy.Fia][6]
-  float (
-      *Xlam)[MNST]; // Factor of discretnes IDL 0 < 1 - in PHASE  [sy.Fia][6] */
+  /* SCM Modernization: Group 3 DC parameters [sy.Lsor] */
+  char (*SATC)[MNCAS]; // SACT method codes & allocations of surface species [sy.Lsor][MNCAS=4]
+  float (*MaSdj)[DNFCN]; // SCM Modernization: Density and SACT isotherm params [sy.Lsor][DNFCN=4]
+  float (*McdC)[DMCDC]; // SCM Modernization: Charges of surface species DC allocated to EIL planes [sy.Lsor][DMCDC=4]
+  char (*xSmD)[NSURFSITE]; // SCM Modernization: Denticity allocation across site types [sy.Lsor][NSURFSITE=8]
+
+  /* SCM Modernization: Group 2 Surface site types [sy.Fia][NSURFSITES=8][NFSIT=4] */
+  float (*Nfsp)[NSURFSITES][NFSIT]; // SCM Modernization: Site densities, capacities, and patch index [sy.Fia][NSURFSITES=8][NFSIT=4]
+
+  /* SCM Modernization: Group 1 Phase parameters [sy.Fia][MNST=6] */
+  char (*SCMT)[MNST][NSCMC]; /* SCM Modernization: Classifier of EIL models & patch SACT codes [sy.Fia][MNST=6][NSCMC=2] */
+  float (*MaSdt)[MNST][NMSDT]; // SCM Modernization: Area fraction and patch isotherm parameters [sy.Fia][MNST=6][NMSDT=4]
+  // EIL capacitance densities and slip plane parameter (split per column transpose from CapT[NsuT][NCAZP=4])
+  float (*XcapA)[MNST]; // Inner-layer capacitance density C1 (TLM,CCM,BSM,3LM,4LM) for surface types, F/m2 [sy.Fia][MNST]
+  float (*XcapB)[MNST]; // Outer-layer capacitance density C2 (TLM,3LM,4LM) for surface types, F/m2 [sy.Fia][MNST]
+  float (*XcapC)[MNST]; // Outer-layer capacitance density C3 (4LM) for surface types, F/m2 [sy.Fia][MNST]
+  float (*XcapZ)[MNST]; // Parameter f_zeta to locate slip plane for zeta potential (fraction of Debye length) [sy.Fia][MNST]
+  float (*XfIEC)[MNST][NCIEC]; // SCM Modernization: Permanent charge density (1/nm2) and IEC (meq/g) [sy.Fia][MNST=6][NCIEC=2]
+  float (*Xlam)[MNST]; // Factor of discretnes IDL 0 < 1 - in PHASE [sy.Fia][6] */
 
   char (
       *sdref)[V_SD_RKLEN]; /* List of SDref keys to sources of data [sy.Nsd] */

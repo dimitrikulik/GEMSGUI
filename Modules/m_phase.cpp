@@ -95,7 +95,7 @@ void TPhase::ods_link(int q) {
   aObj[o_phsatc]->SetPtr(ph[q].SATC);
   aObj[o_phsatc]->SetDim(ph[q].nDC, MNCAS);
   aObj[o_phmasdj]->SetPtr(ph[q].MaSdj);
-  aObj[o_phmasdj]->SetDim(ph[q].nDC, DFCN);
+  aObj[o_phmasdj]->SetDim(ph[q].nDC, DNFCN); // SCM Modernization: DNFCN=4
   aObj[o_phmcdc]->SetPtr(ph[q].mCDc);
   aObj[o_phmcdc]->SetDim(ph[q].nDC, DMCDC);
   aObj[o_phpxres]->SetPtr(ph[q].ipxt); // changed 07.12.2006 KD
@@ -771,7 +771,7 @@ void TPhase::set_def(int q) {
   ph[q].nEIl = 0;
   ph[q].nEIp = 0;
   ph[q].nCDc = 0;
-  ph[q].iRes3 = 0;
+  ph[q].Res3 = 0; // SCM Modernization: Res3
   ph[q].nIsoC = 0;
   ph[q].nIsoS = 0;
   ph[q].mDe = 0;
@@ -792,7 +792,7 @@ void TPhase::set_def(int q) {
   ph[q].DQFc = nullptr;
   ph[q].rcpc = nullptr;
   ph[q].EIpc = nullptr;
-  ph[q].CDc = nullptr;
+  ph[q].mCDc = nullptr; // SCM Modernization: mCDc
   ph[q].IsoP = nullptr;
   ph[q].IsoS = nullptr;
   ph[q].feSAr = nullptr;
@@ -859,7 +859,7 @@ void TPhase::MakeQuery() {
   size[14] = php->nEIl;
   size[15] = php->nEIp;
   size[16] = php->nCDc;
-  size[17] = php->iRes3;
+  size[17] = php->Res3; // SCM Modernization: Res3
   size[18] = php->nIsoC;
   size[19] = php->nIsoS;
   size[20] = php->mDe;
@@ -898,7 +898,7 @@ void TPhase::MakeQuery() {
   php->nEIl = static_cast<short>(size[14]);
   php->nEIp = static_cast<short>(size[15]);
   php->nCDc = static_cast<short>(size[16]);
-  php->iRes3 = static_cast<short>(size[17]);
+  php->Res3 = static_cast<short>(size[17]); // SCM Modernization: Res3
   php->nIsoC = static_cast<short>(size[18]);
   php->nIsoS = static_cast<short>(size[19]);
   php->mDe = static_cast<short>(size[20]);
@@ -1121,19 +1121,24 @@ AGAIN_SETUP:
         if (approximatelyZero(php->CapT[i][EIL_SLPLF]))
           php->CapT[i][EIL_SLPLF] = 0.5f; // fraction of Debye length to locate
                                           // the slip plane for zeta potential
-        if (!php->XfIEC)
-          php->XfIEC[i] = 0;
+        if (php->XfIEC) { // SCM Modernization: 2D XfIEC[NsuT][NCIEC]
+          for (int c = 0; c < NCIEC; c++) {
+            if (approximatelyZero(php->XfIEC[i][c]))
+              php->XfIEC[i][c] = 0.0f;
+          }
+        }
       }
-      for (int i = 0; i < php->nDC; i++) {
-        php->SATC[i][SA_MCA] = SAT_L_COMP; // default Langmuir comp.
-        php->SATC[i][SA_EMX] = CCA_VOL;    // default per whole sorbent
-        php->SATC[i][SA_STX] = CST_0;      // default - 0 surface type
-        php->SATC[i][SA_PLAX] = SPL_0;     // default - zero EDL plane
-        php->SATC[i][SA_SITX] = CSI_0;     // default - 0 site type
-        php->SATC[i][SA_UNIT] = SDU_N;     // default - 'n'
-      }
-      php->PFsuT = S_ON;
     }
+    for (int j = 0; j < php->nDC; j++) {
+      if (php->SATC) {
+        php->SATC[j][SA_MCA] = SAT_L_COMP; // default Langmuir comp.
+        php->SATC[j][SA_EMX] = CCA_VOL;    // default per whole sorbent
+        php->SATC[j][SA_STX] = CST_0;      // default - 0 surface type
+        php->SATC[j][SA_PLAX] = SPL_0;     // default - zero EDL plane
+      }
+    }
+    php->PFsuT = S_ON;
+  }
 
     //---------------------------------------------------------------------
     if (php->PphC == PH_AQUEL &&
@@ -1539,13 +1544,12 @@ AGAIN_SETUP:
                      php->scoef + ii * php->nscM, php->nscM);
 
         if (php->PCDc == S_ON)
-          copyValues(php->mCDc + nDCnew * DMCDC, php->mCDc + ii * DMCDC, DMCDC);
+          copyValues(&php->mCDc[nDCnew][0], &php->mCDc[ii][0], DMCDC);
         if (php->PIsoC == S_ON)
           copyValues(php->IsoP + nDCnew * php->nIsoC,
                      php->IsoP + ii * php->nIsoC, php->nIsoC);
         if (php->PsDiS == S_ON)
-          copyValues(php->xSmD + nDCnew * NSURFSITE >,
-                     php->xSmD + ii * NSURFSITE, NSURFSITE);
+          copyValues(&php->xSmD[nDCnew][0], &php->xSmD[ii][0], NSURFSITE);
         if (php->PumpCon == S_ON)
           copyValues(php->umpCon + nDCnew * php->numpC,
                      php->umpCon + ii * php->numpC, php->numpC);
@@ -1557,8 +1561,8 @@ AGAIN_SETUP:
                      php->nrcp);
 
         if (php->PFsuT != S_OFF) {
-          copyValues(php->SATC[nDCnew][0], php->SATC[ii][0], MNCAS);
-          copyValues(php->MaSdj[nDCnew][0], php->MaSdj[ii][0], DFCN);
+          copyValues(&php->SATC[nDCnew][0], &php->SATC[ii][0], MNCAS);
+          copyValues(&php->MaSdj[nDCnew][0], &php->MaSdj[ii][0], DNFCN); // SCM Modernization: DNFCN=4
         }
         nDCnew++;
       }
@@ -1575,8 +1579,8 @@ AGAIN_SETUP:
       if (php->PFsuT != S_OFF) {
         php->SATC = static_cast<char (*)[MNCAS]>(
             aObj[o_phsatc]->Alloc(php->nDC, MNCAS, A_));
-        php->MaSdj = static_cast<float (*)[DFCN]>(
-            aObj[o_phmasdj]->Alloc(php->nDC, DFCN, F_));
+        php->MaSdj = static_cast<float (*)[DNFCN]>(
+            aObj[o_phmasdj]->Alloc(php->nDC, DNFCN, F_)); // SCM Modernization: DNFCN=4
       }
       if (php->PCDc == S_ON)
         php->mCDc = static_cast<float (*)[DMCDC]>(
@@ -1585,7 +1589,7 @@ AGAIN_SETUP:
         php->IsoP = static_cast<float *>(
             aObj[o_phisop]->Alloc(php->nDC, php->nIsoC, F_));
       if (php->PsDiS == S_ON)
-        php->xSmD = static_cast<short (*)[NSURFSITE]>(
+        php->xSmD = static_cast<char (*)[NSURFSITE]>(
             aObj[o_phxsmd]->Alloc(php->nDC, NSURFSITE, I_));
       if (php->PumpCon == S_ON)
         php->umpCon = static_cast<float *>(

@@ -118,7 +118,8 @@ void TMulti::alloc_EImc( long int EImcSum )
 }
 void TMulti::alloc_mCDc( long int mCDcSum )
 {
-    pm.mCDc = (double*)aObj[ o_wi_mcdc]->Alloc( mCDcSum, 1, D_ );
+    // SCM Modernization: DMCDC=4
+    pm.mCDc = (double (*)[DMCDC])aObj[ o_wi_mcdc]->Alloc( mCDcSum, DMCDC, D_ );
 }
 
 void TMulti::alloc_xSKrC( long int xSKrCSum )

@@ -116,33 +116,31 @@ void TSysEq::ods_link(int q) {
   aObj[o_sssatc]->SetPtr(ss[q].SATC);
   aObj[o_sssatc]->SetDim(ss[q].DM[4], MNCAS); // Modified: MNCAS=4
   aObj[o_ssmasdj]->SetPtr(ss[q].MaSdj);
-  //    aObj[o_ssmasdj]->SetDim(ss[q].DM[4], 1 );
-  aObj[o_ssmasdj]->SetDim(ss[q].DM[4], DFCN);
+  aObj[o_ssmasdj]->SetDim(ss[q].DM[4], DNFCN); // SCM Modernization: DNFCN=4
   aObj[o_ssmcdc]->SetPtr(ss[q].McdC);
-  aObj[o_ssmcdc]->SetDim(ss[q].DM[4], DMCDC);
+  aObj[o_ssmcdc]->SetDim(ss[q].DM[4], DMCDC); // SCM Modernization: DMCDC=4
   aObj[o_ssscmt]->SetPtr(ss[q].SCMT);
-  aObj[o_ssscmt]->SetDim(ss[q].DM[20], ss[q].DM[17]);
+  aObj[o_ssscmt]->SetDim(ss[q].DM[20], MNST * NSCMC); // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
   aObj[o_ssnfsp]->SetPtr(ss[q].Nfsp);
-  aObj[o_ssnfsp]->SetDim(ss[q].DM[20], ss[q].DM[17]);
+  aObj[o_ssnfsp]->SetDim(ss[q].DM[20], NSURFSITES * NFSIT); // SCM Modernization: [sy.Fia][NSURFSITES=8][NFSIT=4]
   aObj[o_ssmasdt]->SetPtr(ss[q].MaSdt);
-  aObj[o_ssmasdt]->SetDim(ss[q].DM[20], ss[q].DM[17]);
-  // New: EIL capacitance densities and slip plane parameter bindings (split
-  // from Phase CapT)
+  aObj[o_ssmasdt]->SetDim(ss[q].DM[20], MNST * NMSDT); // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
+  // SCM Modernization: EIL capacitance densities and slip plane parameter bindings (split from Phase CapT)
   aObj[o_ssxcapa]->SetPtr(
       ss[q].XcapA); // C1 inner capacitance density (TLM,CCM,BSM,3LM,4LM)
-  aObj[o_ssxcapa]->SetDim(ss[q].DM[20], ss[q].DM[17]);
+  aObj[o_ssxcapa]->SetDim(ss[q].DM[20], MNST); // SCM Modernization: [sy.Fia][MNST=6]
   aObj[o_ssxcapb]->SetPtr(
       ss[q].XcapB); // C2 outer capacitance density (TLM,3LM,4LM)
-  aObj[o_ssxcapb]->SetDim(ss[q].DM[20], ss[q].DM[17]);
+  aObj[o_ssxcapb]->SetDim(ss[q].DM[20], MNST); // SCM Modernization: [sy.Fia][MNST=6]
   aObj[o_ssxcapc]->SetPtr(ss[q].XcapC); // C3 4LM capacitance density
-  aObj[o_ssxcapc]->SetDim(ss[q].DM[20], ss[q].DM[17]);
+  aObj[o_ssxcapc]->SetDim(ss[q].DM[20], MNST); // SCM Modernization: [sy.Fia][MNST=6]
   aObj[o_ssxcapf]->SetPtr(
       ss[q].XcapZ); // f_zeta electrokinetic slip plane location parameter
-  aObj[o_ssxcapf]->SetDim(ss[q].DM[20], ss[q].DM[17]);
+  aObj[o_ssxcapf]->SetDim(ss[q].DM[20], MNST); // SCM Modernization: [sy.Fia][MNST=6]
   aObj[o_ssxfiec]->SetPtr(ss[q].XfIEC);
-  aObj[o_ssxfiec]->SetDim(ss[q].DM[20], ss[q].DM[17]);
+  aObj[o_ssxfiec]->SetDim(ss[q].DM[20], MNST * NCIEC); // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
   aObj[o_ssxlam]->SetPtr(ss[q].Xlam);
-  aObj[o_ssxlam]->SetDim(ss[q].DM[20], ss[q].DM[17]);
+  aObj[o_ssxlam]->SetDim(ss[q].DM[20], MNST);
   aObj[o_sysdref]->SetPtr(ss[q].sdref);
   aObj[o_sysdref]->SetDim(ss[q].DM[16], 1);
   aObj[o_sysdval]->SetPtr(ss[q].sdval);
@@ -276,16 +274,16 @@ void TSysEq::dyn_set(int q) {
     ss[q].XEpsC = (double (*)[2])aObj[o_ssxeps]->GetPtr();
 
   ss[q].SATC = (char (*)[MNCAS])aObj[o_sssatc]->GetPtr(); // Modified: MNCAS=4
-  ss[q].MaSdj = (float (*)[DFCN])aObj[o_ssmasdj]->GetPtr();
-  ss[q].McdC = (float (*)[DMCDC])aObj[o_ssmcdc]->GetPtr(); // New: McdC
-  ss[q].SCMT = (char (*)[MNST])aObj[o_ssscmt]->GetPtr();
-  ss[q].Nfsp = (float (*)[MNST])aObj[o_ssnfsp]->GetPtr();
-  ss[q].MaSdt = (float (*)[MNST])aObj[o_ssmasdt]->GetPtr();
-  ss[q].XcapA = (float (*)[MNST])aObj[o_ssxcapa]->GetPtr();
+  ss[q].MaSdj = (float (*)[DNFCN])aObj[o_ssmasdj]->GetPtr(); // SCM Modernization: DNFCN=4
+  ss[q].McdC = (float (*)[DMCDC])aObj[o_ssmcdc]->GetPtr(); // SCM Modernization: DMCDC=4
+  ss[q].SCMT = (char (*)[MNST][NSCMC])aObj[o_ssscmt]->GetPtr(); // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
+  ss[q].Nfsp = (float (*)[NSURFSITES][NFSIT])aObj[o_ssnfsp]->GetPtr(); // SCM Modernization: [sy.Fia][NSURFSITES=8][NFSIT=4]
+  ss[q].MaSdt = (float (*)[MNST][NMSDT])aObj[o_ssmasdt]->GetPtr(); // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
+  ss[q].XcapA = (float (*)[MNST])aObj[o_ssxcapa]->GetPtr(); // SCM Modernization: [sy.Fia][MNST=6]
   ss[q].XcapB = (float (*)[MNST])aObj[o_ssxcapb]->GetPtr();
   ss[q].XcapC = (float (*)[MNST])aObj[o_ssxcapc]->GetPtr();
   ss[q].XcapZ = (float (*)[MNST])aObj[o_ssxcapf]->GetPtr();
-  ss[q].XfIEC = (float (*)[MNST])aObj[o_ssxfiec]->GetPtr();
+  ss[q].XfIEC = (float (*)[MNST][NCIEC])aObj[o_ssxfiec]->GetPtr(); // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
   ss[q].Xlam = (float (*)[MNST])aObj[o_ssxlam]->GetPtr();
 
   ss[q].sdref = (char (*)[V_SD_RKLEN])aObj[o_sysdref]->GetPtr();
@@ -355,16 +353,16 @@ void TSysEq::dyn_kill(int q) {
   ss[q].PUL = (double *)aObj[o_sspul]->Free();
   ss[q].PLL = (double *)aObj[o_sspll]->Free();
   ss[q].SATC = (char (*)[MNCAS])aObj[o_sssatc]->Free(); // Modified: MNCAS=4
-  ss[q].MaSdj = (float (*)[DFCN])aObj[o_ssmasdj]->Free();
-  ss[q].McdC = (float (*)[DMCDC])aObj[o_ssmcdc]->Free();
-  ss[q].SCMT = (char (*)[MNST])aObj[o_ssscmt]->Free();
-  ss[q].Nfsp = (float (*)[MNST])aObj[o_ssnfsp]->Free();
-  ss[q].MaSdt = (float (*)[MNST])aObj[o_ssmasdt]->Free();
-  ss[q].XcapA = (float (*)[MNST])aObj[o_ssxcapa]->Free();
+  ss[q].MaSdj = (float (*)[DNFCN])aObj[o_ssmasdj]->Free(); // SCM Modernization: DNFCN=4
+  ss[q].McdC = (float (*)[DMCDC])aObj[o_ssmcdc]->Free(); // SCM Modernization: DMCDC=4
+  ss[q].SCMT = (char (*)[MNST][NSCMC])aObj[o_ssscmt]->Free(); // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
+  ss[q].Nfsp = (float (*)[NSURFSITES][NFSIT])aObj[o_ssnfsp]->Free(); // SCM Modernization: [sy.Fia][NSURFSITES=8][NFSIT=4]
+  ss[q].MaSdt = (float (*)[MNST][NMSDT])aObj[o_ssmasdt]->Free(); // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
+  ss[q].XcapA = (float (*)[MNST])aObj[o_ssxcapa]->Free(); // SCM Modernization: [sy.Fia][MNST=6]
   ss[q].XcapB = (float (*)[MNST])aObj[o_ssxcapb]->Free();
   ss[q].XcapC = (float (*)[MNST])aObj[o_ssxcapc]->Free();
   ss[q].XcapZ = (float (*)[MNST])aObj[o_ssxcapf]->Free();
-  ss[q].XfIEC = (float (*)[MNST])aObj[o_ssxfiec]->Free();
+  ss[q].XfIEC = (float (*)[MNST][NCIEC])aObj[o_ssxfiec]->Free(); // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
   ss[q].Xlam = (float (*)[MNST])aObj[o_ssxlam]->Free();
   ss[q].sdref = (char (*)[V_SD_RKLEN])aObj[o_sysdref]->Free();
   ss[q].sdval = (char (*)[V_SD_VALEN])aObj[o_sysdval]->Free();
@@ -550,14 +548,13 @@ void TSysEq::dyn_new(int q) {
 
   if (ss[q].switches[29] != S_OFF && ss[q].DM[4] > 0)
     ss[q].MaSdj =
-        (float (*)[DFCN])aObj[o_ssmasdj]->Alloc(ss[q].DM[4], DFCN, F_);
-  //      ss[q].MaSdj = (float *)aObj[ o_ssmasdj]->Alloc( ss[q].DM[4], 1, F_ );
+        (float (*)[DNFCN])aObj[o_ssmasdj]->Alloc(ss[q].DM[4], DNFCN, F_); // SCM Modernization: DNFCN=4
   else
-    ss[q].MaSdj = (float (*)[DFCN])aObj[o_ssmasdj]->Free();
+    ss[q].MaSdj = (float (*)[DNFCN])aObj[o_ssmasdj]->Free();
 
   if (ss[q].switches[29] != S_OFF && ss[q].DM[4] > 0)
     ss[q].McdC =
-        (float (*)[DMCDC])aObj[o_ssmcdc]->Alloc(ss[q].DM[4], DMCDC, F_);
+        (float (*)[DMCDC])aObj[o_ssmcdc]->Alloc(ss[q].DM[4], DMCDC, F_); // SCM Modernization: DMCDC=4
   else
     ss[q].McdC = (float (*)[DMCDC])aObj[o_ssmcdc]->Free();
 
@@ -590,54 +587,54 @@ void TSysEq::dyn_new(int q) {
 
   if (ss[q].switches[28] != S_OFF && ss[q].DM[20] > 0) {
     ss[q].Nfsp =
-        (float (*)[MNST])aObj[o_ssnfsp]->Alloc(ss[q].DM[20], ss[q].DM[17], F_);
+        (float (*)[NSURFSITES][NFSIT])aObj[o_ssnfsp]->Alloc(ss[q].DM[20], NSURFSITES * NFSIT, F_); // SCM Modernization: [sy.Fia][NSURFSITES=8][NFSIT=4]
     ss[q].SCMT =
-        (char (*)[MNST])aObj[o_ssscmt]->Alloc(ss[q].DM[20], ss[q].DM[17], A_);
+        (char (*)[MNST][NSCMC])aObj[o_ssscmt]->Alloc(ss[q].DM[20], MNST * NSCMC, A_); // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
   } else {
-    ss[q].Nfsp = (float (*)[MNST])aObj[o_ssnfsp]->Free();
-    ss[q].SCMT = (char (*)[MNST])aObj[o_ssscmt]->Free();
+    ss[q].Nfsp = (float (*)[NSURFSITES][NFSIT])aObj[o_ssnfsp]->Free();
+    ss[q].SCMT = (char (*)[MNST][NSCMC])aObj[o_ssscmt]->Free();
   }
 
   if (ss[q].switches[29] != S_OFF && ss[q].DM[20] > 0)
     ss[q].MaSdt =
-        (float (*)[MNST])aObj[o_ssmasdt]->Alloc(ss[q].DM[20], ss[q].DM[17], F_);
+        (float (*)[MNST][NMSDT])aObj[o_ssmasdt]->Alloc(ss[q].DM[20], MNST * NMSDT, F_); // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
   else
-    ss[q].MaSdt = (float (*)[MNST])aObj[o_ssmasdt]->Free();
+    ss[q].MaSdt = (float (*)[MNST][NMSDT])aObj[o_ssmasdt]->Free();
 
   if (ss[q].switches[31] != S_OFF && ss[q].DM[20] > 0)
     ss[q].XcapA =
-        (float (*)[MNST])aObj[o_ssxcapa]->Alloc(ss[q].DM[20], ss[q].DM[17], F_);
+        (float (*)[MNST])aObj[o_ssxcapa]->Alloc(ss[q].DM[20], MNST, F_); // SCM Modernization: [sy.Fia][MNST=6]
   else
     ss[q].XcapA = (float (*)[MNST])aObj[o_ssxcapa]->Free();
 
   if (ss[q].switches[32] != S_OFF && ss[q].DM[20] > 0)
     ss[q].XcapB =
-        (float (*)[MNST])aObj[o_ssxcapb]->Alloc(ss[q].DM[20], ss[q].DM[17], F_);
+        (float (*)[MNST])aObj[o_ssxcapb]->Alloc(ss[q].DM[20], MNST, F_); // SCM Modernization: [sy.Fia][MNST=6]
   else
     ss[q].XcapB = (float (*)[MNST])aObj[o_ssxcapb]->Free();
 
   // Added 09.10.2026 by DK to implement 3LM SCMs
   if (ss[q].switches[30] != S_OFF && ss[q].DM[20] > 0)
     ss[q].XcapC =
-        (float (*)[MNST])aObj[o_ssxcapc]->Alloc(ss[q].DM[20], ss[q].DM[17], F_);
+        (float (*)[MNST])aObj[o_ssxcapc]->Alloc(ss[q].DM[20], MNST, F_);
   else
     ss[q].XcapC = (float (*)[MNST])aObj[o_ssxcapc]->Free();
 
   if (ss[q].switches[33] != S_OFF && ss[q].DM[20] > 0)
     ss[q].XfIEC =
-        (float (*)[MNST])aObj[o_ssxfiec]->Alloc(ss[q].DM[20], ss[q].DM[17], F_);
+        (float (*)[MNST][NCIEC])aObj[o_ssxfiec]->Alloc(ss[q].DM[20], MNST * NCIEC, F_); // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
   else
-    ss[q].XfIEC = (float (*)[MNST])aObj[o_ssxfiec]->Free();
+    ss[q].XfIEC = (float (*)[MNST][NCIEC])aObj[o_ssxfiec]->Free();
 
   if (ss[q].switches[30] != S_OFF && ss[q].DM[20] > 0)
     ss[q].XcapZ =
-        (float (*)[MNST])aObj[o_ssxcapf]->Alloc(ss[q].DM[20], ss[q].DM[17], F_);
+        (float (*)[MNST])aObj[o_ssxcapf]->Alloc(ss[q].DM[20], MNST, F_);
   else
     ss[q].XcapZ = (float (*)[MNST])aObj[o_ssxcapf]->Free();
 
   if (ss[q].switches[36] != S_OFF && ss[q].DM[20] > 0)
     ss[q].Xlam =
-        (float (*)[MNST])aObj[o_ssxlam]->Alloc(ss[q].DM[20], ss[q].DM[17], F_);
+        (float (*)[MNST])aObj[o_ssxlam]->Alloc(ss[q].DM[20], MNST, F_);
   else
     ss[q].Xlam = (float (*)[MNST])aObj[o_ssxlam]->Free();
 

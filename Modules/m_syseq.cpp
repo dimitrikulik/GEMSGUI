@@ -559,27 +559,37 @@ void TSysEq::newSizeifChange() {
     if (ssp->pha[i] >= 0)                  // no delete num
     {
       ssp->pha[j] = ssp->pha[i];
-      for (k = 0; k < ssp->DM[17]; k++) {
-        if (ssp->SCMT)
-          ssp->SCMT[j][k] = ssp->SCMT[i][k];
-        if (ssp->Nfsp)
-          ssp->Nfsp[j][k] = ssp->Nfsp[i][k];
-        if (ssp->MaSdt)
-          ssp->MaSdt[j][k] = ssp->MaSdt[i][k];
+      // SCM Modernization: Tier 1 surface types / patches (MNST=6)
+      for (k = 0; k < MNST; k++) {
+        if (ssp->SCMT) {
+          for (int c = 0; c < NSCMC; c++)
+            ssp->SCMT[j][k][c] = ssp->SCMT[i][k][c]; // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
+        }
+        if (ssp->MaSdt) {
+          for (int c = 0; c < NMSDT; c++)
+            ssp->MaSdt[j][k][c] = ssp->MaSdt[i][k][c]; // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
+        }
         if (ssp->XcapA)
           ssp->XcapA[j][k] = ssp->XcapA[i][k];
         if (ssp->XcapB)
           ssp->XcapB[j][k] = ssp->XcapB[i][k];
         if (ssp->XcapC)
-          ssp->XcapC[j][k] =
-              ssp->XcapC[i][k]; // New: copy C3 capacitance density (4LM)
+          ssp->XcapC[j][k] = ssp->XcapC[i][k];
         if (ssp->XcapZ)
-          ssp->XcapZ[j][k] =
-              ssp->XcapZ[i][k]; // New: copy slip plane parameter f_zeta
-        if (ssp->XfIEC)
-          ssp->XfIEC[j][k] = ssp->XfIEC[i][k];
+          ssp->XcapZ[j][k] = ssp->XcapZ[i][k];
+        if (ssp->XfIEC) {
+          for (int c = 0; c < NCIEC; c++)
+            ssp->XfIEC[j][k][c] = ssp->XfIEC[i][k][c]; // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
+        }
         if (ssp->Xlam)
           ssp->Xlam[j][k] = ssp->Xlam[i][k];
+      }
+      // SCM Modernization: Tier 2 surface site types (NSURFSITES=8)
+      if (ssp->Nfsp) {
+        for (k = 0; k < NSURFSITES; k++) {
+          for (int c = 0; c < NFSIT; c++)
+            ssp->Nfsp[j][k][c] = ssp->Nfsp[i][k][c]; // SCM Modernization: [sy.Fia][NSURFSITES=8][NFSIT=4]
+        }
       }
       j++;
     }
@@ -671,7 +681,7 @@ void TSysEq::newSizeifChange() {
       if (ssp->MaSdj) {
         // Extended by KD on 25.10.2004
         int kk;
-        for (kk = 0; kk < DFCN; kk++)
+        for (kk = 0; kk < DNFCN; kk++) // SCM Modernization: DNFCN=4
           ssp->MaSdj[j][kk] = ssp->MaSdj[i][kk];
         //               ssp->MaSdj[j] = ssp->MaSdj[i];
       }

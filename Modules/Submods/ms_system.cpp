@@ -133,9 +133,11 @@ void TSyst::ods_link(int /*q*/) {
   aObj[o_syyof]->SetDim(mup->Fi, 1);
   aObj[o_sylngmf]->SetPtr(sy.lnGmf);
   aObj[o_sylngmf]->SetDim(mup->L, 1);
+  // SCM Modernization: Group 3 Surface species DC parameters
   aObj[o_symasdj]->SetPtr(sy.MaSdj);
-  //    aObj[ o_symasdj]->SetDim( mup->Ls, 1 );
-  aObj[o_symasdj]->SetDim(mup->Lads, DFCN); // changed 25.10.2004 by KD
+  aObj[o_symasdj]->SetDim(mup->Lads, DNFCN); // SCM Modernization: DNFCN=4
+  aObj[o_symcdc]->SetPtr(sy.McdC);
+  aObj[o_symcdc]->SetDim(mup->Lads, DMCDC); // SCM Modernization: DMCDC=4
   aObj[o_syaalp]->SetPtr(sy.Aalp);
   aObj[o_syaalp]->SetDim(mup->Fi, 1);
   aObj[o_sysigm]->SetPtr(sy.Sigm);
@@ -144,27 +146,35 @@ void TSyst::ods_link(int /*q*/) {
   aObj[o_syxr0h0]->SetDim(mup->Fi, 2);
   aObj[o_syxeps]->SetPtr(sy.XEpsC);
   aObj[o_syxeps]->SetDim(mup->Fi, 2);
+  // SCM Modernization: Group 2 Surface site types
+  // [mu.Fis][NSURFSITES=8][NFSIT=4]
   aObj[o_synfsp]->SetPtr(sy.Nfsp);
-  aObj[o_synfsp]->SetDim(mup->Fis, sy.NsTm);
+  aObj[o_synfsp]->SetDim(mup->Fis, NSURFSITES * NFSIT);
+  // SCM Modernization: Group 1 Surface types / patches
+  // [mu.Fis][MNST=6][NMSDT=4]
   aObj[o_symasdt]->SetPtr(sy.MaSdt);
-  aObj[o_symasdt]->SetDim(mup->Fis, sy.NsTm);
+  aObj[o_symasdt]->SetDim(mup->Fis, MNST * NMSDT);
+  // SCM Modernization: EIL capacitance densities and slip plane parameter
+  // (split per column transpose from Phase CapT)
   aObj[o_syxcapa]->SetPtr(
       sy.XcapA); // C1 inner capacitance density (TLM,CCM,BSM,3LM,4LM)
-  aObj[o_syxcapa]->SetDim(mup->Fis, sy.NsTm);
+  aObj[o_syxcapa]->SetDim(mup->Fis, MNST);
   aObj[o_syxcapb]->SetPtr(
       sy.XcapB); // C2 outer capacitance density (TLM,3LM,4LM)
-  aObj[o_syxcapb]->SetDim(mup->Fis, sy.NsTm);
-  aObj[o_syxcapc]->SetPtr(sy.XcapC); // New: C3 4LM capacitance density
-  aObj[o_syxcapc]->SetDim(mup->Fis, sy.NsTm);
+  aObj[o_syxcapb]->SetDim(mup->Fis, MNST);
+  aObj[o_syxcapc]->SetPtr(sy.XcapC); // C3 4LM capacitance density
+  aObj[o_syxcapc]->SetDim(mup->Fis, MNST);
   aObj[o_syxcapf]->SetPtr(
-      sy.XcapZ); // New: f_zeta electrokinetic slip plane parameter
-  aObj[o_syxcapf]->SetDim(mup->Fis, sy.NsTm);
+      sy.XcapZ); // f_zeta electrokinetic slip plane parameter
+  aObj[o_syxcapf]->SetDim(mup->Fis, MNST);
   aObj[o_syxfiec]->SetPtr(sy.XfIEC);
-  aObj[o_syxfiec]->SetDim(mup->Fis, NCIEC);
+  aObj[o_syxfiec]->SetDim(
+      mup->Fis, MNST * NCIEC); // SCM Modernization: [mu.Fis][MNST=6][NCIEC=2]
   aObj[o_syscmt]->SetPtr(sy.SCMT);
-  aObj[o_syscmt]->SetDim(mup->Fis, sy.NsTm);
+  aObj[o_syscmt]->SetDim(
+      mup->Fis, MNST * NSCMC); // SCM Modernization: [mu.Fis][MNST=6][NSCMC=2]
   aObj[o_syxlam]->SetPtr(sy.Xlam);
-  aObj[o_syxlam]->SetDim(mup->Fis, sy.NsTm);
+  aObj[o_syxlam]->SetDim(mup->Fis, MNST);
 
   aObj[o_syguns]->SetPtr(sy.Guns);
   aObj[o_syguns]->SetDim(mup->L, 1);
@@ -204,21 +214,30 @@ void TSyst::dyn_set(int /*q*/) {
   sy.PLL = (double *)aObj[o_sypll]->GetPtr();
   sy.YOF = (double *)aObj[o_syyof]->GetPtr();
   sy.lnGmf = (double *)aObj[o_sylngmf]->GetPtr();
-  sy.MaSdj = (float (*)[DFCN])aObj[o_symasdj]->GetPtr();
+  sy.MaSdj =
+      (float (*)[DNFCN])aObj[o_symasdj]->GetPtr(); // SCM Modernization: DNFCN=4
+  sy.McdC =
+      (float (*)[DMCDC])aObj[o_symcdc]->GetPtr(); // SCM Modernization: DMCDC=4
   sy.Aalp = (double *)aObj[o_syaalp]->GetPtr();
   sy.Sigm = (double (*)[2])aObj[o_sysigm]->GetPtr();
   sy.Xr0h0 = (double (*)[2])aObj[o_syxr0h0]->GetPtr();
   sy.XEpsC = (double (*)[2])aObj[o_syxeps]->GetPtr();
-  sy.Nfsp = (float (*)[MNST])aObj[o_synfsp]->GetPtr();
-  sy.MaSdt = (float (*)[MNST])aObj[o_symasdt]->GetPtr();
-  sy.XcapA = (float (*)[MNST])aObj[o_syxcapa]->GetPtr();
+  sy.Nfsp =
+      (float (*)[NSURFSITES][NFSIT])aObj[o_synfsp]
+          ->GetPtr(); // SCM Modernization: [mu.Fis][NSURFSITES=8][NFSIT=4]
+  sy.MaSdt = (float (*)[MNST][NMSDT])aObj[o_symasdt]
+                 ->GetPtr(); // SCM Modernization: [mu.Fis][MNST=6][NMSDT=4]
+  sy.XcapA = (float (*)[MNST])aObj[o_syxcapa]
+                 ->GetPtr(); // SCM Modernization: [mu.Fis][MNST=6]
   sy.XcapB = (float (*)[MNST])aObj[o_syxcapb]->GetPtr();
-  sy.XcapC = (float (*)[MNST])aObj[o_syxcapc]
-                 ->GetPtr(); // New: C3 4LM capacitance density
-  sy.XcapZ = (float (*)[MNST])aObj[o_syxcapf]
-                 ->GetPtr(); // New: f_zeta slip plane parameter
-  sy.XfIEC = (float (*)[MNST])aObj[o_syxfiec]->GetPtr();
-  sy.SCMT = (char (*)[MNST])aObj[o_syscmt]->GetPtr();
+  sy.XcapC =
+      (float (*)[MNST])aObj[o_syxcapc]->GetPtr(); // C3 4LM capacitance density
+  sy.XcapZ =
+      (float (*)[MNST])aObj[o_syxcapf]->GetPtr(); // f_zeta slip plane parameter
+  sy.XfIEC = (float (*)[MNST][NCIEC])aObj[o_syxfiec]
+                 ->GetPtr(); // SCM Modernization: [mu.Fis][MNST=6][NCIEC=2]
+  sy.SCMT = (char (*)[MNST][NSCMC])aObj[o_syscmt]
+                ->GetPtr(); // SCM Modernization: [mu.Fis][MNST=6][NSCMC=2]
   sy.Xlam = (float (*)[MNST])aObj[o_syxlam]->GetPtr();
 
   sy.Guns = (double *)aObj[o_syguns]->GetPtr();
@@ -256,21 +275,29 @@ void TSyst::dyn_kill(int /*q*/) {
   sy.PLL = (double *)aObj[o_sypll]->Free();
   sy.YOF = (double *)aObj[o_syyof]->Free();
   sy.lnGmf = (double *)aObj[o_sylngmf]->Free();
-  sy.MaSdj = (float (*)[DFCN])aObj[o_symasdj]->Free();
+  sy.MaSdj =
+      (float (*)[DNFCN])aObj[o_symasdj]->Free(); // SCM Modernization: DNFCN=4
+  sy.McdC =
+      (float (*)[DMCDC])aObj[o_symcdc]->Free(); // SCM Modernization: DMCDC=4
   sy.Aalp = (double *)aObj[o_syaalp]->Free();
   sy.Sigm = (double (*)[2])aObj[o_sysigm]->Free();
   sy.Xr0h0 = (double (*)[2])aObj[o_syxr0h0]->Free();
   sy.XEpsC = (double (*)[2])aObj[o_syxeps]->Free();
-  sy.Nfsp = (float (*)[MNST])aObj[o_synfsp]->Free();
-  sy.MaSdt = (float (*)[MNST])aObj[o_symasdt]->Free();
-  sy.XcapA = (float (*)[MNST])aObj[o_syxcapa]->Free();
+  sy.Nfsp = (float (*)[NSURFSITES][NFSIT])aObj[o_synfsp]
+                ->Free(); // SCM Modernization: [mu.Fis][NSURFSITES=8][NFSIT=4]
+  sy.MaSdt = (float (*)[MNST][NMSDT])aObj[o_symasdt]
+                 ->Free(); // SCM Modernization: [mu.Fis][MNST=6][NMSDT=4]
+  sy.XcapA = (float (*)[MNST])aObj[o_syxcapa]
+                 ->Free(); // SCM Modernization: [mu.Fis][MNST=6]
   sy.XcapB = (float (*)[MNST])aObj[o_syxcapb]->Free();
-  sy.XcapC = (float (*)[MNST])aObj[o_syxcapc]
-                 ->Free(); // New: C3 4LM capacitance density
-  sy.XcapZ = (float (*)[MNST])aObj[o_syxcapf]
-                 ->Free(); // New: f_zeta slip plane parameter
-  sy.XfIEC = (float (*)[MNST])aObj[o_syxfiec]->Free();
-  sy.SCMT = (char (*)[MNST])aObj[o_syscmt]->Free();
+  sy.XcapC =
+      (float (*)[MNST])aObj[o_syxcapc]->Free(); // C3 4LM capacitance density
+  sy.XcapZ =
+      (float (*)[MNST])aObj[o_syxcapf]->Free(); // f_zeta slip plane parameter
+  sy.XfIEC = (float (*)[MNST][NCIEC])aObj[o_syxfiec]
+                 ->Free(); // SCM Modernization: [mu.Fis][MNST=6][NCIEC=2]
+  sy.SCMT = (char (*)[MNST][NSCMC])aObj[o_syscmt]
+                ->Free(); // SCM Modernization: [mu.Fis][MNST=6][NSCMC=2]
   sy.Xlam = (float (*)[MNST])aObj[o_syxlam]->Free();
 
   sy.Guns = (double *)aObj[o_syguns]->Free();
@@ -388,11 +415,15 @@ void TSyst::dyn_new(int /*q*/) {
   else
     sy.GEX = (double *)aObj[o_sygex]->Free();
 
-  if (sy.PMaSdj != S_OFF)
-    sy.MaSdj = (float (*)[DFCN])aObj[o_symasdj]->Alloc(mup->Lads, DFCN, F_);
-  //  sy.MaSdj = (float *)aObj[ o_symasdj]->Alloc( mup->Ls, 1, F_ );
-  else
-    sy.MaSdj = (float (*)[DFCN])aObj[o_symasdj]->Free();
+  if (sy.PMaSdj != S_OFF) {
+    sy.MaSdj = (float (*)[DNFCN])aObj[o_symasdj]->Alloc(
+        mup->Lads, DNFCN, F_); // SCM Modernization: DNFCN=4
+    sy.McdC = (float (*)[DMCDC])aObj[o_symcdc]->Alloc(
+        mup->Lads, DMCDC, F_); // SCM Modernization: DMCDC=4
+  } else {
+    sy.MaSdj = (float (*)[DNFCN])aObj[o_symasdj]->Free();
+    sy.McdC = (float (*)[DMCDC])aObj[o_symcdc]->Free();
+  }
 
   if (sy.PlnGf != S_OFF)
     sy.lnGmf = (double *)aObj[o_sylngmf]->Alloc(mup->L, 1, D_);
@@ -422,44 +453,55 @@ void TSyst::dyn_new(int /*q*/) {
     sy.Xr0h0 = (double (*)[2])aObj[o_syxr0h0]->Free();
 
   if (sy.PNfsp != S_OFF && sy.NsTm > 0) {
-    sy.Nfsp = (float (*)[MNST])aObj[o_synfsp]->Alloc(mup->Fis, sy.NsTm, F_);
-    sy.SCMT = (char (*)[MNST])aObj[o_syscmt]->Alloc(mup->Fis, sy.NsTm, A_);
+    sy.Nfsp = (float (*)[NSURFSITES][NFSIT])aObj[o_synfsp]->Alloc(
+        mup->Fis, NSURFSITES * NFSIT,
+        F_); // SCM Modernization: [mu.Fis][NSURFSITES=8][NFSIT=4]
+    sy.SCMT = (char (*)[MNST][NSCMC])aObj[o_syscmt]->Alloc(
+        mup->Fis, MNST * NSCMC,
+        A_); // SCM Modernization: [mu.Fis][MNST=6][NSCMC=2]
   } else {
-    sy.Nfsp = (float (*)[MNST])aObj[o_synfsp]->Free();
-    sy.SCMT = (char (*)[MNST])aObj[o_syscmt]->Free();
+    sy.Nfsp = (float (*)[NSURFSITES][NFSIT])aObj[o_synfsp]->Free();
+    sy.SCMT = (char (*)[MNST][NSCMC])aObj[o_syscmt]->Free();
   }
 
   if (sy.PMaSdt != S_OFF && sy.NsTm > 0)
-    sy.MaSdt = (float (*)[MNST])aObj[o_symasdt]->Alloc(mup->Fis, sy.NsTm, F_);
+    sy.MaSdt = (float (*)[MNST][NMSDT])aObj[o_symasdt]->Alloc(
+        mup->Fis, MNST * NMSDT,
+        F_); // SCM Modernization: [mu.Fis][MNST=6][NMSDT=4]
   else
-    sy.MaSdt = (float (*)[MNST])aObj[o_symasdt]->Free();
+    sy.MaSdt = (float (*)[MNST][NMSDT])aObj[o_symasdt]->Free();
 
   if (sy.PXcapA != S_OFF && sy.NsTm > 0)
-    sy.XcapA = (float (*)[MNST])aObj[o_syxcapa]->Alloc(mup->Fis, sy.NsTm, F_);
+    sy.XcapA = (float (*)[MNST])aObj[o_syxcapa]->Alloc(
+        mup->Fis, MNST, F_); // SCM Modernization: [mu.Fis][MNST=6]
   else
     sy.XcapA = (float (*)[MNST])aObj[o_syxcapa]->Free();
 
   if (sy.PXcapB != S_OFF && sy.NsTm > 0)
-    sy.XcapB = (float (*)[MNST])aObj[o_syxcapb]->Alloc(mup->Fis, sy.NsTm, F_);
+    sy.XcapB = (float (*)[MNST])aObj[o_syxcapb]->Alloc(
+        mup->Fis, MNST, F_); // SCM Modernization: [mu.Fis][MNST=6]
   else
     sy.XcapB = (float (*)[MNST])aObj[o_syxcapb]->Free();
 
-  // New: EIL C3 (4LM) capacitance density and slip plane f_zeta allocation
+  // SCM Modernization: EIL C3 (4LM) capacitance density and slip plane f_zeta
+  // allocation
   if (sy.PXcapC != S_OFF && sy.NsTm > 0) {
-    sy.XcapC = (float (*)[MNST])aObj[o_syxcapc]->Alloc(mup->Fis, sy.NsTm, F_);
-    sy.XcapZ = (float (*)[MNST])aObj[o_syxcapf]->Alloc(mup->Fis, sy.NsTm, F_);
+    sy.XcapC = (float (*)[MNST])aObj[o_syxcapc]->Alloc(mup->Fis, MNST, F_);
+    sy.XcapZ = (float (*)[MNST])aObj[o_syxcapf]->Alloc(mup->Fis, MNST, F_);
   } else {
     sy.XcapC = (float (*)[MNST])aObj[o_syxcapc]->Free();
     sy.XcapZ = (float (*)[MNST])aObj[o_syxcapf]->Free();
   }
 
   if (sy.PXfIEC != S_OFF && sy.NsTm > 0)
-    sy.XfIEC = (float (*)[MNST])aObj[o_syxfiec]->Alloc(mup->Fis, sy.NsTm, F_);
+    sy.XfIEC = (float (*)[MNST][NCIEC])aObj[o_syxfiec]->Alloc(
+        mup->Fis, MNST * NCIEC,
+        F_); // SCM Modernization: [mu.Fis][MNST=6][NCIEC=2]
   else
-    sy.XfIEC = (float (*)[MNST])aObj[o_syxfiec]->Free();
+    sy.XfIEC = (float (*)[MNST][NCIEC])aObj[o_syxfiec]->Free();
 
   if (sy.PXlam != S_OFF && sy.NsTm > 0)
-    sy.Xlam = (float (*)[MNST])aObj[o_syxlam]->Alloc(mup->Fis, sy.NsTm, F_);
+    sy.Xlam = (float (*)[MNST])aObj[o_syxlam]->Alloc(mup->Fis, MNST, F_);
   else
     sy.Xlam = (float (*)[MNST])aObj[o_syxlam]->Free();
 
@@ -767,20 +809,38 @@ void TSyst::setDefData() {
   if (sy.PSATT != S_OFF)
     memset(sy.SATC, A_EMPTY, mup->Lads * MNCAS); // Modified: MNCAS=4
   //        memset( sy.SATC, A_EMPTY, /* SAT_INDEF,*/ mup->Ls*2 );
-  if (sy.PMaSdj != S_OFF && sy.NsTm > 0)
-    for (i = 0; i < mup->Lads; i++)
-      for (j = 0; j < DFCN; j++)
-        sy.MaSdj[i][j] = FLOAT_EMPTY; // changed 25.10.2004 by KD
-                                      //             sy.MaSdj[i] = FLOAT_EMPTY;
+  if (sy.PMaSdj != S_OFF && sy.NsTm > 0) {
+    for (i = 0; i < mup->Lads; i++) {
+      for (j = 0; j < DNFCN; j++)
+        sy.MaSdj[i][j] = FLOAT_EMPTY; // SCM Modernization: DNFCN=4
+      if (sy.McdC) {
+        for (j = 0; j < DMCDC; j++)
+          sy.McdC[i][j] = FLOAT_EMPTY; // SCM Modernization: DMCDC=4
+      }
+    }
+  }
   if (sy.PNfsp == S_REM && sy.NsTm > 0) {
-    memset(sy.SCMT, A_EMPTY, /* SC_NOT_USED,*/ mup->Fis * sy.NsTm);
-    for (k = 0; k < mup->Fis; k++)
-      for (i = 0; i < sy.NsTm; i++) {
-        sy.Nfsp[k][i] = FLOAT_EMPTY;
-        if (sy.PMaSdt != S_OFF)
-          sy.MaSdt[k][i] = FLOAT_EMPTY;
-        if (sy.PXfIEC != S_OFF)
-          sy.XfIEC[k][i] = FLOAT_EMPTY;
+    memset(sy.SCMT, A_EMPTY, mup->Fis * MNST * NSCMC);
+    for (k = 0; k < mup->Fis; k++) {
+      for (i = 0; i < NSURFSITES; i++) {
+        for (j = 0; j < NFSIT; j++)
+          sy.Nfsp[k][i][j] =
+              FLOAT_EMPTY; // SCM Modernization: [mu.Fis][NSURFSITES=8][NFSIT=4]
+      }
+      for (i = 0; i < MNST; i++) {
+        for (j = 0; j < NSCMC; j++)
+          sy.SCMT[k][i][j] =
+              A_EMPTY; // SCM Modernization: [mu.Fis][MNST=6][NSCMC=2]
+        if (sy.PMaSdt != S_OFF) {
+          for (j = 0; j < NMSDT; j++)
+            sy.MaSdt[k][i][j] =
+                FLOAT_EMPTY; // SCM Modernization: [mu.Fis][MNST=6][NMSDT=4]
+        }
+        if (sy.PXfIEC != S_OFF) {
+          for (j = 0; j < NCIEC; j++)
+            sy.XfIEC[k][i][j] =
+                FLOAT_EMPTY; // SCM Modernization: [mu.Fis][MNST=6][NCIEC=2]
+        }
         if (sy.PXlam != S_OFF)
           sy.Xlam[k][i] = FLOAT_EMPTY;
         if (sy.PBeq != S_OFF) {
@@ -789,12 +849,12 @@ void TSyst::setDefData() {
           if (sy.PXcapB != S_OFF)
             sy.XcapB[k][i] = FLOAT_EMPTY;
           if (sy.PXcapC != S_OFF) {
-            sy.XcapC[k][i] = FLOAT_EMPTY; // New: C3 4LM capacitance density
-            sy.XcapZ[k][i] = FLOAT_EMPTY; // New: f_zeta slip plane parameter
+            sy.XcapC[k][i] = FLOAT_EMPTY; // C3 4LM capacitance density
+            sy.XcapZ[k][i] = FLOAT_EMPTY; // f_zeta slip plane parameter
           }
         }
       }
-    /*......*/
+    }
   }
   if (sy.PYOF != S_OFF)
     memset(sy.YOF, 0, mup->Fi * sizeof(double));
@@ -890,27 +950,34 @@ void TSyst::phase_data_load() {
 // #define mp(i,j) (aPH->php->MaSdj[(j)+(i)*D_F_CD_NP])
 //  Added on 25.10.2004 by KD
 
-// Load default informations from sorption phases
+// SCM Modernization: Load default informations from sorption phases into 3-D /
+// 2-D arrays
 void TSyst::sorption_data_load(TPhase *aPH, int k) {
-  int ist, i, j, jb = 0, je, jp;
+  int ist, isi, i, j, jb = 0, je, jp;
   unsigned ii, pnDC;
   RMULTS *mup = TRMults::sm->GetMU();
 
-  for (ist = 0; ist < sy.NsTm; ist++) {
+  // SCM Modernization: Tier 1: Surface types / patches (MNST=6)
+  for (ist = 0; ist < MNST; ist++) {
     if (ist < aPH->php->NsuT) {
       if (sy.PNfsp != S_OFF) {
-        sy.Nfsp[k][ist] =
-            aPH->php->MSDT[ist][MSDT_FSUTSA]; // Fraction of surface patch
-        sy.SCMT[k][ist] = aPH->php->SCMC[ist][SCMC_EILM_CODE]; // EIL model code
-        /*       sy.CSTS[k][ist] = aPH->php->SCMT[ist][1]; */
-        sy.MaSdt[k][ist] = aPH->php->MSDT[ist][0];
-        //       sy.MiSdt[k][ist] = aPH->php->MSDT[ist][1];
+        // SCM Modernization: SCMC[NsuT][NSCMC=2] -> SCMT[mu.Fis][MNST][NSCMC=2]
+        sy.SCMT[k][ist][0] = aPH->php->SCMC[ist][0]; // EIL model code
+        sy.SCMT[k][ist][1] = aPH->php->SCMC[ist][1]; // Patch SACT code
+        // SCM Modernization: MSDT[NsuT][NMSDT=4] ->
+        // MaSdt[mu.Fis][MNST][NMSDT=4]
+        for (int c = 0; c < NMSDT; c++)
+          sy.MaSdt[k][ist][c] = aPH->php->MSDT[ist][c];
       }
 
-      if (sy.PXfIEC != S_OFF)
-        sy.XfIEC[k][ist] = aPH->php->XfIEC[ist];
-      // Connections from CapT[NsuT][NCAZP=4] to separate 2D arrays XcapA,
-      // XcapB, XcapC, XcapZ
+      // SCM Modernization: XfIEC[NsuT][NCIEC=2] -> XfIEC[mu.Fis][MNST][NCIEC=2]
+      if (sy.PXfIEC != S_OFF) {
+        for (int c = 0; c < NCIEC; c++)
+          sy.XfIEC[k][ist][c] = aPH->php->XfIEC[ist][c];
+      }
+
+      // SCM Modernization: Connections from CapT[NsuT][NCAZP=4] to separate 2D
+      // arrays XcapA..Z[mu.Fis][MNST]
       if (sy.PXcapA != S_OFF)
         sy.XcapA[k][ist] =
             aPH->php->CapT[ist][CAPT_A_CAPD]; // C1 inner capacitance density
@@ -919,34 +986,49 @@ void TSyst::sorption_data_load(TPhase *aPH, int k) {
             aPH->php->CapT[ist][CAPT_B_CAPD]; // C2 outer capacitance density
       if (sy.PXcapC != S_OFF) {
         sy.XcapC[k][ist] =
-            aPH->php->CapT[ist][CAPT_C_CAPD]; // New: C3 4LM capacitance density
+            aPH->php->CapT[ist][CAPT_C_CAPD]; // C3 4LM capacitance density
         sy.XcapZ[k][ist] =
-            aPH->php->CapT[ist][CAPT_F_ZETA]; // New: f_zeta electrokinetic slip
+            aPH->php->CapT[ist][CAPT_F_ZETA]; // f_zeta electrokinetic slip
                                               // plane parameter
       }
     } else {
       if (sy.PNfsp != S_OFF) {
-        sy.Nfsp[k][ist] = FLOAT_EMPTY;
-        /*     sy.CSTS[k][ist] = CCA_VOL;  */
-        sy.SCMT[k][ist] = SC_NOT_USED;
-        sy.MaSdt[k][ist] = FLOAT_EMPTY;
-        //       sy.MiSdt[k][ist] = FLOAT_EMPTY;
+        sy.SCMT[k][ist][0] = SC_NOT_USED;
+        sy.SCMT[k][ist][1] = SC_NOT_USED;
+        for (int c = 0; c < NMSDT; c++)
+          sy.MaSdt[k][ist][c] = FLOAT_EMPTY;
       }
-
-      if (sy.PXfIEC != S_OFF)
-        sy.XfIEC[k][ist] = FLOAT_EMPTY;
+      if (sy.PXfIEC != S_OFF) {
+        for (int c = 0; c < NCIEC; c++)
+          sy.XfIEC[k][ist][c] = FLOAT_EMPTY;
+      }
       if (sy.PXcapA != S_OFF)
         sy.XcapA[k][ist] = FLOAT_EMPTY;
       if (sy.PXcapB != S_OFF)
         sy.XcapB[k][ist] = FLOAT_EMPTY;
       if (sy.PXcapC != S_OFF) {
-        sy.XcapC[k][ist] = FLOAT_EMPTY; // New: C3 4LM capacitance density
-        sy.XcapZ[k][ist] = FLOAT_EMPTY; // New: f_zeta slip plane parameter
+        sy.XcapC[k][ist] = FLOAT_EMPTY;
+        sy.XcapZ[k][ist] = FLOAT_EMPTY;
       }
     }
-  } /* end for ist */
-  if (sy.PSATT != S_OFF &&
-      sy.PMaSdj != S_OFF) { /* Load arrays SATC_ and MaSdj_ */
+  } /* end for ist (Tier 1) */
+
+  // SCM Modernization: Tier 2: Surface site types FsiT[nSiT][NFSIT=4] ->
+  // Nfsp[mu.Fis][NSURFSITES=8][NFSIT=4]
+  if (sy.PNfsp != S_OFF) {
+    for (isi = 0; isi < NSURFSITES; isi++) {
+      if (isi < aPH->php->nSiT) {
+        for (int c = 0; c < NFSIT; c++)
+          sy.Nfsp[k][isi][c] = aPH->php->FsiT[isi][c];
+      } else {
+        for (int c = 0; c < NFSIT; c++)
+          sy.Nfsp[k][isi][c] = FLOAT_EMPTY;
+      }
+    }
+  }
+
+  // SCM Modernization: Tier 3: Surface species parameters [mu.Lads]
+  if (sy.PSATT != S_OFF && sy.PMaSdj != S_OFF) {
     int ja, kk;
     pnDC = aPH->php->nDC;
     // Calculate indexes of begin and end of list of DC in current phase in
@@ -954,8 +1036,7 @@ void TSyst::sorption_data_load(TPhase *aPH, int k) {
     for (i = 0; i < k; i++)
       jb += mup->Ll[i];
     je = jb + mup->Ll[k]; // Ls
-    for (j = jb; j < je;
-         j++) { /* Check dependent component and search it's name in phase */
+    for (j = jb; j < je; j++) {
       for (ii = 0; ii < pnDC; ii++) {
         if (!memcmp(mup->SM[j], aPH->php->SM[ii], DC_RKLEN - 4))
           break;
@@ -963,17 +1044,15 @@ void TSyst::sorption_data_load(TPhase *aPH, int k) {
       if (ii >= pnDC)
         continue;
       jp = ii;
-      ja = j - (mup->Ls - mup->Lads); // index in SATC_ and MaSdj_
-      /* data copy */
-      for (kk = 0; kk < MNCAS; kk++) // Modified: MNCAS=4
+      ja = j - (mup->Ls - mup->Lads); // index in SATC_, MaSdj_, McdC_
+      for (kk = 0; kk < MNCAS; kk++)  // SCM Modernization: MNCAS=4
         sy.SATC[ja][kk] = aPH->php->SATC[jp][kk];
-      //            sy.SATC[j][0] = aPH->php->SATC[jp][0];
-      //            sy.SATC[j][1] = aPH->php->SATC[jp][1];
-      // Extended by KD on 25.10.2004
-      for (kk = 0; kk < DFCN; kk++)
+      for (kk = 0; kk < DNFCN; kk++) // SCM Modernization: DNFCN=4
         sy.MaSdj[ja][kk] = aPH->php->MaSdj[jp][kk];
-      //            sy.MaSdj[j][PI_DEN]  = aPH->php->MaSdj[jp][PI_DEN];
-      //            sy.MaSdj[j] = aPH->php->MaSdj[jp];
+      if (sy.McdC && aPH->php->mCDc) {
+        for (kk = 0; kk < DMCDC; kk++) // SCM Modernization: DMCDC=4
+          sy.McdC[ja][kk] = aPH->php->mCDc[jp][kk];
+      }
     } /* end j */
   }
 }
@@ -1379,25 +1458,43 @@ void TSyst::packData() {
     if (sy.Pcl[i] != S_OFF && mup->PHC[i] == 'x') {
       ErrorIf(i5 >= sy.Fia, GetName(), "sy.Fia Invalid count");
       STat->ssp->pha[i5] = i;
-      for (j = 0; j < sy.NsTm; j++) {
+      // SCM Modernization: Tier 1 surface types / patches (MNST=6)
+      for (j = 0; j < MNST; j++) {
         if (sy.PNfsp != S_OFF) {
-          STat->ssp->SCMT[i5][j] = sy.SCMT[i][j];
-          STat->ssp->Nfsp[i5][j] = sy.Nfsp[i][j];
+          for (int c = 0; c < NSCMC; c++)
+            STat->ssp->SCMT[i5][j][c] =
+                sy.SCMT[i][j]
+                       [c]; // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
+          for (int c = 0; c < NMSDT; c++)
+            STat->ssp->MaSdt[i5][j][c] =
+                sy.MaSdt[i][j]
+                        [c]; // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
         }
-        if (sy.PMaSdt != S_OFF)
-          STat->ssp->MaSdt[i5][j] = sy.MaSdt[i][j];
         if (sy.PXcapA != S_OFF)
           STat->ssp->XcapA[i5][j] = sy.XcapA[i][j];
         if (sy.PXcapB != S_OFF)
           STat->ssp->XcapB[i5][j] = sy.XcapB[i][j];
         if (sy.PXcapC != S_OFF) {
-          STat->ssp->XcapC[i5][j] = sy.XcapC[i][j]; // New: copy C3 (4LM)
-          STat->ssp->XcapZ[i5][j] = sy.XcapZ[i][j]; // New: copy f_zeta
+          STat->ssp->XcapC[i5][j] = sy.XcapC[i][j]; // C3 (4LM)
+          STat->ssp->XcapZ[i5][j] = sy.XcapZ[i][j]; // f_zeta
         }
-        if (sy.PXfIEC != S_OFF)
-          STat->ssp->XfIEC[i5][j] = sy.XfIEC[i][j];
+        if (sy.PXfIEC != S_OFF) {
+          for (int c = 0; c < NCIEC; c++)
+            STat->ssp->XfIEC[i5][j][c] =
+                sy.XfIEC[i][j]
+                        [c]; // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
+        }
         if (sy.PXlam != S_OFF)
           STat->ssp->Xlam[i5][j] = sy.Xlam[i][j];
+      }
+      // SCM Modernization: Tier 2 surface site types (NSURFSITES=8)
+      if (sy.PNfsp != S_OFF) {
+        for (j = 0; j < NSURFSITES; j++) {
+          for (int c = 0; c < NFSIT; c++)
+            STat->ssp->Nfsp[i5][j][c] =
+                sy.Nfsp[i][j][c]; // SCM Modernization:
+                                  // [sy.Fia][NSURFSITES=8][NFSIT=4]
+        }
       }
       i5++;
     }
@@ -1462,16 +1559,16 @@ void TSyst::packData() {
       //            STat->ssp->dca[i5] = i;
       if (sy.PSATT !=
           S_OFF) { // irreversible migration from old data structure 27.10.2004
-        for (kk = 0; kk < DFCN; kk++)
+        for (kk = 0; kk < MNCAS; kk++) // SCM Modernization: MNCAS=4
           STat->ssp->SATC[i5][kk] = sy.SATC[ia][kk];
-        //                STat->ssp->SATC[i5][1] = sy.SATC[i][1];
       }
       if (sy.PMaSdj != S_OFF) {
-        // Extended by KD on 25.10.2004
-        for (kk = 0; kk < DFCN; kk++)
+        for (kk = 0; kk < DNFCN; kk++) // SCM Modernization: DNFCN=4
           STat->ssp->MaSdj[i5][kk] = sy.MaSdj[ia][kk];
-        //               STat->ssp->MaSdj[i5][PI_CD0]  = sy.MaSdj[i][PI_CD0];
-        //              STat->ssp->MaSdj[i5] = sy.MaSdj[i];
+        if (sy.McdC && STat->ssp->McdC) {
+          for (kk = 0; kk < DMCDC; kk++) // SCM Modernization: DMCDC=4
+            STat->ssp->McdC[i5][kk] = sy.McdC[ia][kk];
+        }
       }
       i5++;
     }
@@ -1580,25 +1677,43 @@ void TSyst::packData(TCIntArray PHon, TCIntArray PHoff, TCIntArray DCon,
     if (sy.Pcl[i] != S_OFF && mup->PHC[i] == 'x') {
       ErrorIf(i5 >= sy.Fia, GetName(), "sy.Fia Invalid count");
       STat->ssp->pha[i5] = (short)PHon[i];
-      for (j = 0; j < sy.NsTm; j++) {
+      // SCM Modernization: Tier 1 surface types / patches (MNST=6)
+      for (j = 0; j < MNST; j++) {
         if (sy.PNfsp != S_OFF) {
-          STat->ssp->SCMT[i5][j] = sy.SCMT[i][j];
-          STat->ssp->Nfsp[i5][j] = sy.Nfsp[i][j];
+          for (int c = 0; c < NSCMC; c++)
+            STat->ssp->SCMT[i5][j][c] =
+                sy.SCMT[i][j]
+                       [c]; // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
+          for (int c = 0; c < NMSDT; c++)
+            STat->ssp->MaSdt[i5][j][c] =
+                sy.MaSdt[i][j]
+                        [c]; // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
         }
-        if (sy.PMaSdt != S_OFF)
-          STat->ssp->MaSdt[i5][j] = sy.MaSdt[i][j];
         if (sy.PXcapA != S_OFF)
           STat->ssp->XcapA[i5][j] = sy.XcapA[i][j];
         if (sy.PXcapB != S_OFF)
           STat->ssp->XcapB[i5][j] = sy.XcapB[i][j];
         if (sy.PXcapC != S_OFF) {
-          STat->ssp->XcapC[i5][j] = sy.XcapC[i][j]; // New: copy C3 (4LM)
-          STat->ssp->XcapZ[i5][j] = sy.XcapZ[i][j]; // New: copy f_zeta
+          STat->ssp->XcapC[i5][j] = sy.XcapC[i][j]; // C3 (4LM)
+          STat->ssp->XcapZ[i5][j] = sy.XcapZ[i][j]; // f_zeta
         }
-        if (sy.PXfIEC != S_OFF)
-          STat->ssp->XfIEC[i5][j] = sy.XfIEC[i][j];
+        if (sy.PXfIEC != S_OFF) {
+          for (int c = 0; c < NCIEC; c++)
+            STat->ssp->XfIEC[i5][j][c] =
+                sy.XfIEC[i][j]
+                        [c]; // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
+        }
         if (sy.PXlam != S_OFF)
           STat->ssp->Xlam[i5][j] = sy.Xlam[i][j];
+      }
+      // SCM Modernization: Tier 2 surface site types (NSURFSITES=8)
+      if (sy.PNfsp != S_OFF) {
+        for (j = 0; j < NSURFSITES; j++) {
+          for (int c = 0; c < NFSIT; c++)
+            STat->ssp->Nfsp[i5][j][c] =
+                sy.Nfsp[i][j][c]; // SCM Modernization:
+                                  // [sy.Fia][NSURFSITES=8][NFSIT=4]
+        }
       }
       i5++;
     }
@@ -1673,16 +1788,16 @@ void TSyst::packData(TCIntArray PHon, TCIntArray PHoff, TCIntArray DCon,
       //            STat->ssp->dca[i5] = i;
       if (sy.PSATT !=
           S_OFF) { // irreversible migration from old data structure 27.10.2004
-        for (kk = 0; kk < DFCN; kk++)
+        for (kk = 0; kk < MNCAS; kk++) // SCM Modernization: MNCAS=4
           STat->ssp->SATC[i5][kk] = sy.SATC[ia][kk];
-        //                STat->ssp->SATC[i5][1] = sy.SATC[i][1];
       }
       if (sy.PMaSdj != S_OFF) {
-        // Extended by KD on 25.10.2004
-        for (kk = 0; kk < DFCN; kk++)
+        for (kk = 0; kk < DNFCN; kk++) // SCM Modernization: DNFCN=4
           STat->ssp->MaSdj[i5][kk] = sy.MaSdj[ia][kk];
-        //               STat->ssp->MaSdj[i5][PI_CD0]  = sy.MaSdj[i][PI_CD0];
-        //              STat->ssp->MaSdj[i5] = sy.MaSdj[i];
+        if (sy.McdC && STat->ssp->McdC) {
+          for (kk = 0; kk < DMCDC; kk++) // SCM Modernization: DMCDC=4
+            STat->ssp->McdC[i5][kk] = sy.McdC[ia][kk];
+        }
       }
       i5++;
     }
