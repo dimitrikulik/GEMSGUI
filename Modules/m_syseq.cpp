@@ -563,11 +563,15 @@ void TSysEq::newSizeifChange() {
       for (k = 0; k < MNST; k++) {
         if (ssp->SCMT) {
           for (int c = 0; c < NSCMC; c++)
-            ssp->SCMT[j][k][c] = ssp->SCMT[i][k][c]; // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
+            ssp->SCMT[j][k][c] =
+                ssp->SCMT[i][k]
+                         [c]; // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
         }
         if (ssp->MaSdt) {
           for (int c = 0; c < NMSDT; c++)
-            ssp->MaSdt[j][k][c] = ssp->MaSdt[i][k][c]; // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
+            ssp->MaSdt[j][k][c] =
+                ssp->MaSdt[i][k]
+                          [c]; // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
         }
         if (ssp->XcapA)
           ssp->XcapA[j][k] = ssp->XcapA[i][k];
@@ -579,7 +583,9 @@ void TSysEq::newSizeifChange() {
           ssp->XcapZ[j][k] = ssp->XcapZ[i][k];
         if (ssp->XfIEC) {
           for (int c = 0; c < NCIEC; c++)
-            ssp->XfIEC[j][k][c] = ssp->XfIEC[i][k][c]; // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
+            ssp->XfIEC[j][k][c] =
+                ssp->XfIEC[i][k]
+                          [c]; // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
         }
         if (ssp->Xlam)
           ssp->Xlam[j][k] = ssp->Xlam[i][k];
@@ -588,12 +594,15 @@ void TSysEq::newSizeifChange() {
       if (ssp->Nfsp) {
         for (k = 0; k < NSURFSITES; k++) {
           for (int c = 0; c < NFSIT; c++)
-            ssp->Nfsp[j][k][c] = ssp->Nfsp[i][k][c]; // SCM Modernization: [sy.Fia][NSURFSITES=8][NFSIT=4]
+            ssp->Nfsp[j][k][c] =
+                ssp->Nfsp[i][k][c]; // SCM Modernization:
+                                    // [sy.Fia][NSURFSITES=8][NFSIT=4]
         }
       }
       j++;
     }
-  ssp->DM[20] = j;
+  ssp->DM[20] =
+      j; // number of sorption phases sy.Fia or solution phases mu.FIs ?
 
   for (i = 0, j = 0; i < ssp->DM[10]; i++) // System phk
     if (ssp->phk[i] >= 0)                  // no delete num

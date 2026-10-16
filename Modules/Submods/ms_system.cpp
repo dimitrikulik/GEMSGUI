@@ -1044,9 +1044,12 @@ void TSyst::sorption_data_load(TPhase *aPH, int k) {
       if (ii >= pnDC)
         continue;
       jp = ii;
-      ja = j - (mup->Ls - mup->Lads); // index in SATC_, MaSdj_, McdC_
+      ja = j - (mup->Ls - mup->Lads); // index in SATC_, xSmD, MaSdj_, McdC_
+                                      // range over sorption phases only
       for (kk = 0; kk < MNCAS; kk++)  // SCM Modernization: MNCAS=4
         sy.SATC[ja][kk] = aPH->php->SATC[jp][kk];
+      for (kk = 0; kk < NSURFSITES; kk++) // SCM Modernization: NSURFSITES=8
+        sy.xSmD[ja][kk] = aPH->php->xSmD[jp][kk];
       for (kk = 0; kk < DNFCN; kk++) // SCM Modernization: DNFCN=4
         sy.MaSdj[ja][kk] = aPH->php->MaSdj[jp][kk];
       if (sy.McdC && aPH->php->mCDc) {
@@ -1141,76 +1144,69 @@ void TSyst::unpackData() {
     sy.Dcl[ind] = S_OFF;
   }
 
-  //  for( i=0; i<sy.Fia; i++) // pha Phase ON adsorbtion  ( mup->PHC[]=='x' )
-  /*    Surfaces data should be updated from the database like other
-     thermodynamic properties SD 21/04/26 for( i=0; i<STat->ssp->DM[20]; i++)
-      {
-          ind = Prf->indPH( STat->ssp->pha[i] );
-          if( ind < 0 ) continue;
-          for( j=0; j<sy.NsTm; j++ )
-          {
-              if( sy.PNfsp != S_OFF )
-                  sy.SCMT[ind][j] = STat->ssp->SCMT[i][j];
-              if( sy.PNfsp != S_OFF )
-                  sy.Nfsp[ind][j] = STat->ssp->Nfsp[i][j];
-              if( sy.PMaSdt != S_OFF )
-                  sy.MaSdt[ind][j] = STat->ssp->MaSdt[i][j];
-              if( sy.PXcapA != S_OFF )
-                  sy.XcapA[ind][j] = STat->ssp->XcapA[i][j];
-              if( sy.PXcapB != S_OFF )
-                  sy.XcapB[ind][j] = STat->ssp->XcapB[i][j];
-              if( sy.PXcapC != S_OFF )
-              {
-                  sy.XcapC[ind][j] = STat->ssp->XcapC[i][j]; // New: copy C3
-     (4LM) sy.XcapZ[ind][j] = STat->ssp->XcapZ[i][j]; // New: copy f_zeta
-              }
-              if( sy.PXfIEC != S_OFF )
-                  sy.XfIEC[ind][j] = STat->ssp->XfIEC[i][j];
-              if( sy.PXlam != S_OFF )
-                  sy.Xlam[ind][j] = STat->ssp->Xlam[i][j];
-          }
+  // SCM Modernization: Tier 1 and Tier 2 sorption phase data
+  for (i = 0; i < STat->ssp->DM[20]; i++) // pha Phase ON adsorption
+  {
+    ind = Prf->indPH(STat->ssp->pha[i]);
+    if (ind < 0 || ind >= mup->Fis)
+      continue;
+    // SCM Modernization: Tier 1 surface types / patches (MNST=6)
+    for (j = 0; j < MNST; j++) {
+      if (sy.PNfsp != S_OFF) {
+        for (int c = 0; c < NSCMC; c++)
+          sy.SCMT[ind][j][c] =
+              STat->ssp->SCMT[i][j][c]; // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
+        for (int c = 0; c < NMSDT; c++)
+          sy.MaSdt[ind][j][c] =
+              STat->ssp->MaSdt[i][j][c]; // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
       }
-  */
-  //   for( i=0; i<sy.Lsor; i++) dca dcomp ON adsorption ( mup->DCC[]=='X' )
-  /*    Surfaces data should be updated from the database like other
-     thermodynamic properties SD 21/04/26 for( i=0; i<STat->ssp->DM[4]; i++)
-      {
-          ind = Prf->indDC( STat->ssp->dca[i] ) - ( mup->Ls - mup->Lads );
-          if( ind < 0 )
-             continue;
-          if( sy.PSATT != S_OFF )
-          {
-              int mtM, msM, kk;
-              msM = aObj[o_sysatc]->GetM();
-              mtM = aObj[o_sssatc]->GetM();
-              if(mtM >= msM)
-              {
-                 for( kk=0; kk<MNCAS; kk++ ) // Modified: MNCAS=4
-                      sy.SATC[ind][kk] = STat->ssp->SATC[i][kk];
-              }
-              else
-              {  char * satc_ = &STat->ssp->SATC[0][0];
-                 sy.SATC[ind][SA_MCA] = satc_[ i*2 + SA_MCA ];
-                 sy.SATC[ind][SA_EMX] = satc_[ i*2 + SA_EMX ];
-              }
-          }
-          if( sy.PMaSdj != S_OFF ) // Extended by KD on 25.10.2004
-          {
-              int mtM, msM, kk ;
-              msM = aObj[o_symasdj]->GetM();
-              mtM = aObj[o_ssmasdj]->GetM();
-              if(mtM >= msM)
-              {
-                 for( kk=0; kk<DFCN; kk++ )
-                    sy.MaSdj[ind][kk] = STat->ssp->MaSdj[i][kk];
-              }
-              else { // For reading old SysEq records
-                 float *masdj_ = &STat->ssp->MaSdj[0][0];
-                 sy.MaSdj[ind][PI_DEN]  = masdj_[i*mtM];     // check if *2
-              }
-          }
+      if (sy.PXcapA != S_OFF)
+        sy.XcapA[ind][j] = STat->ssp->XcapA[i][j];
+      if (sy.PXcapB != S_OFF)
+        sy.XcapB[ind][j] = STat->ssp->XcapB[i][j];
+      if (sy.PXcapC != S_OFF) {
+        sy.XcapC[ind][j] = STat->ssp->XcapC[i][j]; // C3 (4LM)
+        sy.XcapZ[ind][j] = STat->ssp->XcapZ[i][j]; // f_zeta
       }
-  */
+      if (sy.PXfIEC != S_OFF) {
+        for (int c = 0; c < NCIEC; c++)
+          sy.XfIEC[ind][j][c] =
+              STat->ssp->XfIEC[i][j][c]; // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
+      }
+      if (sy.PXlam != S_OFF)
+        sy.Xlam[ind][j] = STat->ssp->Xlam[i][j];
+    }
+    // SCM Modernization: Tier 2 surface site types (NSURFSITES=8)
+    if (sy.PNfsp != S_OFF) {
+      for (j = 0; j < NSURFSITES; j++) {
+        for (int c = 0; c < NFSIT; c++)
+          sy.Nfsp[ind][j][c] =
+              STat->ssp->Nfsp[i][j][c]; // SCM Modernization: [sy.Fia][NSURFSITES=8][NFSIT=4]
+      }
+    }
+  }
+
+  // SCM Modernization: Tier 3 surface species data
+  for (i = 0; i < STat->ssp->DM[4]; i++) // dca dcomp ON adsorption
+  {
+    ind = Prf->indDC(STat->ssp->dca[i]) - (mup->Ls - mup->Lads);
+    if (ind < 0 || ind >= mup->Lads)
+      continue;
+    if (sy.PSATT != S_OFF) {
+      for (int kk = 0; kk < MNCAS; kk++) // SCM Modernization: MNCAS=4
+        sy.SATC[ind][kk] = STat->ssp->SATC[i][kk]; // DC SACT codes etc.
+    }
+    if (sy.PMaSdj != S_OFF) {
+      for (int kk = 0; kk < DNFCN; kk++) // SCM Modernization: DNFCN=4
+        sy.MaSdj[ind][kk] = STat->ssp->MaSdj[i][kk]; // DC species parameters
+      for (int kk = 0; kk < NSURFSITE; kk++) // SCM Modernization: NSURFSITE=8
+        sy.xSmD[ind][kk] = STat->ssp->xSmD[i][kk]; // species denticity map
+      if (sy.McdC && STat->ssp->McdC) {
+        for (int kk = 0; kk < DMCDC; kk++) // SCM Modernization: DMCDC=4
+          sy.McdC[ind][kk] = STat->ssp->McdC[i][kk]; // DC charges on planes
+      }
+    }
+  }
   if (sy.PULim != S_OFF || sy.PLLim != S_OFF)
     for (i = 0; i < sy.Fik; i++) // phk  no zero in PUL/PLL
     {
@@ -1557,17 +1553,19 @@ void TSyst::packData() {
       ia = i - (mup->Ls - mup->Lads);
       STat->ssp->dca[i5] = i;
       //            STat->ssp->dca[i5] = i;
-      if (sy.PSATT !=
-          S_OFF) { // irreversible migration from old data structure 27.10.2004
+      if (sy.PSATT != S_OFF) { // irrev. migration from old structure 27.10.2004
         for (kk = 0; kk < MNCAS; kk++) // SCM Modernization: MNCAS=4
-          STat->ssp->SATC[i5][kk] = sy.SATC[ia][kk];
+          STat->ssp->SATC[i5][kk] = sy.SATC[ia][kk]; // DC SACT codes etc.
+        // no site balance SCMs only
       }
       if (sy.PMaSdj != S_OFF) {
         for (kk = 0; kk < DNFCN; kk++) // SCM Modernization: DNFCN=4
-          STat->ssp->MaSdj[i5][kk] = sy.MaSdj[ia][kk];
+          STat->ssp->MaSdj[i5][kk] = sy.MaSdj[ia][kk]; // DC species parameters
+        for (kk = 0; kk < NSURFSITE; kk++) // SCM Modernization: NSURFSITE=8
+          STat->ssp->xSmD[i5][kk] = sy.xSmD[ia][kk]; // species denticity map
         if (sy.McdC && STat->ssp->McdC) {
           for (kk = 0; kk < DMCDC; kk++) // SCM Modernization: DMCDC=4
-            STat->ssp->McdC[i5][kk] = sy.McdC[ia][kk];
+            STat->ssp->McdC[i5][kk] = sy.McdC[ia][kk]; // DC charges on planes
         }
       }
       i5++;
