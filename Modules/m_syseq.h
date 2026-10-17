@@ -115,16 +115,16 @@ typedef struct {         /* Packed system state description */
   // Adsorption / EDL models     default OFF
   /* SCM Modernization: Group 3 DC parameters [sy.Lsor] */
   char (*SATC)[MNCAS]; // SACT method codes & allocations of surface species [sy.Lsor][MNCAS=4]
-  float (*MaSdj)[DNFCN]; // SCM Modernization: Density and SACT isotherm params [sy.Lsor][DNFCN=4]
-  float (*McdC)[DMCDC]; // SCM Modernization: Charges of surface species DC allocated to EIL planes [sy.Lsor][DMCDC=4]
-  char (*xSmD)[NSURFSITE]; // SCM Modernization: Denticity allocation across site types [sy.Lsor][NSURFSITE=8]
+  float (*MASDJ)[DNFCN]; // SCM Modernization: Density and SACT isotherm params [sy.Lsor][DNFCN=4]
+  float (*mCDc)[DMCDC]; // SCM Modernization: Charges of surface species DC allocated to EIL planes [sy.Lsor][DMCDC=4]
+  char (*XSMD)[NSURFSITE]; // SCM Modernization: Denticity allocation across site types [sy.Lsor][NSURFSITE=8]
 
   /* SCM Modernization: Group 2 Surface site types [sy.Fia][NSURFSITES=8][NFSIT=4] */
   float (*Nfsp)[NSURFSITES][NFSIT]; // SCM Modernization: Site densities, capacities, and patch index [sy.Fia][NSURFSITES=8][NFSIT=4]
 
   /* SCM Modernization: Group 1 Phase parameters [sy.Fia][MNST=6] */
-  char (*SCMT)[MNST][NSCMC]; /* SCM Modernization: Classifier of EIL models & patch SACT codes [sy.Fia][MNST=6][NSCMC=2] */
-  float (*MaSdt)[MNST][NMSDT]; // SCM Modernization: Area fraction and patch isotherm parameters [sy.Fia][MNST=6][NMSDT=4]
+  char (*SCMC)[MNST][NSCMC]; /* SCM Modernization: Classifier of EIL models & patch SACT codes [sy.Fia][MNST=6][NSCMC=2] */
+  float (*MASDT)[MNST][NMSDT]; // SCM Modernization: Area fraction and patch isotherm parameters [sy.Fia][MNST=6][NMSDT=4]
   // EIL capacitance densities and slip plane parameter (split per column transpose from CapT[NsuT][NCAZP=4])
   float (*XcapA)[MNST]; // Inner-layer capacitance density C1 (TLM,CCM,BSM,3LM,4LM) for surface types, F/m2 [sy.Fia][MNST]
   float (*XcapB)[MNST]; // Outer-layer capacitance density C2 (TLM,3LM,4LM) for surface types, F/m2 [sy.Fia][MNST]
@@ -132,6 +132,12 @@ typedef struct {         /* Packed system state description */
   float (*XcapZ)[MNST]; // Parameter f_zeta to locate slip plane for zeta potential (fraction of Debye length) [sy.Fia][MNST]
   float (*XfIEC)[MNST][NCIEC]; // SCM Modernization: Permanent charge density (1/nm2) and IEC (meq/g) [sy.Fia][MNST=6][NCIEC=2]
   float (*Xlam)[MNST]; // Factor of discretnes IDL 0 < 1 - in PHASE [sy.Fia][6] */
+
+  #define MaSdj MASDJ
+  #define McdC mCDc
+  #define xSmD XSMD
+  #define SCMT SCMC
+  #define MaSdt MASDT
 
   char (
       *sdref)[V_SD_RKLEN]; /* List of SDref keys to sources of data [sy.Nsd] */

@@ -885,27 +885,27 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
       // Transferring data into MaSdj array   KD 25.10.2004
       // Now a0 and b0 contain CD (charge distribution) for 0 and beta planes,
       // resp.
-      if (php->MaSdj) // && php->NR1 == DFCN
+      if (php->MASDJ) // && php->NR1 == DFCN
       {
         if (fabs(cN) < 1e-20)
           cN = 0.0;
-        php->MaSdj[i][PI_P2] =
+        php->MASDJ[i][PI_P2] =
             cN; // Dentateness or Frumkin isotherm parameter cN
         if (fabs(Fi) < 1e-20)
           Fi = 0.0;
-        php->MaSdj[i][PI_P1] = Fi; // Frumkin isotherm parameter Alpha-Fi
+        php->MASDJ[i][PI_P1] = Fi; // Frumkin isotherm parameter Alpha-Fi
                                    // EDL CD parameters
         if (fabs(a0) < 1e-20)
           a0 = Z;
         if (fabs(bp) < 1e-20)
           bp = 0;
-        // SCM Modernization: MaSdj has DNFCN=4 (DEN, P1, P2, P3); charges are in mCDc
+        // SCM Modernization: MASDJ has DNFCN=4 (DEN, P1, P2, P3); charges are in mCDc
         if (!(php->DCC[i] == DC_SUR_CARRIER || php->DCC[i] == DC_SUR_MINAL ||
               php->DCC[i] == DC_PEL_CARRIER)) {
-          php->MaSdj[i][PI_DEN] = Masdj0;
-          php->MaSdj[i][PI_P1] = Fi;
-          php->MaSdj[i][PI_P2] = cN;
-          php->MaSdj[i][PI_P3] = 0.0f;
+          php->MASDJ[i][PI_DEN] = Masdj0;
+          php->MASDJ[i][PI_P1] = Fi;
+          php->MASDJ[i][PI_P2] = cN;
+          php->MASDJ[i][PI_P3] = 0.0f;
           if (php->mCDc) {
             php->mCDc[i][0] = a0;
             php->mCDc[i][1] = bp;
@@ -913,10 +913,10 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
             php->mCDc[i][3] = Z;
           }
         } else { //  Sorbent has no data for surface charges
-          php->MaSdj[i][PI_DEN] = 0.0f;
-          php->MaSdj[i][PI_P1] = 0.0f;
-          php->MaSdj[i][PI_P2] = 0.0f;
-          php->MaSdj[i][PI_P3] = 0.0f;
+          php->MASDJ[i][PI_DEN] = 0.0f;
+          php->MASDJ[i][PI_P1] = 0.0f;
+          php->MASDJ[i][PI_P2] = 0.0f;
+          php->MASDJ[i][PI_P3] = 0.0f;
           if (php->mCDc) {
             php->mCDc[i][0] = 0.0f;
             php->mCDc[i][1] = 0.0f;
@@ -1308,15 +1308,15 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
       if (!php->SATC[i][SA_PLAX] || php->SATC[i][SA_PLAX] == A_NUL)
         php->SATC[i][SA_PLAX] = SPL_0; /* Default! */
 
-      /* Default MaSdj values TBD  */
-      if (!php->MaSdj[i][0] || php->MaSdj[i][0] == A_NUL)
-        php->MaSdj[i][0] = 1.0f;
-      if (!php->MaSdj[i][1] || php->MaSdj[i][1] == A_NUL)
-        php->MaSdj[i][1] = 1.0f;
-      if (!php->MaSdj[i][2] || php->MaSdj[i][2] == A_NUL)
-        php->MaSdj[i][2] = 1.0f;
-      if (!php->MaSdj[i][3] || php->MaSdj[i][3] == A_NUL)
-        php->MaSdj[i][3] = 1.0f;
+      /* Default MASDJ values TBD  */
+      if (!php->MASDJ[i][0] || php->MASDJ[i][0] == A_NUL)
+        php->MASDJ[i][0] = 1.0f;
+      if (!php->MASDJ[i][1] || php->MASDJ[i][1] == A_NUL)
+        php->MASDJ[i][1] = 1.0f;
+      if (!php->MASDJ[i][2] || php->MASDJ[i][2] == A_NUL)
+        php->MASDJ[i][2] = 1.0f;
+      if (!php->MASDJ[i][3] || php->MASDJ[i][3] == A_NUL)
+        php->MASDJ[i][3] = 1.0f;
 
       /* Default mCDc column values */
       if (!php->mCDc[i][0] || php->mCDc[i][0] == A_NUL)

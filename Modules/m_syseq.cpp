@@ -561,16 +561,16 @@ void TSysEq::newSizeifChange() {
       ssp->pha[j] = ssp->pha[i];
       // SCM Modernization: Tier 1 surface types / patches (MNST=6)
       for (k = 0; k < MNST; k++) {
-        if (ssp->SCMT) {
+        if (ssp->SCMC) {
           for (int c = 0; c < NSCMC; c++)
-            ssp->SCMT[j][k][c] =
-                ssp->SCMT[i][k]
+            ssp->SCMC[j][k][c] =
+                ssp->SCMC[i][k]
                          [c]; // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
         }
-        if (ssp->MaSdt) {
+        if (ssp->MASDT) {
           for (int c = 0; c < NMSDT; c++)
-            ssp->MaSdt[j][k][c] =
-                ssp->MaSdt[i][k]
+            ssp->MASDT[j][k][c] =
+                ssp->MASDT[i][k]
                           [c]; // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
         }
         if (ssp->XcapA)
@@ -687,25 +687,26 @@ void TSysEq::newSizeifChange() {
     if (ssp->dca[i] >= 0)                 // no delete num
     {
       ssp->dca[j] = ssp->dca[i];
-      if (ssp->MaSdj) {
+      if (ssp->MASDJ) {
         // Extended by KD on 25.10.2004
         int kk;
         for (kk = 0; kk < DNFCN; kk++) // SCM Modernization: DNFCN=4
-          ssp->MaSdj[j][kk] = ssp->MaSdj[i][kk];
-        //               ssp->MaSdj[j] = ssp->MaSdj[i];
+          ssp->MASDJ[j][kk] = ssp->MASDJ[i][kk];
       }
-      if (ssp->McdC) {
+      if (ssp->XSMD) {
+        for (int kk = 0; kk < NSURFSITE; kk++)
+          ssp->XSMD[j][kk] = ssp->XSMD[i][kk];
+      }
+      if (ssp->mCDc) {
         int kk;
         for (kk = 0; kk < DMCDC; kk++)
-          ssp->McdC[j][kk] = ssp->McdC[i][kk]; // New: copy McdC
+          ssp->mCDc[j][kk] = ssp->mCDc[i][kk]; // New: copy mCDc
       }
       if (ssp->SATC) {
         // Extended by KD on 27.10.2004
         int kk;
         for (kk = 0; kk < MNCAS; kk++) // Modified: MNCAS=4
           ssp->SATC[j][kk] = ssp->SATC[i][kk];
-        //              ssp->SATC[j][0] = ssp->SATC[i][0];
-        //              ssp->SATC[j][1] = ssp->SATC[i][1];
       }
       j++;
     }

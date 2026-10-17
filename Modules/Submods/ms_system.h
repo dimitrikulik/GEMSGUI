@@ -181,11 +181,11 @@ typedef struct { // SYSTEM is base to Project (local values)
                       // reserved [mu.Fi][2]
   // Adsorption / EDL models     default OFF
   // SCM Modernization: Group 3 Surface species DC parameters [mu.Lads]
-  float (*MaSdj)[DNFCN]; // SCM Modernization: Density and SACT isotherm params
+  float (*MASDJ)[DNFCN]; // SCM Modernization: Density and SACT isotherm params
                          // [mu.Lads][DNFCN=4]
-  float (*McdC)[DMCDC];  // SCM Modernization: Charges of surface species
+  float (*mCDc)[DMCDC];  // SCM Modernization: Charges of surface species
                          // allocated to EIL planes [mu.Lads][DMCDC=4]
-  char (*xSmD)[NSURFSITE]; // SCM Modernization: Denticity allocation across
+  char (*XSMD)[NSURFSITE]; // SCM Modernization: Denticity allocation across
                            // site types [mu.Lads][NSURFSITE=8]
 
   // SCM Modernization: Group 2 Surface site types
@@ -195,7 +195,7 @@ typedef struct { // SYSTEM is base to Project (local values)
                         // patch index [mu.Fis][NSURFSITES=8][NFSIT=4]
 
   // SCM Modernization: Group 1 Surface types / patches [mu.Fis][MNST=6]
-  float (*MaSdt)[MNST][NMSDT]; // SCM Modernization: Area fraction and patch
+  float (*MASDT)[MNST][NMSDT]; // SCM Modernization: Area fraction and patch
                                // isotherm parameters [mu.Fis][MNST=6][NMSDT=4]
   // EIL capacitance densities and slip plane parameter (split per column
   // transpose from Phase CapT[NsuT][NCAZP=4])
@@ -212,8 +212,16 @@ typedef struct { // SYSTEM is base to Project (local values)
                             // (1/nm2) and IEC (meq/g) [mu.Fis][MNST=6][NCIEC=2]
   float (
       *Xlam)[MNST]; // Factor of discretnes IDL 0 < 1 - in PHASE  [mu.Fis][MNST]
-  char (*SCMT)[MNST][NSCMC]; // SCM Modernization: Classifier of EIL models &
+  char (*SCMC)[MNST][NSCMC]; // SCM Modernization: Classifier of EIL models &
                              // patch SACT codes [mu.Fis][MNST=6][NSCMC=2]
+
+  #define MaSdj MASDJ
+  #define McdC mCDc
+  #define xSmD XSMD
+  #define MaSdt MASDT
+  #define SCMT SCMC
+  #define PMASDJ PMaSdj
+  #define PMASDT PMaSdt
 } SYSTEM;
 
 // Data of SYSTEM

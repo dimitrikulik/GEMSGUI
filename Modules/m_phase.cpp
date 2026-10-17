@@ -80,21 +80,21 @@ void TPhase::ods_link(int q) {
   aObj[o_phnotes]->SetPtr(ph[q].notes);
   aObj[o_phdim]->SetPtr(&ph[q].nDC);    // i 8
   aObj[o_phdisep]->SetPtr(&ph[q].Asur); // f 8
-  // NsuT
+  // SCM Modernization: Tier 1 fixed dimension MNST=6
   aObj[o_phscmc]->SetPtr(ph[q].SCMC);
-  aObj[o_phscmc]->SetDim(ph[q].NsuT, NSCMC);
+  aObj[o_phscmc]->SetDim(MNST, NSCMC);
   aObj[o_phxfiec]->SetPtr(ph[q].XfIEC);
-  aObj[o_phxfiec]->SetDim(ph[q].NsuT, NCIEC);
-  aObj[o_phmsdt]->SetPtr(ph[q].MSDT);
-  aObj[o_phmsdt]->SetDim(ph[q].NsuT, NMSDT);
+  aObj[o_phxfiec]->SetDim(MNST, NCIEC);
+  aObj[o_phmsdt]->SetPtr(ph[q].MASDT);
+  aObj[o_phmsdt]->SetDim(MNST, NMSDT);
   aObj[o_phcapt]->SetPtr(ph[q].CapT);
-  aObj[o_phcapt]->SetDim(ph[q].NsuT, NCAZP);
+  aObj[o_phcapt]->SetDim(MNST, NCAZP);
   aObj[o_phfsit]->SetPtr(ph[q].FsiT);
   aObj[o_phfsit]->SetDim(ph[q].nSiT, NFSIT);
   // nDC
   aObj[o_phsatc]->SetPtr(ph[q].SATC);
   aObj[o_phsatc]->SetDim(ph[q].nDC, MNCAS);
-  aObj[o_phmasdj]->SetPtr(ph[q].MaSdj);
+  aObj[o_phmasdj]->SetPtr(ph[q].MASDJ);
   aObj[o_phmasdj]->SetDim(ph[q].nDC, DNFCN); // SCM Modernization: DNFCN=4
   aObj[o_phmcdc]->SetPtr(ph[q].mCDc);
   aObj[o_phmcdc]->SetDim(ph[q].nDC, DMCDC);
@@ -158,7 +158,7 @@ void TPhase::ods_link(int q) {
   aObj[o_phfloat2]->SetPtr(&ph[q].Vpor); // f 8
 
   // dynamic
-  aObj[o_phxsmd]->SetPtr(ph[q].xSmD);
+  aObj[o_phxsmd]->SetPtr(ph[q].XSMD);
   aObj[o_phxsmd]->SetDim(ph[q].nDC, NSURFSITE);
   aObj[o_phocprk]->SetPtr(ph[q].ocPRk);
   aObj[o_phocprk]->SetDim(ph[q].nPRk, 2);
@@ -248,10 +248,10 @@ void TPhase::dyn_set(int q) {
   ph[q].SCMC = static_cast<char (*)[NSCMC]>(aObj[o_phscmc]->GetPtr());
   ph[q].FsiT = static_cast<float (*)[NFSIT]>(aObj[o_phfsit]->GetPtr());
   ph[q].XfIEC = static_cast<float (*)[NCIEC]>(aObj[o_phxfiec]->GetPtr());
-  ph[q].MSDT = static_cast<float (*)[NMSDT]>(aObj[o_phmsdt]->GetPtr());
+  ph[q].MASDT = static_cast<float (*)[NMSDT]>(aObj[o_phmsdt]->GetPtr());
   ph[q].CapT = static_cast<float (*)[NCAZP]>(aObj[o_phcapt]->GetPtr());
   ph[q].SATC = static_cast<char (*)[MNCAS]>(aObj[o_phsatc]->GetPtr());
-  ph[q].MaSdj = static_cast<float (*)[DNFCN]>(aObj[o_phmasdj]->GetPtr());
+  ph[q].MASDJ = static_cast<float (*)[DNFCN]>(aObj[o_phmasdj]->GetPtr());
   ph[q].ipxt =
       static_cast<short *>(aObj[o_phpxres]->GetPtr()); // changed 07.12.2006 KD
   // For safe use of old Phase records without ipxt table   07.12.2006
@@ -289,7 +289,7 @@ void TPhase::dyn_set(int q) {
   moiety_new(ph[q].nDC, ph[q].nMoi, true);
 
   // new record 06/06/12
-  ph[q].xSmD = static_cast<char (*)[NSURFSITE]>(aObj[o_phxsmd]->GetPtr());
+  ph[q].XSMD = static_cast<char (*)[NSURFSITE]>(aObj[o_phxsmd]->GetPtr());
   ph[q].ocPRk = static_cast<short *>(aObj[o_phocprk]->GetPtr());
   ph[q].lPhc = static_cast<float *>(aObj[o_phlphc1]->GetPtr());
   ph[q].DQFc = static_cast<float *>(aObj[o_phdqfc]->GetPtr());
@@ -336,10 +336,10 @@ void TPhase::dyn_kill(int q) {
   ph[q].SCMC = static_cast<char (*)[NSCMC]>(aObj[o_phscmc]->Free());
   ph[q].FsiT = static_cast<float (*)[NFSIT]>(aObj[o_phfsit]->Free());
   ph[q].XfIEC = static_cast<float (*)[NCIEC]>(aObj[o_phxfiec]->Free());
-  ph[q].MSDT = static_cast<float (*)[NMSDT]>(aObj[o_phmsdt]->Free());
+  ph[q].MASDT = static_cast<float (*)[NMSDT]>(aObj[o_phmsdt]->Free());
   ph[q].CapT = static_cast<float (*)[NCAZP]>(aObj[o_phcapt]->Free());
   ph[q].SATC = static_cast<char (*)[MNCAS]>(aObj[o_phsatc]->Free());
-  ph[q].MaSdj = static_cast<float (*)[DNFCN]>(aObj[o_phmasdj]->Free());
+  ph[q].MASDJ = static_cast<float (*)[DNFCN]>(aObj[o_phmasdj]->Free());
   ph[q].ipxt =
       static_cast<short *>(aObj[o_phpxres]->Free()); // changed 07.12.2006  KD
   ph[q].pnc = static_cast<float *>(aObj[o_phpnc]->Free());
@@ -365,7 +365,7 @@ void TPhase::dyn_kill(int q) {
   ph[q].nxSub = static_cast<short *>(aObj[o_ph_nxsub]->Free());
 
   // new record 06/06/12
-  ph[q].xSmD = static_cast<char (*)[NSURFSITE]>(aObj[o_phxsmd]->Free());
+  ph[q].XSMD = static_cast<char (*)[NSURFSITE]>(aObj[o_phxsmd]->Free());
   ph[q].ocPRk = static_cast<short *>(aObj[o_phocprk]->Free());
   ph[q].lPhc = static_cast<float *>(aObj[o_phlphc1]->Free());
   ph[q].DQFc = static_cast<float *>(aObj[o_phdqfc]->Free());
@@ -448,30 +448,31 @@ void TPhase::dyn_new(int q) {
   //    	aObj[ o_phpxres]->SetDim( 0, 0 );
 
   if (ph[q].PFsuT == S_ON || ph[q].PFsuT == S_REM) {
+    // SCM Modernization: Tier 1 fixed dimension MNST=6
     ph[q].SCMC = static_cast<char (*)[NSCMC]>(
-        aObj[o_phscmc]->Alloc(ph[q].NsuT, NSCMC, A_));
+        aObj[o_phscmc]->Alloc(MNST, NSCMC, A_));
     ph[q].FsiT = static_cast<float (*)[NFSIT]>(
         aObj[o_phfsit]->Alloc(ph[q].nSiT, NFSIT, F_));
     ph[q].XfIEC = static_cast<float (*)[NCIEC]>(
-        aObj[o_phxfiec]->Alloc(ph[q].NsuT, NCIEC, F_));
-    ph[q].MSDT = static_cast<float (*)[NMSDT]>(
-        aObj[o_phmsdt]->Alloc(ph[q].NsuT, NMSDT, F_));
+        aObj[o_phxfiec]->Alloc(MNST, NCIEC, F_));
+    ph[q].MASDT = static_cast<float (*)[NMSDT]>(
+        aObj[o_phmsdt]->Alloc(MNST, NMSDT, F_));
     ph[q].CapT = static_cast<float (*)[NCAZP]>(
-        aObj[o_phcapt]->Alloc(ph[q].NsuT, NCAZP, F_));
+        aObj[o_phcapt]->Alloc(MNST, NCAZP, F_));
     //        ph[q].SATC =  (char (*)[2]>(aObj[ o_phsatc ]->Alloc( ph[q].nDC, 2,
     //        A_);
     ph[q].SATC = static_cast<char (*)[MNCAS]>(
         aObj[o_phsatc]->Alloc(ph[q].nDC, MNCAS, A_));
-    ph[q].MaSdj = static_cast<float (*)[DNFCN]>(
+    ph[q].MASDJ = static_cast<float (*)[DNFCN]>(
         aObj[o_phmasdj]->Alloc(ph[q].nDC, DNFCN, F_));
   } else {
     ph[q].SCMC = static_cast<char (*)[NSCMC]>(aObj[o_phscmc]->Free());
     ph[q].FsiT = static_cast<float (*)[NFSIT]>(aObj[o_phfsit]->Free());
     ph[q].XfIEC = static_cast<float (*)[NCIEC]>(aObj[o_phxfiec]->Free());
-    ph[q].MSDT = static_cast<float (*)[NMSDT]>(aObj[o_phmsdt]->Free());
+    ph[q].MASDT = static_cast<float (*)[NMSDT]>(aObj[o_phmsdt]->Free());
     ph[q].CapT = static_cast<float (*)[NCAZP]>(aObj[o_phcapt]->Free());
     ph[q].SATC = static_cast<char (*)[MNCAS]>(aObj[o_phsatc]->Free());
-    ph[q].MaSdj = static_cast<float (*)[DNFCN]>(aObj[o_phmasdj]->Free());
+    ph[q].MASDJ = static_cast<float (*)[DNFCN]>(aObj[o_phmasdj]->Free());
   }
   if (ph[q].Nsd) {
     ph[q].sdref = static_cast<char (*)[V_SD_RKLEN]>(
@@ -558,11 +559,11 @@ void TPhase::dyn_new(int q) {
     ph[q].smcSl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcsl]->Free());
   }
   if (ph[q].PsDiS == S_ON) {
-    ph[q].xSmD = static_cast<char (*)[NSURFSITE]>(
+    ph[q].XSMD = static_cast<char (*)[NSURFSITE]>(
         aObj[o_phxsmd]->Alloc(ph[q].nDC, NSURFSITE, I_));
     ph[q].IsoC = static_cast<char *>(aObj[o_phisoc]->Alloc(2, ph[q].nSiT, A_));
   } else {
-    ph[q].xSmD = static_cast<char (*)[NSURFSITE]>(aObj[o_phxsmd]->Free());
+    ph[q].XSMD = static_cast<char (*)[NSURFSITE]>(aObj[o_phxsmd]->Free());
     ph[q].IsoC = static_cast<char *>(aObj[o_phisoc]->Free());
   }
   if (ph[q].PrpCon == S_ON) {
@@ -786,7 +787,7 @@ void TPhase::set_def(int q) {
   ph[q].IEC = 0.;
   ph[q].fRes2 = 0.;
 
-  ph[q].xSmD = nullptr;
+  ph[q].XSMD = nullptr;
   ph[q].ocPRk = nullptr;
   ph[q].lPhc = nullptr;
   ph[q].DQFc = nullptr;
@@ -1103,14 +1104,14 @@ AGAIN_SETUP:
           php->SCMC[i][SCMC_SACT_CODE] = SAT_L_COMP; // changed, 10.10.2026 (DK)
         }
 
-        if (approximatelyZero(php->MSDT[i][MSDT_FSUTSA]))
-          php->MSDT[i][MSDT_FSUTSA] = 1.0f / php->NsuT;
-        if (approximatelyZero(php->MSDT[i][MSDT_ISOPAR1]))
-          php->MSDT[i][MSDT_ISOPAR1] = 1.0f; // aPa->pa.p.DNS
-        if (approximatelyZero(php->MSDT[i][MSDT_ISOPAR2]))
-          php->MSDT[i][MSDT_ISOPAR2] = 0.0f; // 0.6022; min site density 1/nm2
-        if (approximatelyZero(php->MSDT[i][MSDT_CSPOVPAR]))
-          php->MSDT[i][MSDT_CSPOVPAR] = 0.0f;
+        if (approximatelyZero(php->MASDT[i][MSDT_FSUTSA]))
+          php->MASDT[i][MSDT_FSUTSA] = 1.0f / php->NsuT;
+        if (approximatelyZero(php->MASDT[i][MSDT_ISOPAR1]))
+          php->MASDT[i][MSDT_ISOPAR1] = 1.0f; // aPa->pa.p.DNS
+        if (approximatelyZero(php->MASDT[i][MSDT_ISOPAR2]))
+          php->MASDT[i][MSDT_ISOPAR2] = 0.0f; // 0.6022; min site density 1/nm2
+        if (approximatelyZero(php->MASDT[i][MSDT_CSPOVPAR]))
+          php->MASDT[i][MSDT_CSPOVPAR] = 0.0f;
 
         if (approximatelyZero(php->CapT[i][EIL_CAPDA]))
           php->CapT[i][EIL_CAPDA] = 1.0f; // C1 inner capacitance if F/m2
@@ -1549,7 +1550,7 @@ AGAIN_SETUP:
           copyValues(php->IsoP + nDCnew * php->nIsoC,
                      php->IsoP + ii * php->nIsoC, php->nIsoC);
         if (php->PsDiS == S_ON)
-          copyValues(&php->xSmD[nDCnew][0], &php->xSmD[ii][0], NSURFSITE);
+          copyValues(&php->XSMD[nDCnew][0], &php->XSMD[ii][0], NSURFSITE);
         if (php->PumpCon == S_ON)
           copyValues(php->umpCon + nDCnew * php->numpC,
                      php->umpCon + ii * php->numpC, php->numpC);
@@ -1562,7 +1563,7 @@ AGAIN_SETUP:
 
         if (php->PFsuT != S_OFF) {
           copyValues(&php->SATC[nDCnew][0], &php->SATC[ii][0], MNCAS);
-          copyValues(&php->MaSdj[nDCnew][0], &php->MaSdj[ii][0], DNFCN); // SCM Modernization: DNFCN=4
+          copyValues(&php->MASDJ[nDCnew][0], &php->MASDJ[ii][0], DNFCN); // SCM Modernization: DNFCN=4
         }
         nDCnew++;
       }
@@ -1579,7 +1580,7 @@ AGAIN_SETUP:
       if (php->PFsuT != S_OFF) {
         php->SATC = static_cast<char (*)[MNCAS]>(
             aObj[o_phsatc]->Alloc(php->nDC, MNCAS, A_));
-        php->MaSdj = static_cast<float (*)[DNFCN]>(
+        php->MASDJ = static_cast<float (*)[DNFCN]>(
             aObj[o_phmasdj]->Alloc(php->nDC, DNFCN, F_)); // SCM Modernization: DNFCN=4
       }
       if (php->PCDc == S_ON)
@@ -1589,7 +1590,7 @@ AGAIN_SETUP:
         php->IsoP = static_cast<float *>(
             aObj[o_phisop]->Alloc(php->nDC, php->nIsoC, F_));
       if (php->PsDiS == S_ON)
-        php->xSmD = static_cast<char (*)[NSURFSITE]>(
+        php->XSMD = static_cast<char (*)[NSURFSITE]>(
             aObj[o_phxsmd]->Alloc(php->nDC, NSURFSITE, I_));
       if (php->PumpCon == S_ON)
         php->umpCon = static_cast<float *>(

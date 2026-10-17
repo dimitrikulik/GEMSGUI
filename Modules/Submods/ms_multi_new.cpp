@@ -96,9 +96,9 @@ void TMulti::alloc_lPhc( long int lPhcSum )
     pm.lPhc = (double*)aObj[o_wi_lphc]->Alloc( lPhcSum, 1, D_ );
 }
 
-void TMulti::alloc_xSMd( long int xSMdSum )
+void TMulti::alloc_XSMD( long int xSMdSum )
 {
-    pm.xSMd = (long int*)aObj[ o_wi_xsmd]->Alloc( xSMdSum, 1, L_ );
+    pm.XSMD = (long int (*)[NSURFSITES])aObj[ o_wi_xsmd]->Alloc( xSMdSum, 1, L_ );
 }
 void TMulti::alloc_IsoPc( long int IsoPcSum )
 {

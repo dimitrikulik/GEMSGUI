@@ -18,6 +18,7 @@
 //-------------------------------------------------------------------
 //
 
+#include "GEMS3K/m_const_base.h"
 #include "GEMS3K/node.h"
 #include "m_param.h"
 #include "v_mod.h"
@@ -139,8 +140,8 @@ void TMulti::ods_link(int) {
   aObj[o_wi_pparc]->SetDim(pm.L, 1);
 
   // part 2
-  aObj[o_wi_satndx]->SetPtr(pm.SATX); // changed 27.10.2004 for CD MUSIC
-  aObj[o_wi_satndx]->SetDim(pm.Lads, 4);
+  aObj[o_wi_satndx]->SetPtr(pm.SATC); // changed 27.10.2004 for CD MUSIC
+  aObj[o_wi_satndx]->SetDim(pm.Lads, MNCAS);
   //
   aObj[o_wd_ym]->SetPtr(pm.Y_m);
   aObj[o_wd_ym]->SetDim(pm.L, 1);
@@ -208,7 +209,7 @@ void TMulti::ods_link(int) {
   aObj[o_wi_xr0h0]->SetDim(pm.FI, 2);
   aObj[o_wi_xlama]->SetPtr(pm.XlamA);
   aObj[o_wi_xlama]->SetDim(pm.FIs, MNST);
-  aObj[o_wi_xetaf]->SetPtr(pm.Xetaf);
+  aObj[o_wi_xetaf]->SetPtr(pm.XfIEC);
   aObj[o_wi_xetaf]->SetDim(
       pm.FIs, MNST * NCIEC); // SCM Modernization: [FIs][MNST=6][NCIEC=2]
   aObj[o_wi_xcond]->SetPtr(pm.Xcond);
@@ -354,7 +355,7 @@ void TMulti::ods_link(int) {
   aObj[o_wi_dcc3]->SetDim(pm.Lads, 1);
   //
   // SCM Modernization: [FIs][MNST=6][NSCMC=2]
-  aObj[o_wi_scm]->SetPtr(pm.SCM);
+  aObj[o_wi_scm]->SetPtr(pm.SCMC);
   aObj[o_wi_scm]->SetDim(pm.FIs, MNST * NSCMC);
   // Changed 27.10.2004
   aObj[o_wi_satt]->SetPtr(pm.SATT);
@@ -423,7 +424,8 @@ void TMulti::ods_link(int) {
   aObj[o_wi_lsesmo]->SetDim(pm.FIs, 4);
   aObj[o_wi_lsismo]->SetPtr(pm.LsISmo);
   aObj[o_wi_lsismo]->SetDim(pm.FIs, 4);
-  aObj[o_wi_xsmd]->SetPtr(pm.xSMd);
+  aObj[o_wi_xsmd]->SetPtr(pm.XSMD);
+  aObj[o_wi_xsmd]->SetDim(pm.Lads, NSURFSITE);
   aObj[o_wi_eimc]->SetPtr(pm.EImc);
   // SCM Modernization: Group 3 charges across EIL planes [Lads][DMCDC=4]
   aObj[o_wi_mcdc]->SetPtr(pm.mCDc);
@@ -478,7 +480,7 @@ void TMulti::dyn_set(int /*q*/) {
   pm.mui = (long int *)aObj[o_wi_mui]->GetPtr();
   pm.muk = (long int *)aObj[o_wi_muk]->GetPtr();
   pm.muj = (long int *)aObj[o_wi_muj]->GetPtr();
-  pm.SATX = (long int (*)[4])aObj[o_wi_satndx]->GetPtr();
+  pm.SATC = (long int (*)[MNCAS])aObj[o_wi_satndx]->GetPtr();
   pm.DUL = (double *)aObj[o_wi_dul]->GetPtr();
   pm.DLL = (double *)aObj[o_wi_dll]->GetPtr();
   pm.fDQF = (double *)aObj[o_wi_gex]->GetPtr();
@@ -543,7 +545,7 @@ void TMulti::dyn_set(int /*q*/) {
   pm.XpsiZ = (double (*)[MNST])aObj[o_wo_psiz]->GetPtr();
   pm.Xr0h0 = (double (*)[2])aObj[o_wi_xr0h0]->GetPtr();
   pm.XlamA = (double (*)[MNST])aObj[o_wi_xlama]->GetPtr();
-  pm.Xetaf = (double (*)[MNST][NCIEC])aObj[o_wi_xetaf]->GetPtr();
+  pm.XfIEC = (double (*)[MNST][NCIEC])aObj[o_wi_xetaf]->GetPtr();
   pm.Xcond = (double *)aObj[o_wi_xcond]->GetPtr();
   pm.Xeps = (double *)aObj[o_wi_xeps]->GetPtr();
   pm.Awt = (double *)aObj[o_wi_awt]->GetPtr();
@@ -619,8 +621,8 @@ void TMulti::dyn_set(int /*q*/) {
   pm.DCC = (char *)aObj[o_wi_dcc]->GetPtr();
   pm.DCC3 = (char *)aObj[o_wi_dcc3]->GetPtr();
   pm.PHC = (char *)aObj[o_wi_phc]->GetPtr();
-  pm.SCM = (char (*)[MNST][NSCMC])aObj[o_wi_scm]
-               ->GetPtr(); // SCM Modernization: [FIs][MNST=6][NSCMC=2]
+  pm.SCMC = (char (*)[MNST][NSCMC])aObj[o_wi_scm]
+                ->GetPtr(); // SCM Modernization: [FIs][MNST=6][NSCMC=2]
   pm.SATT = (char *)aObj[o_wi_satt]->GetPtr();
   pm.DCCW = (char *)aObj[o_wi_dccw]->GetPtr();
   // 11/02/2009
@@ -648,7 +650,7 @@ void TMulti::dyn_set(int /*q*/) {
   // TSorpMod stuff
   pm.LsESmo = (long int *)aObj[o_wi_lsesmo]->GetPtr();
   pm.LsISmo = (long int *)aObj[o_wi_lsismo]->GetPtr();
-  pm.xSMd = (long int *)aObj[o_wi_xsmd]->GetPtr();
+  pm.XSMD = (long int (*)[NSURFSITES])aObj[o_wi_xsmd]->GetPtr();
   pm.EImc = (double *)aObj[o_wi_eimc]->GetPtr();
   pm.mCDc = (double (*)[DMCDC])aObj[o_wi_mcdc]->GetPtr(); // new 10.10.2026
   pm.IsoPc = (double *)aObj[o_wi_isopc]->GetPtr();
@@ -681,7 +683,7 @@ void TMulti::dyn_kill(int /*q*/) {
   pm.mui = (long int *)aObj[o_wi_mui]->Free();
   pm.muk = (long int *)aObj[o_wi_muk]->Free();
   pm.muj = (long int *)aObj[o_wi_muj]->Free();
-  pm.SATX = (long int (*)[4])aObj[o_wi_satndx]->Free();
+  pm.SATC = (long int (*)[MNCAS])aObj[o_wi_satndx]->Free();
   pm.DUL = (double *)aObj[o_wi_dul]->Free();
   pm.DLL = (double *)aObj[o_wi_dll]->Free();
   pm.fDQF = (double *)aObj[o_wi_gex]->Free();
@@ -745,7 +747,7 @@ void TMulti::dyn_kill(int /*q*/) {
   pm.XpsiZ = (double (*)[MNST])aObj[o_wo_psiz]->Free();
   pm.Xr0h0 = (double (*)[2])aObj[o_wi_xr0h0]->Free();
   pm.XlamA = (double (*)[MNST])aObj[o_wi_xlama]->Free();
-  pm.Xetaf = (double (*)[MNST][NCIEC])aObj[o_wi_xetaf]->Free();
+  pm.XfIEC = (double (*)[MNST][NCIEC])aObj[o_wi_xetaf]->Free();
   pm.Xcond = (double *)aObj[o_wi_xcond]->Free();
   pm.Xeps = (double *)aObj[o_wi_xeps]->Free();
   pm.Awt = (double *)aObj[o_wi_awt]->Free();
@@ -825,8 +827,8 @@ void TMulti::dyn_kill(int /*q*/) {
   pm.DCC = (char *)aObj[o_wi_dcc]->Free();
   pm.DCC3 = (char *)aObj[o_wi_dcc3]->Free();
   pm.PHC = (char *)aObj[o_wi_phc]->Free();
-  pm.SCM = (char (*)[MNST][NSCMC])aObj[o_wi_scm]
-               ->Free(); // SCM Modernization: [FIs][MNST=6][NSCMC=2]
+  pm.SCMC = (char (*)[MNST][NSCMC])aObj[o_wi_scm]
+                ->Free(); // SCM Modernization: [FIs][MNST=6][NSCMC=2]
   pm.SATT = (char *)aObj[o_wi_satt]->Free();
   pm.DCCW = (char *)aObj[o_wi_dccw]->Free();
   // 11/02/2009
@@ -854,7 +856,7 @@ void TMulti::dyn_kill(int /*q*/) {
   // TSorpMod stuff
   pm.LsESmo = (long int *)aObj[o_wi_lsesmo]->Free();
   pm.LsISmo = (long int *)aObj[o_wi_lsismo]->Free();
-  pm.xSMd = (long int *)aObj[o_wi_xsmd]->Free();
+  pm.XSMD = (long int (*)[NSURFSITES])aObj[o_wi_xsmd]->Free();
   pm.EImc = (double *)aObj[o_wi_eimc]->Free();
   pm.mCDc = (double (*)[DMCDC])aObj[o_wi_mcdc]
                 ->Free(); // SCM Modernization: [Lads][DMCDC=4]
@@ -1059,8 +1061,8 @@ void TMulti::dyn_new(int /*q*/) {
   }
 
   if (pm.FIat > 0 && pm.FIs > 0) { // ADSORPTION AND ION EXCHANGE
-    pm.SATX = (long int (*)[4])aObj[o_wi_satndx]->Alloc(pm.Lads, 4, L_);
-    pm.SCM = (char (*)[MNST][NSCMC])aObj[o_wi_scm]->Alloc(
+    pm.SATC = (long int (*)[MNCAS])aObj[o_wi_satndx]->Alloc(pm.Lads, 4, L_);
+    pm.SCMC = (char (*)[MNST][NSCMC])aObj[o_wi_scm]->Alloc(
         pm.FIs, MNST * NSCMC, A_); // SCM Modernization: [FIs][MNST=6][NSCMC=2]
     //   fillValue( pm.SCM, SC_NOT_USED, pm.FIs*pm.FIat );
     pm.Nfsp = (double (*)[NSURFSITES][NFSIT])aObj[o_wi_nfsp]->Alloc(
@@ -1083,7 +1085,7 @@ void TMulti::dyn_new(int /*q*/) {
     pm.XpsiD = (double (*)[MNST])aObj[o_wo_psid]->Alloc(pm.FIs, MNST, D_);
     pm.XpsiZ = (double (*)[MNST])aObj[o_wo_psiz]->Alloc(pm.FIs, MNST, D_);
     pm.XlamA = (double (*)[MNST])aObj[o_wi_xlama]->Alloc(pm.FIs, MNST, D_);
-    pm.Xetaf = (double (*)[MNST][NCIEC])aObj[o_wi_xetaf]->Alloc(
+    pm.XfIEC = (double (*)[MNST][NCIEC])aObj[o_wi_xetaf]->Alloc(
         pm.FIs, MNST * NCIEC, D_); // SCM Modernization: [FIs][MNST=6][NCIEC=2]
     pm.XetaA = (double (*)[MNST])aObj[o_w_xetaa]->Alloc(pm.FIs, MNST, D_);
     pm.XetaB = (double (*)[MNST])aObj[o_w_xetab]->Alloc(pm.FIs, MNST, D_);
@@ -1101,9 +1103,9 @@ void TMulti::dyn_new(int /*q*/) {
     pm.SM3 = (char (*)[MAXDCNAME])aObj[o_wd_sm3]->Alloc(pm.Lads, 1, MAXDCNAME);
     pm.DCC3 = (char *)aObj[o_wi_dcc3]->Alloc(pm.Lads, 1, A_);
   } else {
-    pm.SATX = (long int (*)[4])aObj[o_wi_satndx]->Free();
-    pm.SCM = (char (*)[MNST][NSCMC])aObj[o_wi_scm]
-                 ->Free(); // SCM Modernization: [FIs][MNST=6][NSCMC=2]
+    pm.SATC = (long int (*)[MNCAS])aObj[o_wi_satndx]->Free();
+    pm.SCMC = (char (*)[MNST][NSCMC])aObj[o_wi_scm]
+                  ->Free(); // SCM Modernization: [FIs][MNST=6][NSCMC=2]
     pm.Nfsp = (double (*)[NSURFSITES][NFSIT])aObj[o_wi_nfsp]
                   ->Free(); // SCM Modernization: [FIs][NSURFSITES=8][NFSIT=4]
     pm.MASDT = (double (*)[MNST][NMSDT])aObj[o_wi_masdt]
@@ -1123,7 +1125,7 @@ void TMulti::dyn_new(int /*q*/) {
     pm.XpsiD = (double (*)[MNST])aObj[o_wo_psid]->Free();
     pm.XpsiZ = (double (*)[MNST])aObj[o_wo_psiz]->Free();
     pm.XlamA = (double (*)[MNST])aObj[o_wi_xlama]->Free();
-    pm.Xetaf = (double (*)[MNST][NCIEC])aObj[o_wi_xetaf]
+    pm.XfIEC = (double (*)[MNST][NCIEC])aObj[o_wi_xetaf]
                    ->Free(); // SCM Modernization: [FIs][MNST=6][NCIEC=2]
     pm.XFTS = (double (*)[MNST])aObj[o_w_xfts]->Free();
     pm.XetaA = (double (*)[MNST])aObj[o_w_xetaa]->Free();
@@ -1207,9 +1209,10 @@ void TMulti::dyn_new(int /*q*/) {
   // TSorpMod stuff
   pm.LsESmo = (long int *)aObj[o_wi_lsesmo]->Alloc(pm.FIs, 4, L_);
   pm.LsISmo = (long int *)aObj[o_wi_lsismo]->Alloc(pm.FIs, 4, L_);
-  // pm.xSMd   = (long int *)aObj[ o_wi_xsmd]->Alloc( pm.FIs, 1, D_ );
+  pm.XSMD =
+      (long int (*)[NSURFSITES])aObj[o_wi_xsmd]->Alloc(pm.Lads, NSURFSITES, L_);
   // pm.EImc   = (double *)aObj[ o_wi_eimc]->Alloc( pm.FIs, 1, D_ );
-  // pm.mCDc = (double (*)[DMCDC])aObj[o_wi_mcdc]->Alloc(pm.Lads, DMCDC, D_);
+  pm.mCDc = (double (*)[DMCDC])aObj[o_wi_mcdc]->Alloc(pm.Lads, DMCDC, D_);
   // pm.IsoPc   = (double *)aObj[ o_wi_isopc]->Alloc( pm.Fs, 1, D_ );
   // pm.IsoSc   = (double *)aObj[ o_wi_isosc]->Alloc( pm.Fs, 1, D_ );
   pm.lnScalT = (double *)aObj[o_wi_lnscal]->Alloc(pm.Ls, 1, D_);
