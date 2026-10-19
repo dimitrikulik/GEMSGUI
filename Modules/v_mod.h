@@ -321,7 +321,7 @@ enum param_objects {       // work objects
   o_wd_eh,
   o_wi_mol,
   o_wi_gwat,
-  o_wi_ymet,
+  o_wo_zeff, // was o_wi_YMET
   o_wio_denw,
   o_wio_epsw,
   o_wo_psi,
@@ -514,7 +514,7 @@ enum param_objects {       // work objects
   o_wi_mcdc,
   o_wi_isopc,
   o_wi_isosc,
-  o_wi_lnscal,
+  o_wi_fwgts, // new, was o_wi_lnscal
   o_wi_lnsact,
   o_wi_lngamf,
   o_wi_cterms,

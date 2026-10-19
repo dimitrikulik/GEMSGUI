@@ -269,16 +269,7 @@ case DC_AQ_SURCOMP:
         case DC_SCP_CONDEN:
             break;
             /* sorption phase components */
-        case DC_SSC_A0:
-        case DC_SSC_A1:
-        case DC_SSC_A2:
-        case DC_SSC_A3:
-        case DC_SSC_A4:
-        case DC_WSC_A0:
-        case DC_WSC_A1:
-        case DC_WSC_A2:
-        case DC_WSC_A3:
-        case DC_WSC_A4:
+        case DC_SUR_SPECIES:
         case DC_SUR_GROUP:
         case DC_SUR_COMPLEX:
         case DC_SUR_IPAIR:

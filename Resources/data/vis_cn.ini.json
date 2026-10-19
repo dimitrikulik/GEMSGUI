@@ -60,6 +60,14 @@
                         "type": "F_FLOAT"
                     },
                     {
+                        "label": "Zeff",
+                        "lenth": 16,
+                        "locus": "+n-o",
+                        "maxM": 1,
+                        "maxN": -1,
+                        "type": "F_FLOAT"
+                    },
+                    {
                         "label": "pH",
                         "lenth": 16,
                         "locus": "+n-o",

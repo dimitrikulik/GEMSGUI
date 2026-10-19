@@ -241,16 +241,16 @@ typedef struct {        // Description of PHASE record (old part)
 
   // Old sorption model stuff - used so far, before TSolMod is implemented
   // Data in NsuT rows for NsuT surface types (patches)
-  char (*SCMC)[NSCMC];  /// Classifier of EIL models [i][0] { 4 3 T B C D N I };
-                        /// Common isotherm (SACT) codes [i][1] for surface
-                        /// types|patches ( L Q 1 2 3 4 F R N I ) [MNST=6][2]
-  float (*MASDT)[NMSDT]; /// Area fraction of surface type and other surface type
-                        /// parameters [MNST=6][NMSDT=4] [i][0] Reactive fraction
-                        /// of surface type in sorbent surface area; [i][1] SACT
-                        /// isotherm parameter p1 (FFG, BET)_ [i][2]; SACT
-                        /// isotherm parameter p2 (QCA, BET)_ [i][3] Permanent
-                        /// charge spillover parameter p3"
-  #define MSDT MASDT
+  char (*SCMC)[NSCMC]; /// Classifier of EIL models [i][0] { 4 3 T B C D N I };
+                       /// Common isotherm (SACT) codes [i][1] for surface
+                       /// types|patches ( L Q 1 2 3 4 F R N I ) [MNST=6][2]
+  float (*MASDT)[NMSDT]; /// Area fraction of surface type and other surface
+                         /// type parameters [MNST=6][NMSDT=4] [i][0] Reactive
+                         /// fraction of surface type in sorbent surface area;
+                         /// [i][1] SACT isotherm parameter p1 (FFG, BET)_
+                         /// [i][2]; SACT isotherm parameter p2 (QCA, BET)_
+                         /// [i][3] Permanent charge spillover parameter p3"
+#define MSDT MASDT
   float (*CapT)
       [NCAZP]; /// EIL capacitance densities & f_zeta [MNST=6][NCAZP=4]
                /// [i][0] C1 - inner EIL capacitance density parameter, F/m2
@@ -262,7 +262,7 @@ typedef struct {        // Description of PHASE record (old part)
                /// zeta potential, fraction of Debye length (default 0.5) Stern
 
   float (*XfIEC)[NCIEC]; // Constant charge density or IEC on 0-plane on surface
-                         // type, meq/g or eq/kg [MNST=6][NCIEC=2]
+                         // type, 1/nm2 and capacity in eq/kg [MNST=6][NCIEC=2]
 
   // Data in nSiT rows for surface site types from 0 to 7, all surf species
   // related to given site(s) must link to the same surface type (patch)
@@ -273,11 +273,11 @@ typedef struct {        // Description of PHASE record (old part)
                      /// this site type | Reserved input property of site type
 
   // Data for surface species (protolysis, surf complexes, exchange ions)
-  char (
-      *XSMD)[NSURFSITE]; /// SCM Modernization: denticity allocation of surface species (per
-                         /// row) to up to 8 surface site types (number of bonds
-                         /// 1 2 3 4 or 0 if no binding to a given site type) [nDC][NSURFSITE=8]
-  #define xSmD XSMD
+  char (*XSMD)[NSURFSITE]; /// SCM Modernization: denticity allocation of
+                           /// surface species (per row) to up to 8 surface site
+                           /// types (number of bonds 1 2 3 4 or 0 if no binding
+                           /// to a given site type) [nDC][NSURFSITE=8]
+#define xSmD XSMD
   char (*SATC)[MNCAS]; /// SACT method codes & allocations of individual surface
                        /// species [nDC][MNCAS=4] [0] Allocation index of
                        /// surface species to surface type (patch) { 0 1 2 3 4 5
@@ -295,7 +295,7 @@ typedef struct {        // Description of PHASE record (old part)
                       /// Frumkin (FFG), <0 repulsion, >0 attraction)_ | [j][2]
                       /// SACT isotherm parameter 2 (e.g. QCA, BET SACT)_ |
                       /// [j][3] SACT isotherm parameter 3, e.g. b in BET SACT
-  #define MaSdj MASDJ
+#define MaSdj MASDJ
 
   float (*mCDc)[DMCDC]; /// new: Array of per-formula charges of surface
                         /// species: [0] A (0) plane charge; [1] B (1) plane

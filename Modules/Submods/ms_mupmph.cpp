@@ -347,10 +347,10 @@ void TMulti::multi_sys_dc() {
     }
     if (syp->PSATT !=
         S_OFF) { // Loading SATC - codes of methods for SAT calculation
-      pm.SATT[ja] = syp->SATC[jja][SA_MCA];
+      pm.SATT[ja] = syp->SATC[jja][SURSP_INDIV_SACT_CODE];
 
       // Loading allocation to surface types
-      switch (syp->SATC[jja][SA_STX]) {
+      switch (syp->SATC[jja][SURSP_ALLOC_SURFTYPE]) {
       default:
       case CST_0:
         pm.SATC[ja][XL_ST] = 0;
@@ -373,7 +373,7 @@ void TMulti::multi_sys_dc() {
       }
 
       // Loading allocation to carrier end-members
-      switch (syp->SATC[jja][SA_EMX]) {
+      switch (syp->SATC[jja][SURSP_ALLOC_SORBENT_EM]) {
       case CCA_0:
         pm.SATC[ja][XL_EM] = 0;
         break;
@@ -392,18 +392,6 @@ void TMulti::multi_sys_dc() {
       case CCA_5:
         pm.SATC[ja][XL_EM] = 5;
         break;
-        //              case CCA_6:
-        //                pm.SATC[ja][XL_EM] = 6;
-        //                break;
-        //              case CCA_7:
-        //                pm.SATC[ja][XL_EM] = 7;
-        //                break;
-        //              case CCA_8:
-        //                pm.SATC[ja][XL_EM] = 8;
-        //                break;
-        //              case CCA_9:
-        //                pm.SATC[ja][XL_EM] = 9;
-        //                break;
       case CCA_VOL:
         pm.SATC[ja][XL_EM] = -1; // whole sorbent
         break;
@@ -422,25 +410,7 @@ void TMulti::multi_sys_dc() {
           }
         }
       }
-      // Loading charge allocation to surface planes
-      switch (syp->SATC[jja][SA_PLAX]) {
-      default:
-      case SPL_0: // only to 0 plane (sorbent surface plane)
-        pm.SATC[ja][XL_SP] = 0;
-        break;
-      case SPL_1:
-      case SPL_B: // to beta plane or plane 1 in CD 3-layer
-        pm.SATC[ja][XL_SP] = 1;
-        break;
-      case SPL_2:
-      case SPL_D: // to DL plane or plane 2 in CD 3-layer
-        pm.SATC[ja][XL_SP] = 2;
-        break;
-      case SPL_3:
-      case SPL_C: // to OS anion beta plane (4-layer model, reserved)
-        pm.SATC[ja][XL_SP] = 3;
-        break;
-      }
+      pm.SATC[ja][XL_SP] = 0; // Obsolete: plane charges now handled via mCDc
     }
   }
 }
@@ -719,88 +689,13 @@ void TMulti::multi_sys_ph() {
         pm.Lads++;
         ja++;
         break;
-        /* Remapping DC codes to indices in pm->SATC - compat with old-style
-         * SCMs * even - inner-sphere complex on surface type 0,1,2,3,4 - A
-         * plane */
-      case DC_SSC_A0:
-        //                pm.SATC[ja][XL_ST] = AT_SA0;
-        pm.Lads++;
-        ja++;
-        break;
-      case DC_SSC_A1:
-        //                pm.SATC[ja][XL_ST] = AT_SA1;
-        pm.Lads++;
-        ja++;
-        break;
-      case DC_SSC_A2:
-        //                pm.SATC[ja][XL_ST] = AT_SA2;
-        pm.Lads++;
-        ja++;
-        break;
-      case DC_SSC_A3:
-        //                pm.SATC[ja][XL_ST] = AT_SA3;
-        pm.Lads++;
-        ja++;
-        break;
-      case DC_SSC_A4:
-        //                pm.SATC[ja][XL_ST] = AT_SA4;
-        pm.Lads++;
-        ja++;
-        break;
-        /* odd - outer-sphere complex on surface type 0,1,2,3,4 - beta plane */
-      case DC_WSC_A0:
-        //                pm.SATC[ja][XL_ST] = AT_SB0;
-        pm.Lads++;
-        ja++;
-        break;
-      case DC_WSC_A1:
-        //                pm.SATC[ja][XL_ST] = AT_SB1;
-        pm.Lads++;
-        ja++;
-        break;
-      case DC_WSC_A2:
-        //                pm.SATC[ja][XL_ST] = AT_SB2;
-        pm.Lads++;
-        ja++;
-        break;
-      case DC_WSC_A3:
-        //                pm.SATC[ja][XL_ST] = AT_SB3;
-        pm.Lads++;
-        ja++;
-        break;
-      case DC_WSC_A4:
-        //                pm.SATC[ja][XL_ST] = AT_SB4;
-        pm.Lads++;
-        ja++;
-        break;
-        /* Inner-sphere exchange ion at const-charge plane */
+        // cleaned up here on 17.10.2026 by DK
       case DC_IESC_A:
-        //                pm.SATC[ja][XL_ST] = AT_SA5;
-        pm.Lads++;
-        ja++;
-        break;
-        /* Outer-sphere exchange ion at const-charge plane */
       case DC_IEWC_B:
-        //                pm.SATC[ja][XL_ST] = AT_SB5;
-        pm.Lads++;
-        ja++;
-        break;
-        /* Aliaces for single-site model *
-         * Surface site A plane -> '0' */
+      case DC_SUR_SPECIES:
       case DC_SUR_GROUP:
-        //                pm.SATC[ja][XL_ST] = AT_SA0;
-        pm.Lads++;
-        ja++;
-        break;
-        /* Strong sur. complex A plane -> '0' */
       case DC_SUR_COMPLEX:
-        //                pm.SATC[ja][XL_ST] = AT_SA0;
-        pm.Lads++;
-        ja++;
-        break;
-        /* Weak sur complex B plane -> '1' */
       case DC_SUR_IPAIR:
-        //                pm.SATC[ja][XL_ST] = AT_SB0;
         pm.Lads++;
         ja++;
         break;
@@ -1040,10 +935,10 @@ void TMulti::ph_surtype_assign(int k, int kk, int jb, int je, int car_l[],
 
     // Tier 3: SACT codes and allocations from SATC
     if (syp->PSATT != S_OFF && syp->SATC) {
-      pm.SATT[ja] = syp->SATC[jja][SA_MCA];
+      pm.SATT[ja] = syp->SATC[jja][SURSP_INDIV_SACT_CODE];
 
       // Allocation of surface species to surface type (patch)
-      switch (syp->SATC[jja][SA_STX]) {
+      switch (syp->SATC[jja][SURSP_ALLOC_SURFTYPE]) {
       default:
       case CST_0:
         pm.SATC[ja][XL_ST] = 0;
@@ -1066,7 +961,7 @@ void TMulti::ph_surtype_assign(int k, int kk, int jb, int je, int car_l[],
       }
 
       // Allocation of surface species to sorbent (or its end-members)
-      switch (syp->SATC[jja][SA_EMX]) {
+      switch (syp->SATC[jja][SURSP_ALLOC_SORBENT_EM]) {
       case CCA_0:
         jcl = 0;
         break;
@@ -1094,28 +989,7 @@ void TMulti::ph_surtype_assign(int k, int kk, int jb, int je, int car_l[],
         break;
       }
 
-      // Charge allocation to surface planes
-      switch (syp->SATC[jja][SA_PLAX]) {
-      default:
-      case SPL_0: // only to 0 plane (sorbent surface plane)
-        pm.SATC[ja][XL_SP] = 0;
-        break;
-      case SPL_1:
-      case SPL_B:
-      case 'B': // to beta plane or plane 1 in CD 3-layer
-        pm.SATC[ja][XL_SP] = 1;
-        break;
-      case SPL_2:
-      case SPL_D:
-      case 'D': // to DL plane or plane 2 in CD 3-layer
-        pm.SATC[ja][XL_SP] = 2;
-        break;
-      case SPL_3:
-      case SPL_C:
-      case 'C': // to OS anion beta plane (4-layer model)
-        pm.SATC[ja][XL_SP] = 3;
-        break;
-      }
+      pm.SATC[ja][XL_SP] = 0; // Obsolete: plane charges now handled via mCDc
     } else {
       pm.SATT[ja] = SAT_INDEF;
       pm.SATC[ja][XL_ST] = 0;

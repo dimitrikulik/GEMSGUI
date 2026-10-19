@@ -1278,7 +1278,7 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
         php->SCMC[i][SCMC_EILM_CODE] = SC_NEM; /* Default! */
       if (!php->SCMC[i][SCMC_SACT_CODE] ||
           php->SCMC[i][SCMC_SACT_CODE] == A_NUL)
-        php->SCMC[i][SCMC_SACT_CODE] = SAT_L_COMP; /* Default! */
+        php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_NCOMP; /* Default! */
       if (approximatelyZero(php->MSDT[i][MSDT_FSUTSA]))
         php->MSDT[i][MSDT_FSUTSA] = 1.0f; //  aPa->pa.p.DNS;
       if (approximatelyZero(php->MSDT[i][MSDT_ISOPAR1]))
@@ -1299,14 +1299,14 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
 
     for (i = 0; i < php->nDC;
          i++) { // Restoring defaults if zeros or null-character
-      if (!php->SATC[i][SA_MCA] || php->SATC[i][SA_MCA] == A_NUL)
-        php->SATC[i][SA_MCA] = SAT_INDEF;
-      if (!php->SATC[i][SA_EMX] || php->SATC[i][SA_EMX] == A_NUL)
-        php->SATC[i][SA_EMX] = CCA_VOL; /* Default! */
-      if (!php->SATC[i][SA_STX] || php->SATC[i][SA_STX] == A_NUL)
-        php->SATC[i][SA_STX] = CST_0;
-      if (!php->SATC[i][SA_PLAX] || php->SATC[i][SA_PLAX] == A_NUL)
-        php->SATC[i][SA_PLAX] = SPL_0; /* Default! */
+      if (!php->SATC[i][SURSP_INDIV_SACT_CODE] || php->SATC[i][SURSP_INDIV_SACT_CODE] == A_NUL)
+        php->SATC[i][SURSP_INDIV_SACT_CODE] = SACT_INDEF;
+      if (!php->SATC[i][SURSP_ALLOC_SORBENT_EM] || php->SATC[i][SURSP_ALLOC_SORBENT_EM] == A_NUL)
+        php->SATC[i][SURSP_ALLOC_SORBENT_EM] = CCA_VOL; /* Default! */
+      if (!php->SATC[i][SURSP_ALLOC_SURFTYPE] || php->SATC[i][SURSP_ALLOC_SURFTYPE] == A_NUL)
+        php->SATC[i][SURSP_ALLOC_SURFTYPE] = CST_0;
+      if (!php->SATC[i][SURSP_COV_DENS_UNITS] || php->SATC[i][SURSP_COV_DENS_UNITS] == A_NUL)
+        php->SATC[i][SURSP_COV_DENS_UNITS] = CST_0; /* Default! */
 
       /* Default MASDJ values TBD  */
       if (!php->MASDJ[i][0] || php->MASDJ[i][0] == A_NUL)

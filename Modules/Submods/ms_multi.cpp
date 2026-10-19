@@ -66,7 +66,7 @@ void TMulti::ods_link(int) {
   aObj[o_wd_eh]->SetPtr(&pm.Eh);
   aObj[o_wi_mol]->SetPtr(&pm.DHBM);
   aObj[o_wi_gwat]->SetPtr(&pm.GWAT);
-  aObj[o_wi_ymet]->SetPtr(&pm.YMET);
+  aObj[o_wo_zeff]->SetPtr(&pm.Zeff);
   aObj[o_wio_denw]->SetPtr(&pm.denW); /*d 10*/
   aObj[o_wio_epsw]->SetPtr(&pm.epsW); /*d 10*/
   aObj[o_wo_psi]->SetPtr(&pm.PCI);    /*d 2*/
@@ -432,8 +432,8 @@ void TMulti::ods_link(int) {
   aObj[o_wi_mcdc]->SetDim(pm.Lads, DMCDC);
   aObj[o_wi_isopc]->SetPtr(pm.IsoPc);
   aObj[o_wi_isosc]->SetPtr(pm.IsoSc);
-  aObj[o_wi_lnscal]->SetPtr(pm.lnScalT);
-  aObj[o_wi_lnscal]->SetDim(pm.Ls, 1);
+  aObj[o_wi_fwgts]->SetPtr(pm.FWGTS);
+  aObj[o_wi_fwgts]->SetDim(pm.FIs, 1);
   aObj[o_wi_lnsact]->SetPtr(pm.lnSACT);
   aObj[o_wi_lnsact]->SetDim(pm.Ls, 1);
   aObj[o_wi_lngamf]->SetPtr(pm.lnGammF);
@@ -655,7 +655,7 @@ void TMulti::dyn_set(int /*q*/) {
   pm.mCDc = (double (*)[DMCDC])aObj[o_wi_mcdc]->GetPtr(); // new 10.10.2026
   pm.IsoPc = (double *)aObj[o_wi_isopc]->GetPtr();
   pm.IsoSc = (double *)aObj[o_wi_isosc]->GetPtr();
-  pm.lnScalT = (double *)aObj[o_wi_lnscal]->GetPtr();
+  pm.FWGTS = (double *)aObj[o_wi_fwgts]->GetPtr();
   pm.lnSACT = (double *)aObj[o_wi_lnsact]->GetPtr();
   pm.lnGammF = (double *)aObj[o_wi_lngamf]->GetPtr();
   pm.CTerms = (double *)aObj[o_wi_cterms]->GetPtr();
@@ -862,7 +862,7 @@ void TMulti::dyn_kill(int /*q*/) {
                 ->Free(); // SCM Modernization: [Lads][DMCDC=4]
   pm.IsoPc = (double *)aObj[o_wi_isopc]->Free();
   pm.IsoSc = (double *)aObj[o_wi_isosc]->Free();
-  pm.lnScalT = (double *)aObj[o_wi_lnscal]->Free();
+  pm.FWGTS = (double *)aObj[o_wi_fwgts]->Free();
   pm.lnSACT = (double *)aObj[o_wi_lnsact]->Free();
   pm.lnGammF = (double *)aObj[o_wi_lngamf]->Free();
   pm.CTerms = (double *)aObj[o_wi_cterms]->Free();
@@ -1098,7 +1098,7 @@ void TMulti::dyn_new(int /*q*/) {
     pm.MASDJ = (double (*)[DNFCN])aObj[o_wo_masdj]->Alloc(
         pm.Lads, DNFCN, D_); // SCM Modernization: DNFCN=4
     //        pm.MASDJ = (double *)aObj[ o_wo_masdj]->Alloc( pm.Ls, 1, D_ );
-    pm.D = (double (*)[MNST])aObj[o_w_d]->Alloc(MNST, MNST, D_);
+    pm.D = (double (*)[MNST])aObj[o_w_d]->Alloc(NSURFSITES, MNST, D_);
     pm.lnSAC = (double (*)[4])aObj[o_wo_lnsat]->Alloc(pm.Lads, 4, D_);
     pm.SM3 = (char (*)[MAXDCNAME])aObj[o_wd_sm3]->Alloc(pm.Lads, 1, MAXDCNAME);
     pm.DCC3 = (char *)aObj[o_wi_dcc3]->Alloc(pm.Lads, 1, A_);
@@ -1215,7 +1215,7 @@ void TMulti::dyn_new(int /*q*/) {
   pm.mCDc = (double (*)[DMCDC])aObj[o_wi_mcdc]->Alloc(pm.Lads, DMCDC, D_);
   // pm.IsoPc   = (double *)aObj[ o_wi_isopc]->Alloc( pm.Fs, 1, D_ );
   // pm.IsoSc   = (double *)aObj[ o_wi_isosc]->Alloc( pm.Fs, 1, D_ );
-  pm.lnScalT = (double *)aObj[o_wi_lnscal]->Alloc(pm.Ls, 1, D_);
+  pm.FWGTS = (double *)aObj[o_wi_fwgts]->Alloc(pm.FIs, 1, D_);
   pm.lnSACT = (double *)aObj[o_wi_lnsact]->Alloc(pm.Ls, 1, D_);
   pm.lnGammF = (double *)aObj[o_wi_lngamf]->Alloc(pm.Ls, 1, D_);
   pm.CTerms = (double *)aObj[o_wi_cterms]->Alloc(pm.Ls, 1, D_);

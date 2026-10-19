@@ -1101,7 +1101,7 @@ AGAIN_SETUP:
         if (!php->SCMC[i][SCMC_SACT_CODE] ||
             php->SCMC[i][SCMC_SACT_CODE] == A_NUL) {
           // php->SCMC[i] = php->sol_t[SCM_TYPE];  // fixed, 24.07.2006 (DK)
-          php->SCMC[i][SCMC_SACT_CODE] = SAT_L_COMP; // changed, 10.10.2026 (DK)
+          php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_NCOMP; // changed, 10.10.2026 (DK)
         }
 
         if (approximatelyZero(php->MASDT[i][MSDT_FSUTSA]))
@@ -1132,10 +1132,10 @@ AGAIN_SETUP:
     }
     for (int j = 0; j < php->nDC; j++) {
       if (php->SATC) {
-        php->SATC[j][SA_MCA] = SAT_L_COMP; // default Langmuir comp.
-        php->SATC[j][SA_EMX] = CCA_VOL;    // default per whole sorbent
-        php->SATC[j][SA_STX] = CST_0;      // default - 0 surface type
-        php->SATC[j][SA_PLAX] = SPL_0;     // default - zero EDL plane
+        php->SATC[j][SURSP_ALLOC_SURFTYPE] = CST_0;          // default - 0 surface type
+        php->SATC[j][SURSP_INDIV_SACT_CODE] = SACT_LAN_COMP; // default Langmuir comp.
+        php->SATC[j][SURSP_ALLOC_SORBENT_EM] = CCA_VOL;      // default per whole sorbent
+        php->SATC[j][SURSP_COV_DENS_UNITS] = CST_0;          // default - 0: 1/nm2
       }
     }
     php->PFsuT = S_ON;
