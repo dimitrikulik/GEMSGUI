@@ -322,7 +322,8 @@ int TDataBase::getrec( RecEntry& rep, GemDataStream& f, RecHead& rh )
     if( strncmp( rh.bgm, MARKRECHEAD, 2 ) ||
             strncmp( rh.endm, MARKRECHEAD, 2 ) ||
             (rh.Nobj != nOD && (nOD+frstOD-1) != o_tpstr  && 
-             (rh.Nobj+frstOD-1) != o_phsdval  && (nOD+frstOD-1) != o_sptext ) )
+             (rh.Nobj+frstOD-1) != o_phsdval  &&
+             (rh.Nobj+frstOD-1) != o_stdic  && (nOD+frstOD-1) != o_sptext ) )
         Error( GetKeywd(),"Record header format error");
     f.getline( key, KeyLen()+KeyNumFlds(), MARKRKEY);
     ErrorIf( f.gcount()>=(KeyLen()+KeyNumFlds()), GetKeywd(),
@@ -664,7 +665,10 @@ time_t TDataBase::GetTime( uint i )
     //   aFile[nF]->f.read( (char *)&rh, sizeof(RecHead) );
     rh.read (aFile[nF]->f);
     if( strncmp( rh.bgm, MARKRECHEAD, 2 ) ||
-            strncmp( rh.endm, MARKRECHEAD, 2 ) || rh.Nobj != nOD )
+            strncmp( rh.endm, MARKRECHEAD, 2 ) ||
+            (rh.Nobj != nOD && (nOD+frstOD-1) != o_tpstr  && 
+             (rh.Nobj+frstOD-1) != o_phsdval  &&
+             (rh.Nobj+frstOD-1) != o_stdic  && (nOD+frstOD-1) != o_sptext ) )
         Error( GetKeywd(), "PDB record header format error");
     status =  UNDF_;
     fNum = findIndex<int>( fls, nF );

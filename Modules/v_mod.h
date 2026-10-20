@@ -1121,13 +1121,11 @@ enum syseq_objects { // System
   o_sspll,
   o_sssatc,
   o_ssmasdj,
-  o_ssmcdc, // new 11.10.2026
   o_ssscmt,
   o_ssnfsp,
   o_ssmasdt,
   o_ssxcapa,
   o_ssxcapb,
-  o_ssxcapc,
   o_ssxcapf,
   o_ssxfiec,
   o_ssxlam,
@@ -1146,6 +1144,10 @@ enum syseq_objects { // System
   o_stba,
   o_stvm,
   o_stdic,
+  // SCM Modernization SysEq database objects (appended for backward compatibility)
+  o_ssmcdc, // SCM plane charge distribution table mCDc [DM4][DMCDC]
+  o_ssxcapc, // SCM 4LM outer capacitance density C3 [sy.Fia][MNST]
+  // Equstat work objects
   o_stdim,
   o_stitr,
   o_sttdp,

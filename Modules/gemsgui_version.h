@@ -1,8 +1,8 @@
 #pragma once
 
 #define GEMSGUI_VERSION "3.12.0"
-#define GEMSGUI_VERSION_HASH "9f5b3916"
-#define GEMSGUI_GIT_BRANCH "master"
+#define GEMSGUI_VERSION_HASH "a9a41f47"
+#define GEMSGUI_GIT_BRANCH "no_tsorpmod_intermed"
 #define GEMSGUI_OSX "Darwin"
 #define GEMSGUI_COMPILER_ID "AppleClang"
 #define GEMSGUI_COMPILER_VERSION "21.0.0.21000334"

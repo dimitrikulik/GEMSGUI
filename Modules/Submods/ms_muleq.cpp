@@ -385,6 +385,7 @@ void TMulti::EqstatExpand( /*const char *key,*/ bool calcActivityModels/*, bool 
         if(pmp->E && pmp->LO && pmp->Lads )  // Calling this only when sorption models are present
         {
             jb = 0;
+            je = 0;
             for( k=0; k<pmp->FIs; k++ )
             { // loop on solution phases
                jb = je;

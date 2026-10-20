@@ -895,7 +895,7 @@ void TVisor::defaultCFG()
         MAXTIME, MAXPTN, MAXPTN, MAXPTN, MAXNV
     };
     rt.push_back( std::make_shared<TDataBase>(rt.size(), "syseq", false, true,
-                                             o_ssphst, 71, 0, 8, syseq_rkfrm));
+                                             o_ssphst, 71+2/*11/10/2026*/, 0, 8, syseq_rkfrm));
 
     // RT_PROCES default
     unsigned char proces_rkfrm[10] = { MAXMUNAME, MAXTDPCODE, MAXSYSNAME,

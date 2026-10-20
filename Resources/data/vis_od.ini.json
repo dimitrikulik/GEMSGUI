@@ -3085,7 +3085,7 @@
         "dyna": true,
         "hint": "Effective thickness of EDL layer 2-d in 4LM, nm (new) ",
         "id": "o_wo_xdlc",
-        "label": "dlhD",
+        "label": "dlhC",
         "ndxs": "a",
         "type": "D_"
     },
@@ -8140,16 +8140,6 @@
         "type": "F_"
     },
     {
-        "dimM": 1,
-        "dimN": 3,
-        "dyna": true,
-        "hint": "| Charge distribution of surface species DC on EIL planes: Charge assigned to A (O) EIL plane_\n| Surface species charge assigned to B (1) EDL plane_\n| Surface species charge assigned to C (2) EIL plane_\n| Surface species EIL charge balance ",
-        "id": "o_ssmcdc",
-        "label": "tMcdC",
-        "ndxs": "N",
-        "type": "F_"
-    },
-    {
         "dimM": 3,
         "dimN": 3,
         "dyna": true,
@@ -8203,19 +8193,9 @@
         "dimM": 3,
         "dimN": 3,
         "dyna": true,
-        "hint": "Outer-layer capacitance density parameter C3 (4LM) for surface types, F/m2",
-        "id": "o_ssxcapc",
-        "label": "tXcapC",
-        "ndxs": "N",
-        "type": "F_"
-    },
-    {
-        "dimM": 3,
-        "dimN": 3,
-        "dyna": true,
         "hint": "Factor of location of slip plane for zeta potential: fraction of Debye length",
         "id": "o_ssxcapf",
-        "label": "tLocZf",
+        "label": "tXcapF",
         "ndxs": "N",
         "type": "F_"
     },
@@ -8378,6 +8358,26 @@
         "label": "DIC_",
         "ndxs": "N",
         "type": "D_"
+    },
+    {
+        "dimM": 1,
+        "dimN": 3,
+        "dyna": true,
+        "hint": "| Charge distribution of surface species DC on EIL planes: Charge assigned to A (O) EIL plane_\n| Surface species charge assigned to B (1) EDL plane_\n| Surface species charge assigned to C (2) EIL plane_\n| Surface species EIL charge balance ",
+        "id": "o_ssmcdc",
+        "label": "tMcdC",
+        "ndxs": "N",
+        "type": "F_"
+    },
+    {
+        "dimM": 3,
+        "dimN": 3,
+        "dyna": true,
+        "hint": "Outer-layer capacitance density parameter C3 (4LM) for surface types, F/m2",
+        "id": "o_ssxcapc",
+        "label": "tXcapC",
+        "ndxs": "N",
+        "type": "F_"
     },
     {
         "dimM": 4,
