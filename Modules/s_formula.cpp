@@ -522,6 +522,12 @@ void TFormula::SetFormula( const char * StrForm )
 // add key IC
 void TFormula::fixup_ics( char* ICs )
 {
+    if( ICs[MAXICNAME] == IC_SSITE )
+    {
+        ICs[MAXICNAME+MAXSYMB] = '*';
+        return;
+    }
+
     if( !isdigit( ICs[MAXICNAME] ))
         switch( *ICs )
         {
@@ -553,7 +559,7 @@ void TFormula::fixup_ics( char* ICs )
                // then it is declared as IC_ADDIT, except Vol (IC_VOLUME)
                // Caution! Anything starting with Vol is recognized as IC_VOLUME!
                // Zz is recognized as IC_CHARGE; O as IC_OXYGEN; H as IC_HYDROGEN
-    if( ICs[MAXICNAME] != IC_VOLUME )
+    if( ICs[MAXICNAME] != IC_VOLUME && ICs[MAXICNAME] != IC_SSITE )
          if( strcspn( ICs, " *" ) > 2 )
                 ICs[MAXICNAME] = IC_ADDIT; // >2 and <6 characters: IC_ADDIT is set!
     ICs[MAXICNAME+MAXSYMB] = '*';  // This key field is actually not checked!
@@ -579,6 +585,32 @@ void TFormula::TestIC( const char* key, int N, char *ICsym )
             {
                 jj = j;
                 break;
+            }
+        }
+        if( jj==-1 && ICS[MAXICNAME] == IC_ADDIT )
+        {
+            // Try matching with IC_SSITE ('s') class for site IComps
+            ICS[MAXICNAME] = IC_SSITE;
+            for(int j=0; j<N; j++ )
+            {
+                if( !memcmp( ICsym+j*IC_RKLEN, ICS, MAXICNAME+MAXSYMB ))
+                {
+                    jj = j;
+                    break;
+                }
+            }
+        }
+        if( jj==-1 && ICS[MAXICNAME] == IC_SSITE )
+        {
+            // Try matching with IC_ADDIT ('a') class
+            ICS[MAXICNAME] = IC_ADDIT;
+            for(int j=0; j<N; j++ )
+            {
+                if( !memcmp( ICsym+j*IC_RKLEN, ICS, MAXICNAME+MAXSYMB ))
+                {
+                    jj = j;
+                    break;
+                }
             }
         }
         if( jj==-1 )
@@ -612,6 +644,13 @@ size_t TFormula::Fmwtz( double &Z, double &mW, double &eS, short *lAn )
         ICs[MAXICNAME+MAXSYMB]=0;
         ICs[MAXICNAME+MAXSYMB+1]=0;
         fixup_ics( ICs );
+        if( aIC->GetDB() && aIC->GetDB()->Rtest( ICs, 0 ) == NONE_ )
+        {
+            if( ICs[MAXICNAME] == IC_ADDIT )
+                ICs[MAXICNAME] = IC_SSITE;
+            else if( ICs[MAXICNAME] == IC_SSITE )
+                ICs[MAXICNAME] = IC_ADDIT;
+        }
         // read and if necessary recalc IComp
         aIC->TryRecInp( ICs, icrtim, 0 );
         Sc = aSC[i];
@@ -649,6 +688,13 @@ size_t TFormula::Fmwtz( double &Z, double &mW, double &eS, short *lAn, double &N
         ICs[MAXICNAME+MAXSYMB]=0;
         ICs[MAXICNAME+MAXSYMB+1]=0;
         fixup_ics( ICs );
+        if( aIC->GetDB() && aIC->GetDB()->Rtest( ICs, 0 ) == NONE_ )
+        {
+            if( ICs[MAXICNAME] == IC_ADDIT )
+                ICs[MAXICNAME] = IC_SSITE;
+            else if( ICs[MAXICNAME] == IC_SSITE )
+                ICs[MAXICNAME] = IC_ADDIT;
+        }
         // read and if necessary recalc IComp
         aIC->TryRecInp( ICs, icrtim, 0 );
         Sc = aSC[i];
@@ -693,6 +739,30 @@ void TFormula::Stm_line( int N, double *Sml, char *ICsym, short *ICval )
             {
                 jj = j;
                 break;
+            }
+        }
+        if( jj==-1 && ICS[MAXICNAME] == IC_ADDIT )
+        {
+            ICS[MAXICNAME] = IC_SSITE;
+            for(int j=0; j<N; j++ )
+            {
+                if( !memcmp( ICsym+j*IC_RKLEN, ICS, MAXICNAME+MAXSYMB ))
+                {
+                    jj = j;
+                    break;
+                }
+            }
+        }
+        if( jj==-1 && ICS[MAXICNAME] == IC_SSITE )
+        {
+            ICS[MAXICNAME] = IC_ADDIT;
+            for(int j=0; j<N; j++ )
+            {
+                if( !memcmp( ICsym+j*IC_RKLEN, ICS, MAXICNAME+MAXSYMB ))
+                {
+                    jj = j;
+                    break;
+                }
             }
         }
         if( jj==-1 )

@@ -41,8 +41,14 @@ void TSyst::mark_ic_to_bc( )
         {
             for( ii=0, ij=0; ii<mup->N; ii++ )
                 if( sy.Icl[ii] != S_OFF )
+                {
                     if( !memcmp( mup->SB[ii], aCMP->bcp->SB[i], MAXICNAME+MAXSYMB ))
                         ij++;
+                    else if( !memcmp( mup->SB[ii], aCMP->bcp->SB[i], MAXICNAME ) &&
+                             ((mup->SB[ii][MAXICNAME] == IC_ADDIT && aCMP->bcp->SB[i][MAXICNAME] == IC_SSITE) ||
+                              (mup->SB[ii][MAXICNAME] == IC_SSITE && aCMP->bcp->SB[i][MAXICNAME] == IC_ADDIT)) )
+                        ij++;
+                }
             if( !ij )/*it is IC in this compos dont mark in RMULTS  */
             {
                     sy.Acl[j] = S_OFF;
@@ -146,13 +152,39 @@ void TSyst::mark_dc_to_ic()
             memset( ICs, ' ', IC_RKLEN-1 );
             memcpy( ICs, aFo.GetCn(ii), MAXICNAME+MAXSYMB );
             aFo.fixup_ics( ICs );
+            int match_ij = -1;
             for( ij=0; ij<mup->N; ij++ )
                 if( !memcmp( ICs, mup->SB[ij], MAXICNAME+MAXSYMB ))
                 {
-                    if( sy.Icl[ij] == S_OFF )
-                        sy.N++;
-                    sy.Icl[ij] = S_ON;
+                    match_ij = ij;
+                    break;
                 }
+            if( match_ij == -1 && ICs[MAXICNAME] == IC_ADDIT )
+            {
+                ICs[MAXICNAME] = IC_SSITE;
+                for( ij=0; ij<mup->N; ij++ )
+                    if( !memcmp( ICs, mup->SB[ij], MAXICNAME+MAXSYMB ))
+                    {
+                        match_ij = ij;
+                        break;
+                    }
+            }
+            else if( match_ij == -1 && ICs[MAXICNAME] == IC_SSITE )
+            {
+                ICs[MAXICNAME] = IC_ADDIT;
+                for( ij=0; ij<mup->N; ij++ )
+                    if( !memcmp( ICs, mup->SB[ij], MAXICNAME+MAXSYMB ))
+                    {
+                        match_ij = ij;
+                        break;
+                    }
+            }
+            if( match_ij >= 0 )
+            {
+                if( sy.Icl[match_ij] == S_OFF )
+                    sy.N++;
+                sy.Icl[match_ij] = S_ON;
+            }
         } /* ii */
         aFo.Reset();
     } /* j */
@@ -182,13 +214,38 @@ void TSyst::mark_ic_to_dc()
             memcpy( ICs, aFo.GetCn(ii), MAXICNAME+MAXSYMB );
             aFo.fixup_ics( ICs );
             // switch off DC if in it formula is switch off IC
+            int match_ij = -1;
             for( ij=0; ij<mup->N; ij++ )
-                if( sy.Icl[ij] == S_OFF &&
-                        !memcmp( ICs, mup->SB[ij], MAXICNAME+MAXSYMB ))
+                if( !memcmp( ICs, mup->SB[ij], MAXICNAME+MAXSYMB ))
                 {
-                    sy.Dcl[j] = S_OFF;
+                    match_ij = ij;
                     break;
                 }
+            if( match_ij == -1 && ICs[MAXICNAME] == IC_ADDIT )
+            {
+                ICs[MAXICNAME] = IC_SSITE;
+                for( ij=0; ij<mup->N; ij++ )
+                    if( !memcmp( ICs, mup->SB[ij], MAXICNAME+MAXSYMB ))
+                    {
+                        match_ij = ij;
+                        break;
+                    }
+            }
+            else if( match_ij == -1 && ICs[MAXICNAME] == IC_SSITE )
+            {
+                ICs[MAXICNAME] = IC_ADDIT;
+                for( ij=0; ij<mup->N; ij++ )
+                    if( !memcmp( ICs, mup->SB[ij], MAXICNAME+MAXSYMB ))
+                    {
+                        match_ij = ij;
+                        break;
+                    }
+            }
+            if( match_ij >= 0 && sy.Icl[match_ij] == S_OFF )
+            {
+                sy.Dcl[j] = S_OFF;
+                break;
+            }
             /* IC? */
         } /* ii */
         aFo.Reset();
@@ -538,7 +595,13 @@ void TSyst::systbc_calc( int mode )
             for(int ii=0; ii<aCMP->bcp->N; ii++ )
             { // cycle on COMPOS elements
                 for( i=0; i<mup->N; i++ )
-                    if( !memcmp( aCMP->bcp->SB[ii], mup->SB[i], MAXICNAME+MAXSYMB ))
+                {
+                    bool match = !memcmp( aCMP->bcp->SB[ii], mup->SB[i], MAXICNAME+MAXSYMB );
+                    if( !match && !memcmp( aCMP->bcp->SB[ii], mup->SB[i], MAXICNAME ) &&
+                        ((aCMP->bcp->SB[ii][MAXICNAME] == IC_ADDIT && mup->SB[i][MAXICNAME] == IC_SSITE) ||
+                         (aCMP->bcp->SB[ii][MAXICNAME] == IC_SSITE && mup->SB[i][MAXICNAME] == IC_ADDIT)) )
+                        match = true;
+                    if( match )
                     {
                         if( sy.Icl[i] == S_OFF )
                         { // take sostav not all
@@ -549,6 +612,7 @@ void TSyst::systbc_calc( int mode )
                         ACmw += A[i]*(double)(mup->BC[i]);
                         break;
                     }
+                } // i
             } // ii
             Xincr = aCMP->Reduce_Conc( sy.XAun[j], sy.XeA[j], ACmw, 1.0, sy.R1,
                                        sy.Msys, sy.Mwat, sy.Vaq, sy.Maq, sy.Vsys );

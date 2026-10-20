@@ -882,6 +882,24 @@ int TMulti::find_icnum( char *name, int LNmode )
             if( !memcmp( ICs, pmp->SB[i], MAXICNAME/*+MAXSYMB*/ ))
                 return i;
         }
+        if( ICs[MAXICNAME] == IC_ADDIT )
+        {
+            ICs[MAXICNAME] = IC_SSITE;
+            for( i=0; i<pmp->N; i++ )
+            {
+                if( !memcmp( ICs, pmp->SB[i], MAXICNAME/*+MAXSYMB*/ ))
+                    return i;
+            }
+        }
+        else if( ICs[MAXICNAME] == IC_SSITE )
+        {
+            ICs[MAXICNAME] = IC_ADDIT;
+            for( i=0; i<pmp->N; i++ )
+            {
+                if( !memcmp( ICs, pmp->SB[i], MAXICNAME/*+MAXSYMB*/ ))
+                    return i;
+            }
+        }
         Error( ICs, "E04MSPrep: IC name cannot be found in GEM IPM work data lists..." );
     }
     if( LNmode == 0 )
@@ -891,6 +909,24 @@ int TMulti::find_icnum( char *name, int LNmode )
         {
             if( !memcmp( ICs, mup->SB[i], MAXICNAME+MAXSYMB ))
                 return i;
+        }
+        if( ICs[MAXICNAME] == IC_ADDIT )
+        {
+            ICs[MAXICNAME] = IC_SSITE;
+            for( i=0; i<mup->N; i++ )
+            {
+                if( !memcmp( ICs, mup->SB[i], MAXICNAME+MAXSYMB ))
+                    return i;
+            }
+        }
+        else if( ICs[MAXICNAME] == IC_SSITE )
+        {
+            ICs[MAXICNAME] = IC_ADDIT;
+            for( i=0; i<mup->N; i++ )
+            {
+                if( !memcmp( ICs, mup->SB[i], MAXICNAME+MAXSYMB ))
+                    return i;
+            }
         }
         Error( ICs, "E14MSPrep: IC name cannot be found in Project system definition lists..." );
     }

@@ -1020,9 +1020,14 @@ void TRMults::TestIComp() {
   for (j = 0; j < mu.La; j++) { /* read record */
     aCMP->TryRecInp(mu.SA[j], crt, 0);
     for (i = 0; i < aCMP->bcp->N; i++) {
-      for (ii = 0, ij = 0; ii < mu.N; ii++)
+      for (ii = 0, ij = 0; ii < mu.N; ii++) {
         if (!memcmp(mu.SB[ii], aCMP->bcp->SB[i], MAXICNAME + MAXSYMB))
           ij++;
+        else if (!memcmp(mu.SB[ii], aCMP->bcp->SB[i], MAXICNAME) &&
+                 ((mu.SB[ii][MAXICNAME] == IC_ADDIT && aCMP->bcp->SB[i][MAXICNAME] == IC_SSITE) ||
+                  (mu.SB[ii][MAXICNAME] == IC_SSITE && aCMP->bcp->SB[i][MAXICNAME] == IC_ADDIT)))
+          ij++;
+      }
       if (!ij) {
         std::string msg = "IComp: ";
         msg += std::string(aCMP->bcp->SB[i], 0, MAXICNAME + MAXSYMB);

@@ -139,6 +139,10 @@ public:
     {
         return (db ? db->PackKey(): nullptr);
     }
+    TDataBase* GetDB() const
+    {
+        return db;
+    }
 
     /// Test input data (necessary recalculations)
     virtual bool check_input( const char* /*key*/, int /*level*/=1 )

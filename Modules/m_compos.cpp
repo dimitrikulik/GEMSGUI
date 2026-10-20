@@ -980,8 +980,14 @@ SPECIFY_C:
                 continue;
             /* get index im */
             for( im=0; im<bcp->Nmax; im++ )
+            {
                 if( !memcmp( bcp->SB1[im], bcp->SB[i], (MAXICNAME+MAXSYMB)-1 ))
                     goto IC_FOUND;
+                if( !memcmp( bcp->SB1[im], bcp->SB[i], MAXICNAME ) &&
+                    ((bcp->SB1[im][MAXICNAME] == IC_ADDIT && bcp->SB[i][MAXICNAME] == IC_SSITE) ||
+                     (bcp->SB1[im][MAXICNAME] == IC_SSITE && bcp->SB[i][MAXICNAME] == IC_ADDIT)) )
+                    goto IC_FOUND;
+            }
             Error( GetName(), "E10BCrem: Wrong index of Independent Component");
 IC_FOUND:
             CI[im] = bcp->CI[i];
