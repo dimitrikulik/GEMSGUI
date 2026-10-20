@@ -74,6 +74,7 @@ protected slots:
     void phaseSelectionChanged(int state);
     void lDCrChangeFilter();
     void lDCrSelectionChanged(int state);
+    void phaseClassChanged(int index);
 
 };
 

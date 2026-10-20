@@ -609,6 +609,10 @@ void TRMults::PHmake() {
       mu.Lhc += mu.Ll[kk]; // Corrected on 13.06.03 by KD
       continue;
     case PH_SORPTION:
+    case PH_ADSSBEIL:
+    case PH_ADSORPT:
+    case PH_IONEX:
+    case PH_POLYEL:
       mu.FiE += mu.Ll[kk];
       continue;
     default:

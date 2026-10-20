@@ -159,22 +159,27 @@
             </item>
             <item>
              <property name="text">
-              <string>z     Surface complexation (adsorption) on hydrated amphoteric surface</string>
+              <string>z    Surface complexation with site balances &amp; EIL models (virtual sorbent, e.g. ClaySorEl)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>i      Permanent-charge (ligand) ion-exchange phase </string>
+              <string>q    Surface complexation with surface site balances (e.g. B&amp;B ClaySor)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>y     Polyelectrolyte (oligoelectrolyte), Donnan volume phase</string>
+              <string>i    Permanent-charge ion-exchange phase with site balances (e.g. B&amp;B Clay)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>x     Sorption phase (sorbent+sorbates) in aqueous electrolyte</string>
+              <string>y    Polyelectrolyte (oligoelectrolyte), Donnan volume phase</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>x    Sorption phase (sorbent+sorbates) without site balances (solid carrier DC)</string>
              </property>
             </item>
            </widget>
@@ -546,22 +551,42 @@
             </item>
             <item>
              <property name="text">
-              <string>W   Basic Van der Waals mixing rules in cubic EoS models</string>
+              <string>U    Undefined / not used EIL model for surface type (set up in phase table)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>C    Constant one-term binary interaction parameter kij; CCM for adsorption</string>
+              <string>D    Diffuse-layer electrostatic model (DLM/DDL) for adsorption</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>P    CCM with C = sqrt(IS)/alpha, alpha is given instead of capacity</string>
+              <string>C    Constant-capacitance model (CCM) for adsorption</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>S    Basic Stern electrostatic model (BSM) for adsorption</string>
              </property>
             </item>
             <item>
              <property name="text">
               <string>T    Temperature-dependent one-term binary interaction parameter kij; TLM for adsorption</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3    Three-layer EIL model for CD-MUSIC (3LM)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4    Four-layer electrostatic model (4LM)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>W   Basic Van der Waals mixing rules in cubic EoS models</string>
              </property>
             </item>
             <item>
@@ -586,22 +611,22 @@
             </item>
             <item>
              <property name="text">
-              <string>D    Diffuse-layer electrostatic model (DLM) for adsorption </string>
+              <string>B    Basic Stern model (BSM, legacy alias)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>B    Basic Stern electrostatic model (BSM) for adsorption</string>
+              <string>M   CD-MUSIC 3-layer model (legacy alias)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>M   CD-MUSIC (three-layer) electrostatic model for adsorption</string>
+              <string>E    Extended TLM model (ETLM, legacy alias)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>E    Extended TLM electrostatic model (ETLM) for adsorption </string>
+              <string>P    CCM with C = sqrt(IS)/alpha (legacy alias)</string>
              </property>
             </item>
            </widget>
@@ -1149,7 +1174,7 @@
           <item>
            <widget class="QLabel" name="label_25">
             <property name="text">
-             <string>Select a type of (new) adsorption/ ion exchange/ polyelectrolyte isotherm model, or leave 'N' and go to the next wizard step</string>
+             <string>Select a type of kinetic rate model (reserved, default 'N'):</string>
             </property>
            </widget>
           </item>
@@ -1165,7 +1190,7 @@
           <item>
            <widget class="QLabel" name="label_26">
             <property name="text">
-             <string>Select a type of (new) EIL (Electrified Interface Layer) model for this sorption phase {  N   }</string>
+             <string>Select a type of uptake or transformation model (reserved, default 'N'):</string>
             </property>
            </widget>
           </item>
@@ -1200,7 +1225,7 @@
           <item row="0" column="1">
            <widget class="QLabel" name="label_15">
             <property name="text">
-             <string>Number of EIL model layers { 0 1 2 3 }</string>
+             <string>Number of EIL model layers { 0 1 2 3 4 }</string>
             </property>
            </widget>
           </item>
@@ -1220,7 +1245,7 @@
           <item row="2" column="1">
            <widget class="QLabel" name="label_17">
             <property name="text">
-             <string>Number of charge distribution coefficients</string>
+             <string>Number of charge distribution coefficients (0 to 4)</string>
             </property>
            </widget>
           </item>
@@ -1270,7 +1295,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>Set items in this box only if this phase is an old-style sorption phase, or leave unchanged </string>
+          <string>Sorption Surface Types and Specific Surface Area (All Sorption Phases)</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="0" colspan="3">
@@ -1297,12 +1322,15 @@
             <property name="maximum">
              <number>6</number>
             </property>
+            <property name="value">
+             <number>6</number>
+            </property>
            </widget>
           </item>
           <item row="1" column="1" colspan="2">
            <widget class="QLabel" name="textLabel3">
             <property name="text">
-             <string>Set the number of surface types (minimum 1, maximum 6) to allocate surface complexes</string>
+             <string>Number of surface types (fixed at 6) to allocate surface complexes and SCM parameters</string>
             </property>
             <property name="wordWrap">
              <bool>false</bool>

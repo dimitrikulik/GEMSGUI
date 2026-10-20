@@ -322,6 +322,8 @@ case DC_AQ_SURCOMP:
             break;
         case PH_POLYEL:
         case PH_SORPTION:
+        case PH_ADSSBEIL:
+        case PH_ADSORPT:
             if(sy.Lsor > 0 )
                 break;
             break; /* error code of sorbed species */
@@ -329,7 +331,6 @@ case DC_AQ_SURCOMP:
         case PH_SINDIS:
         case PH_IONEX:
             break;
-        case PH_ADSORPT:
         default:
             ;        /* error code of phase */
         }
@@ -389,6 +390,8 @@ void TSyst::make_syst()
             case PH_SINCOND:
             case PH_SINDIS:
             case PH_SORPTION:
+            case PH_ADSSBEIL:
+            case PH_ADSORPT:
                 if( sy.PAalp !=S_OFF )
                 {
                     SSA = sy.Aalp[k];
@@ -410,7 +413,6 @@ void TSyst::make_syst()
                 }
                 break;
             case PH_IONEX:
-            case PH_ADSORPT:
             default:
                 continue;
             }

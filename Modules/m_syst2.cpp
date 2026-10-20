@@ -691,7 +691,11 @@ void TSysEq::set_def(int q) {
     for (int i = 0; i < TRMults::sm->GetMU()->Fi; i++) {
       if (TRMults::sm->GetMU()->PHC[i] == PH_AQUEL)
         is_a = true;
-      if (TRMults::sm->GetMU()->PHC[i] == PH_SORPTION)
+      if (TRMults::sm->GetMU()->PHC[i] == PH_SORPTION ||
+          TRMults::sm->GetMU()->PHC[i] == PH_ADSSBEIL ||
+          TRMults::sm->GetMU()->PHC[i] == PH_ADSORPT ||
+          TRMults::sm->GetMU()->PHC[i] == PH_IONEX ||
+          TRMults::sm->GetMU()->PHC[i] == PH_POLYEL)
         is_x = true;
       if (TRMults::sm->GetMU()->PHC[i] == PH_GASMIX ||
           TRMults::sm->GetMU()->PHC[i] == PH_PLASMA ||

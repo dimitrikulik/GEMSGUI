@@ -290,9 +290,16 @@ void TPhase::Set_SolMod_Phase_coef() {
     php->npxM = 0; // MaxOrd    To be improved
     php->ncpN = 0; // NPar      To be improved
     php->ncpM = 0; // NPcoef    To be improved
-    php->PphC =
-        PH_ADSORPT; // change later dep on what stays in php->sol_t[MIX_TYP]: if
-                    // 'B' then to PH_ADSSBEIL; if 'E' then to PH_SORPTION
+    if (php->PphC != PH_ADSSBEIL && php->PphC != PH_ADSORPT &&
+        php->PphC != PH_SORPTION && php->PphC != PH_IONEX &&
+        php->PphC != PH_POLYEL) {
+      if (php->sol_t[MIX_TYP] == MR_SORP_SMB)
+        php->PphC = PH_ADSSBEIL;
+      else if (php->sol_t[MIX_TYP] == MR_SORP_ELEM)
+        php->PphC = PH_SORPTION;
+      else
+        php->PphC = PH_ADSORPT;
+    }
     break;
   default: // other models
     break;
@@ -528,7 +535,9 @@ void TPhase::LoadDCC() {
     if (php->Pinternal1 == S_ON || php->DCC[i] == A_NUL || php->DCC[i] == '`') {
       if (Ctype == DC_SCP_CONDEN && php->nDC >= 2 &&
           !(php->PphC == PH_AQUEL || php->PphC == PH_GASMIX ||
-            php->PphC == PH_SORPTION))
+            php->PphC == PH_SORPTION || php->PphC == PH_ADSSBEIL ||
+            php->PphC == PH_ADSORPT || php->PphC == PH_IONEX ||
+            php->PphC == PH_POLYEL))
         Ctype = DC_SOL_MAJOR;
       php->DCC[i] = Ctype;
     }
@@ -849,7 +858,9 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
     if (php->DCC[i] == A_NUL || php->DCC[i] == '`') {
       if (Ctype == DC_SCP_CONDEN && php->nDC >= 2 &&
           !(php->PphC == PH_AQUEL || php->PphC == PH_GASMIX ||
-            php->PphC == PH_SORPTION))
+            php->PphC == PH_SORPTION || php->PphC == PH_ADSSBEIL ||
+            php->PphC == PH_ADSORPT || php->PphC == PH_IONEX ||
+            php->PphC == PH_POLYEL))
         Ctype = DC_SOL_MAJOR;
       php->DCC[i] = Ctype;
     }
@@ -881,7 +892,9 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
       }
     }
 
-    if (php->PphC == PH_SORPTION || php->PphC == PH_POLYEL) {
+    if (php->PphC == PH_SORPTION || php->PphC == PH_POLYEL ||
+        php->PphC == PH_ADSSBEIL || php->PphC == PH_ADSORPT ||
+        php->PphC == PH_IONEX) {
       // Transferring data into MaSdj array   KD 25.10.2004
       // Now a0 and b0 contain CD (charge distribution) for 0 and beta planes,
       // resp.
@@ -942,7 +955,10 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
     if (php->nDC == 1) {
       php->PphC = PH_SINDIS;
     } else if (php->NsuT >= 1.) {
-      php->PphC = PH_SORPTION;
+      if (php->PphC != PH_ADSSBEIL && php->PphC != PH_ADSORPT &&
+          php->PphC != PH_IONEX && php->PphC != PH_POLYEL) {
+        php->PphC = PH_SORPTION;
+      }
     }
   }
 }
@@ -1272,15 +1288,26 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
   }
 
   if (php->NsuT > 0 && php->PFsuT == S_REM) { /* Setup of default values */
+    php->NsuT = MNST;
     for (i = 0; i < php->NsuT; i++) {
       if (!php->SCMC[i][SCMC_EILM_CODE] ||
-          php->SCMC[i][SCMC_EILM_CODE] == A_NUL)
-        php->SCMC[i][SCMC_EILM_CODE] = SC_NEM; /* Default! */
+          php->SCMC[i][SCMC_EILM_CODE] == A_NUL) {
+        if (i == 0) {
+          char scm = php->sol_t[MIX_TYP];
+          if (scm == 'B') scm = SC_BSM;
+          else if (scm == 'M') scm = SC_3LM;
+          else if (scm == 'E') scm = SC_4LM;
+          else if (scm == ' ' || scm == '\0') scm = SC_UNUSED;
+          php->SCMC[0][SCMC_EILM_CODE] = scm;
+        } else {
+          php->SCMC[i][SCMC_EILM_CODE] = SC_UNUSED;
+        }
+      }
       if (!php->SCMC[i][SCMC_SACT_CODE] ||
           php->SCMC[i][SCMC_SACT_CODE] == A_NUL)
         php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_NCOMP; /* Default! */
       if (approximatelyZero(php->MSDT[i][MSDT_FSUTSA]))
-        php->MSDT[i][MSDT_FSUTSA] = 1.0f; //  aPa->pa.p.DNS;
+        php->MSDT[i][MSDT_FSUTSA] = 1.0f / php->NsuT; //  aPa->pa.p.DNS;
       if (approximatelyZero(php->MSDT[i][MSDT_ISOPAR1]))
         php->MSDT[i][MSDT_ISOPAR1] = 1.0f; // 0.6022f; /* 1/nm2; = 1 mkmol/m2 */
       if (approximatelyZero(php->MSDT[i][MSDT_ISOPAR2]))
@@ -1319,14 +1346,10 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
         php->MASDJ[i][3] = 1.0f;
 
       /* Default mCDc column values */
-      if (!php->mCDc[i][0] || php->mCDc[i][0] == A_NUL)
-        php->mCDc[i][0] = 1.0f;
-      if (!php->mCDc[i][1] || php->mCDc[i][1] == A_NUL)
-        php->mCDc[i][1] = 0.2f;
-      if (!php->mCDc[i][2] || php->mCDc[i][2] == A_NUL)
-        php->mCDc[i][2] = 0.2f;
-      if (!php->mCDc[i][3] || php->mCDc[i][3] == A_NUL)
-        php->mCDc[i][3] = 0.5f;
+      for (int c = 0; c < DMCDC; c++) {
+        if (php->mCDc[i][c] == A_NUL)
+          php->mCDc[i][c] = 0.0f;
+      }
     }
     php->PFsuT = S_ON;
   }

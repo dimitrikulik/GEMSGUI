@@ -129,6 +129,7 @@ QWidget* parent):
     if( ii >= 0  )
         ui->pPhPs_0->setCurrentIndex(ii);
     ndxInPhPs_0 = ui->pPhPs_0->currentIndex();
+    QObject::connect( ui->pPhPs_0, SIGNAL(currentIndexChanged(int)), this, SLOT(phaseClassChanged(int)));
 
     //Page 2
     QString filter = QString("*:*:*:*:");
@@ -176,30 +177,33 @@ QWidget* parent):
     if( ii >= 0  )
         ui->kin_t1->setCurrentIndex(ii);
 
-    ui->nEIl->setValue(size[14]);
-    ui->nEIp->setValue(size[15]);
-    ui->nCDc->setValue(size[16]);
+    char phc = flgs[6];
+    bool isSorptionPhase = (phc == 'z' || phc == 'q' || phc == 'x' || phc == 'i' || phc == 'y' || flgs[11] == '+');
+
+    if (isSorptionPhase) {
+        if (size[5] < 1) size[5] = MNST; // 6
+        if (size[14] < 1) size[14] = DMCDC; // 4 (nEIl)
+        if (size[15] < 1) size[15] = DMCDC; // 4 (nEIp)
+        if (size[16] < 1) size[16] = DMCDC; // 4 (nCDc)
+    }
+
+    ui->nEIl->setValue(size[14] > 0 ? size[14] : (isSorptionPhase ? DMCDC : 0));
+    ui->nEIp->setValue(size[15] > 0 ? size[15] : (isSorptionPhase ? DMCDC : 0));
+    ui->nCDc->setValue(size[16] > 0 ? size[16] : (isSorptionPhase ? DMCDC : 0));
     ui->nSiT->setValue(size[29]);
     ui->nIsoC->setValue(size[18]);
     ui->nIsoS->setValue(size[19]);
     ui->mDe->setValue(size[20]);
 
-    //    if( flgs[5] != 'N' )
-    //    {
-    //      checkBoxSorption->setChecked( true );
-    //      if( size[5] == 0 ) size[5] = 1;
-    //      if( r2 == 0. ) r2 = 1.;
-    //    }
-    //    else checkBoxSorption->setChecked( false );
-
-    if( flgs[11] == '+' )
+    if( flgs[11] == '+' || isSorptionPhase )
         ui->checkBoxSorption->setChecked(true);
     else
         ui->checkBoxSorption->setChecked(false);
 
-    ui->spinBox_SurTypes_N->setValue(size[5]);
+    ui->spinBox_SurTypes_N->setValue(size[5] > 0 ? size[5] : (isSorptionPhase ? MNST : 0));
     QString str;
     ui->lineEdit_surfArea->setValidator( new QDoubleValidator( ui->lineEdit_surfArea ));
+    if (approximatelyZero(r2) && isSorptionPhase) r2 = 1.0;
     ui->lineEdit_surfArea->setText( str.setNum(r2) );
 
     // Page 5
@@ -320,9 +324,8 @@ TCStringArray& phase_sel, TCStringArray& lDCr_sel )
     size[3]= ui->pnscM->value();
     size[4]= ui->pnpxM->value();
     size[5]= ui->spinBox_SurTypes_N->value();
-
-    //    if( ui->SCM_code->currentText()[0] != QChar('N') )
-    //      if( size[5] == 0 ) size[5] = 1;
+    if( ui->checkBoxSorption->isChecked() && size[5] < 1 )
+        size[5] = MNST;
 
     size[6]= phase_sel.size(); //nlPh->value();
     size[14]= ui->nEIl->value();
@@ -355,7 +358,9 @@ double   PhaseWizard::getR2()
 {
     double r=ui->lineEdit_surfArea->text().toDouble();
     QString str = ui->SCM_code->currentText();
-    if( str[0] != QChar('N') )
+    QString pphStr = ui->pPhPs_0->currentText();
+    char phc = pphStr.isEmpty() ? ' ' : pphStr[0].toLatin1();
+    if( (str[0] != QChar('N') && str[0] != QChar('U')) || phc == 'z' || phc == 'q' || phc == 'x' || ui->checkBoxSorption->isChecked() )
         if( approximatelyZero(r) ) r = 1.;
     return r;
 }
@@ -391,12 +396,8 @@ void PhaseWizard::getFlags( char flgs[37] )
         flgs[8] = '+';
     else flgs[8] = '-';
 
-    //  if( checkBoxSorption->isChecked() )
-    //       flgs[11] = '+';
-    //  else flgs[11] = '-';
-    //if( flgs[5] != 'N' )
-    //     flgs[11] = '+';
-    if( flgs[0] == 'A' )
+    if( ui->checkBoxSorption->isChecked() || flgs[0] == 'A' ||
+        flgs[6] == 'z' || flgs[6] == 'q' || flgs[6] == 'x' || flgs[6] == 'i' )
         flgs[11] = '+';
     else flgs[11] = '-';
 
@@ -573,5 +574,38 @@ void PhaseWizard::lDCrSelectionChanged(int state)
     //ui->bDCrFilter->setEnabled(state);
 }
 
+void PhaseWizard::phaseClassChanged(int index)
+{
+    QString txt = ui->pPhPs_0->itemText(index);
+    if( txt.isEmpty() ) return;
+    char phc = txt[0].toLatin1();
+
+    if( phc == 'z' || phc == 'q' || phc == 'x' || phc == 'i' )
+    {
+        // Select ModelCode 'A' (Adsorption) if not already a non-ideal model
+        int idxA = ui->ModelCode->findText(QChar('A'), Qt::MatchStartsWith|Qt::MatchCaseSensitive);
+        if( idxA >= 0 && (ui->ModelCode->currentText().startsWith('I') || ui->ModelCode->currentText().startsWith('N')) )
+            ui->ModelCode->setCurrentIndex(idxA);
+
+        ui->checkBoxSorption->setChecked(true);
+
+        if( ui->spinBox_SurTypes_N->value() < 1 )
+            ui->spinBox_SurTypes_N->setValue(MNST);
+
+        if( ui->nEIl->value() < 1 )
+            ui->nEIl->setValue(DMCDC);
+        if( ui->nEIp->value() < 1 )
+            ui->nEIp->setValue(DMCDC);
+        if( ui->nCDc->value() < 1 )
+            ui->nCDc->setValue(DMCDC);
+
+        double r = ui->lineEdit_surfArea->text().toDouble();
+        if( approximatelyZero(r) )
+        {
+            QString str;
+            ui->lineEdit_surfArea->setText(str.setNum(1.0));
+        }
+    }
+}
 
 //--------------------- End of PhaseWizard.cpp ---------------------------

@@ -19,6 +19,7 @@
 //
 
 #include "m_phase.h"
+#include "GEMS3K/m_const_base.h"
 #include "GEMS3K/jsonconfig.h"
 #include "filters_data.h"
 #include "m_dcomp.h"
@@ -1091,42 +1092,53 @@ AGAIN_SETUP:
   // old  part
   if (php->NsuT > 0 && (php->PFsuT == S_REM ||
                         php->PFsuT == S_ON)) { /* Setup of default values */
-    php->PphC = PH_SORPTION;
+    if (php->PphC != PH_ADSSBEIL && php->PphC != PH_ADSORPT &&
+        php->PphC != PH_IONEX && php->PphC != PH_POLYEL) {
+      php->PphC = PH_SORPTION;
+    }
+    php->NsuT = MNST;
     php->nCDc = DMCDC;
     for (int i = 0; i < php->NsuT; i++) {
       if (!php->SCMC[i][SCMC_EILM_CODE] ||
           php->SCMC[i][SCMC_EILM_CODE] == A_NUL) {
-        // php->SCMC[i] = php->sol_t[SCM_TYPE];  // fixed, 24.07.2006 (DK)
-        php->SCMC[i][SCMC_EILM_CODE] = SC_NEM; // changed, 10.10.2026 (DK)
-        if (!php->SCMC[i][SCMC_SACT_CODE] ||
-            php->SCMC[i][SCMC_SACT_CODE] == A_NUL) {
-          // php->SCMC[i] = php->sol_t[SCM_TYPE];  // fixed, 24.07.2006 (DK)
-          php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_NCOMP; // changed, 10.10.2026 (DK)
+        if (i == 0) {
+          char scm = php->sol_t[MIX_TYP];
+          if (scm == 'B') scm = SC_BSM;
+          else if (scm == 'M') scm = SC_3LM;
+          else if (scm == 'E') scm = SC_4LM;
+          else if (scm == ' ' || scm == '\0') scm = SC_UNUSED;
+          php->SCMC[0][SCMC_EILM_CODE] = scm;
+        } else {
+          php->SCMC[i][SCMC_EILM_CODE] = SC_UNUSED;
         }
+      }
+      if (!php->SCMC[i][SCMC_SACT_CODE] ||
+          php->SCMC[i][SCMC_SACT_CODE] == A_NUL) {
+        php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_NCOMP;
+      }
 
-        if (approximatelyZero(php->MASDT[i][MSDT_FSUTSA]))
-          php->MASDT[i][MSDT_FSUTSA] = 1.0f / php->NsuT;
-        if (approximatelyZero(php->MASDT[i][MSDT_ISOPAR1]))
-          php->MASDT[i][MSDT_ISOPAR1] = 1.0f; // aPa->pa.p.DNS
-        if (approximatelyZero(php->MASDT[i][MSDT_ISOPAR2]))
-          php->MASDT[i][MSDT_ISOPAR2] = 0.0f; // 0.6022; min site density 1/nm2
-        if (approximatelyZero(php->MASDT[i][MSDT_CSPOVPAR]))
-          php->MASDT[i][MSDT_CSPOVPAR] = 0.0f;
+      if (approximatelyZero(php->MASDT[i][MSDT_FSUTSA]))
+        php->MASDT[i][MSDT_FSUTSA] = 1.0f / php->NsuT;
+      if (approximatelyZero(php->MASDT[i][MSDT_ISOPAR1]))
+        php->MASDT[i][MSDT_ISOPAR1] = 1.0f; // aPa->pa.p.DNS
+      if (approximatelyZero(php->MASDT[i][MSDT_ISOPAR2]))
+        php->MASDT[i][MSDT_ISOPAR2] = 0.0f; // 0.6022; min site density 1/nm2
+      if (approximatelyZero(php->MASDT[i][MSDT_CSPOVPAR]))
+        php->MASDT[i][MSDT_CSPOVPAR] = 0.0f;
 
-        if (approximatelyZero(php->CapT[i][EIL_CAPDA]))
-          php->CapT[i][EIL_CAPDA] = 1.0f; // C1 inner capacitance if F/m2
-        if (approximatelyZero(php->CapT[i][EIL_CAPDB]))
-          php->CapT[i][EIL_CAPDB] = 0.2f; // C2 outer capacitance
-        if (approximatelyZero(php->CapT[i][EIL_CAPDC]))
-          php->CapT[i][EIL_CAPDC] = 0.2f; // C3 outer capacitance
-        if (approximatelyZero(php->CapT[i][EIL_SLPLF]))
-          php->CapT[i][EIL_SLPLF] = 0.5f; // fraction of Debye length to locate
-                                          // the slip plane for zeta potential
-        if (php->XfIEC) { // SCM Modernization: 2D XfIEC[NsuT][NCIEC]
-          for (int c = 0; c < NCIEC; c++) {
-            if (approximatelyZero(php->XfIEC[i][c]))
-              php->XfIEC[i][c] = 0.0f;
-          }
+      if (approximatelyZero(php->CapT[i][EIL_CAPDA]))
+        php->CapT[i][EIL_CAPDA] = 1.0f; // C1 inner capacitance if F/m2
+      if (approximatelyZero(php->CapT[i][EIL_CAPDB]))
+        php->CapT[i][EIL_CAPDB] = 0.2f; // C2 outer capacitance
+      if (approximatelyZero(php->CapT[i][EIL_CAPDC]))
+        php->CapT[i][EIL_CAPDC] = 0.2f; // C3 outer capacitance
+      if (approximatelyZero(php->CapT[i][EIL_SLPLF]))
+        php->CapT[i][EIL_SLPLF] = 0.5f; // fraction of Debye length to locate
+                                        // the slip plane for zeta potential
+      if (php->XfIEC) { // SCM Modernization: 2D XfIEC[NsuT][NCIEC]
+        for (int c = 0; c < NCIEC; c++) {
+          if (approximatelyZero(php->XfIEC[i][c]))
+            php->XfIEC[i][c] = 0.0f;
         }
       }
     }
@@ -1314,7 +1326,7 @@ AGAIN_SETUP:
       if (!el_data.flags[cbSimelt_] && (pKey1[0] == 'm'))
         continue;
       if (!el_data.flags[cbSorption_] &&
-          (pKey1[0] == 'x' || pKey1[0] == 'i' || pKey1[0] == 'z'))
+          (pKey1[0] == 'x' || pKey1[0] == 'i' || pKey1[0] == 'z' || pKey1[0] == 'q'))
         continue;
       if (!el_data.flags[cbPolyel_] && (pKey1[0] == 'y'))
         continue;

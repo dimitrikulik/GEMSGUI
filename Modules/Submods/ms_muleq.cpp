@@ -389,7 +389,7 @@ void TMulti::EqstatExpand( /*const char *key,*/ bool calcActivityModels/*, bool 
             { // loop on solution phases
                jb = je;
                je += pmp->L1[k];
-               if( pmp->PHC[k] == PH_POLYEL || pmp->PHC[k] == PH_SORPTION )
+               if( pmp->PHC[k] == PH_POLYEL || pmp->PHC[k] == PH_SORPTION || pmp->PHC[k] == PH_ADSSBEIL )
                {
 		  if( pmp->PHC[0] == PH_AQUEL && pmp->XF[k] > pmp->DSM
                        && (pmp->XFA[0] > pmp->ScMinM && pmp->XF[0] > pmp->XwMinM ))  // fixed 30.08.2009 DK
@@ -486,7 +486,9 @@ double TMulti::pb_GX( double *Gxx  )
         //       if( XFw > const1 )
         if( ( pm.PHC[k] == PH_AQUEL && XFw >= pa_p->XwMin )
                 || ( pm.PHC[k] == PH_SORPTION && XFw >= pa_p->ScMin )
-                || ( pm.PHC[k] == PH_POLYEL && XFw >= pa_p->ScMin ) )
+                || ( pm.PHC[k] == PH_POLYEL && XFw >= pa_p->ScMin )
+                || ( pm.PHC[k] == PH_ADSSBEIL && XFw >= pa_p->ScMin )
+                || ( pm.PHC[k] == PH_ADSORPT && XFw >= pa_p->ScMin ) )
             pm.logXw = log( XFw );
         /*   */
         XF = pm.XF[k];

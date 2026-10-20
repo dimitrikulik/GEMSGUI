@@ -529,7 +529,9 @@ void TSyst::set_def(int /*q*/) {
     for (int i = 0; i < mup->Fi; i++) {
       if (mup->PHC[i] == PH_AQUEL)
         is_a = true;
-      if (mup->PHC[i] == PH_SORPTION)
+      if (mup->PHC[i] == PH_SORPTION || mup->PHC[i] == PH_ADSSBEIL ||
+          mup->PHC[i] == PH_ADSORPT || mup->PHC[i] == PH_IONEX ||
+          mup->PHC[i] == PH_POLYEL)
         is_x = true;
       if (mup->PHC[i] == PH_GASMIX || mup->PHC[i] == PH_PLASMA)
         is_g = true;
@@ -910,10 +912,11 @@ void TSyst::phase_data_load() {
     case PH_IONEX:
       break;
     case PH_ADSORPT:
-      break; // Temporary!
+    case PH_ADSSBEIL:
     case PH_POLYEL:
     case PH_SORPTION:
       sorption_data_load(aPH, k);
+      break;
     case PH_SINDIS:
       /*            if( sy.PAalp != S_OFF )
                       sy.Aalp[k] = aPH->php->Asur;

@@ -515,7 +515,8 @@ void TMulti::SolModLoad( )
         { // translate expressions in the non-ideality model for the whole phase
             aObj[ o_neqtxt]->SetPtr( aPH->php->pEq );
             Type = 0;
-            if( pmp->PHC[k] != PH_SORPTION && pmp->PHC[k] != PH_POLYEL )
+            if( pmp->PHC[k] != PH_SORPTION && pmp->PHC[k] != PH_POLYEL &&
+                pmp->PHC[k] != PH_ADSSBEIL && pmp->PHC[k] != PH_ADSORPT )
                 sm_text_analyze( k, Type, JB, JE, jb, je );
             else sm_text_analyze( k, Type, 0, JE, 0, je );
         }
@@ -538,7 +539,8 @@ void TMulti::SolModLoad( )
         else if( modT[DCOMP_DEP] == SM_UXDEP || modT[DCOMP_DEP] == SM_TPDEP )
             Error( "SolModLoad",
                    "Error?: modT[DCOMP_DEP] == SM_UXDEP || modT[DCOMP_DEP] == SM_TPDEP" );
-        if( pmp->PHC[k] != PH_SORPTION && pmp->PHC[k] != PH_POLYEL )
+        if( pmp->PHC[k] != PH_SORPTION && pmp->PHC[k] != PH_POLYEL &&
+            pmp->PHC[k] != PH_ADSSBEIL && pmp->PHC[k] != PH_ADSORPT )
             sm_text_analyze( k, Type, JB, JE, jb, je );
         else  sm_text_analyze( k, Type, 0, JE, 0, je );
 

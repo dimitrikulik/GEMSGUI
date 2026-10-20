@@ -378,6 +378,7 @@ bool TMulti::calculateActivityCoefficients_scripts( long int LinkMode, long int 
             break;
         case PH_POLYEL:  // PoissonBoltzmann( q, jb, je, k ); break;
         case PH_SORPTION: // electrostatic potenials from Gouy-Chapman eqn
+        case PH_ADSSBEIL:
             if( !(pm.PHC[0] == PH_AQUEL && pmpXFk > pm.DSM
                   && (pm.XFA[0] > pm.XwMinM && pm.XF[0] > pm.DSM )))
                 return false;

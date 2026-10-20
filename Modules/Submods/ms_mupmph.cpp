@@ -636,8 +636,8 @@ void TMulti::multi_sys_ph() {
     case PH_SIMELT:
     case PH_IONEX:
       break;
+    case PH_ADSSBEIL:
     case PH_ADSORPT:
-      break;
     case PH_POLYEL:
     case PH_SORPTION:
       pm.FIa++;
@@ -646,6 +646,7 @@ void TMulti::multi_sys_ph() {
       for (i = 0; i < 32; i++)
         car_l[i] = -1;
       car_c = 0; // cQ=0;
+      break;
     case PH_SINDIS:
       break;
     default:; // Error message may be needed here!
@@ -735,7 +736,8 @@ void TMulti::multi_sys_ph() {
                   // is known
       PMM /= pm.L1[k]; // DK 28.02.2012
 
-    if (pm.PHC[k] == PH_POLYEL || pm.PHC[k] == PH_SORPTION)
+    if (pm.PHC[k] == PH_POLYEL || pm.PHC[k] == PH_SORPTION ||
+        pm.PHC[k] == PH_ADSSBEIL || pm.PHC[k] == PH_ADSORPT)
       /* Analyzing assignment of surtypes */
       ph_surtype_assign(k, kk, jb, je, car_l, car_c, Cjs);
 
@@ -746,6 +748,8 @@ void TMulti::multi_sys_ph() {
                            // to J/mol */
       case PH_POLYEL:
       case PH_SORPTION:
+      case PH_ADSSBEIL:
+      case PH_ADSORPT:
         if (Cjs >= 0) {
           PMM = pm.MM[Cjs];
           pm.FWGT[k] = PMM;

@@ -413,8 +413,11 @@ enum PH_CLASSES {  // Possible values
   PH_LIQUID = 'l', // non-electrolyte liquid (melt)
   PH_SIMELT = 'm', // silicate (magmatic) melt or non-aqueous electrolyte
   PH_SORPTION =
-      'x',         // dilspersed solid with adsorption (ion exchange) in aqueous
-  PH_POLYEL = 'y', // colloidal poly- (oligo)electrolyte
+      'x',         // Sorption phase (sorbent+sorbates) without site balances
+  PH_POLYEL = 'y', // colloidal poly- (oligo)electrolyte e.g. Donnan volume phase
+  PH_IONEX = 'i',  // ion exchange on permanent charge with site balances e.g. B&B Clay
+  PH_ADSORPT = 'q', // surface complexation with surface site balances e.g. B&B ClaySor, formerly 'z'
+  PH_ADSSBEIL = 'z', // new: surface complexation with site balances & EIL models e.g. ClaySorEl
   PH_SINCOND = 's', // condenced solid phase, also multicomponent
   PH_SINDIS = 'd',  // dispersed solid phase, also multicomponent
   PH_HCARBL = 'h'   // mixture of condensed hydrocarbons
@@ -422,15 +425,19 @@ enum PH_CLASSES {  // Possible values
 
 enum sorption_control {
   // EDL interface models - separate for site types in v. 3.1
+  SC_NEM = 'N',
+  SC_4LM = '4',
+  SC_3LM = '3',
+  SC_TLM = 'T',
+  SC_BSM = 'S',
+  SC_DDL = 'D',
   SC_DDLM = 'D',
   SC_CCM = 'C',
-  SC_TLM = 'T',
   SC_MTL = 'M',
   SC_MXC = 'E',
   SC_NNE = 'X',
   SC_IEV = 'I',
-  SC_BSM = 'S',
-  SC_3LM = '3',
+  SC_UNUSED = 'U',
   SC_NOT_USED = 'N',
 
   // Methods of Surface Activity Terms calculation
