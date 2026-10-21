@@ -322,6 +322,9 @@ void TMulti::multi_sys_dc() {
     if (!(j < pm.Ls && j >= pm.Ls - pm.Lads))
       continue; // the following is not done for non-surface species
 
+    if (!pm.SATC || !pm.MASDJ || pm.Lads <= 0)
+      continue;
+
     ja = (j - (pm.Ls - pm.Lads));
     jja = (jj - (mup->Ls - mup->Lads));
     // SCM Modernization: Loading MASDJ and mCDc for surface species
@@ -700,6 +703,10 @@ void TMulti::multi_sys_ph() {
         pm.Lads++;
         ja++;
         break;
+      case DC_SCM_SPECIES:
+        is_ss = true;
+        PMM += pm.MM[j];
+        break;
         /* End extension */
       case DC_SOL_MAJOR:
       case DC_SOL_MAJDEP:
@@ -821,6 +828,9 @@ void TMulti::ph_sur_param(int k, int kk) {
   int i;
   SYSTEM *syp = TSyst::sm->GetSY();
 
+  if (!pm.SCMC || pm.FIat <= 0 || k < 0 || k >= pm.FIs)
+    return;
+
   // Tier 1: Surface types / patches [MNST=6]
   for (i = 0; i < MNST; i++) {
     if (syp->PNfsp != S_OFF && syp->SCMC) {
@@ -928,6 +938,9 @@ void TMulti::ph_surtype_assign(int k, int kk, int jb, int je, int car_l[],
   RMULTS *mup = TRMults::sm->GetMU();
   SYSTEM *syp = TSyst::sm->GetSY();
 
+  if (!pm.SATC || !pm.SATT || !pm.MASDJ || pm.Lads <= 0)
+    return;
+
   for (j = jb; j < je; j++) {
     if (pm.DCC[j] == DC_PEL_CARRIER || pm.DCC[j] == DC_SUR_CARRIER ||
         pm.DCC[j] == DC_SUR_MINAL)
@@ -936,6 +949,9 @@ void TMulti::ph_surtype_assign(int k, int kk, int jb, int je, int car_l[],
     ja = j - (pm.Ls - pm.Lads);
     int jj = pm.muj[j];
     int jja = jj - (mup->Ls - mup->Lads);
+
+    if (ja < 0 || ja >= pm.Lads || jja < 0 || jja >= mup->Lads)
+      continue;
 
     // Tier 3: SACT codes and allocations from SATC
     if (syp->PSATT != S_OFF && syp->SATC) {

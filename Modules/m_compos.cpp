@@ -359,8 +359,14 @@ void TCompos::bc_work_dyn_new()
 void TCompos::bc_work_dyn_kill()
 {
     bcp->Nmax = 0;  // Restored by DAK 22.10.99
-    bcp->SB1 = (char (*)[IC_RKLEN])aObj[ o_bcsb1 ]->Free();
-    bcp->ICw = (double *)aObj[ o_bcicw ]->Free();
+    if( aObj[ o_bcsb1 ]->IsDynamic() )
+        bcp->SB1 = (char (*)[IC_RKLEN])aObj[ o_bcsb1 ]->Free();
+    else
+        bcp->SB1 = nullptr;
+    if( aObj[ o_bcicw ]->IsDynamic() )
+        bcp->ICw = (double *)aObj[ o_bcicw ]->Free();
+    else
+        bcp->ICw = nullptr;
     delete[] bcp->A;
     bcp->A =0;
     if( C )

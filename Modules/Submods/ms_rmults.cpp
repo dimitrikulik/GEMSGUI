@@ -542,7 +542,14 @@ void TRMults::PHmake() {
     // read Phase record
     aPH->TryRecInp(mu.SF[kk], crt, 0);
     mu.PHC[kk] = aPH->php->PphC;
-    // test and load � DCOMP and REACDC
+    // Backward compatibility for legacy ClaySor models:
+    // If phase class was 'z' (formerly PH_ADSORPT in older GEMS, now PH_ADSSBEIL)
+    // but the phase has no electrostatic surface types/SCM (NsuT == 0 or !SCMC),
+    // automatically substitute 'z' with 'q' (PH_ADSORPT).
+    if (mu.PHC[kk] == PH_ADSSBEIL && (aPH->php->NsuT == 0 || !aPH->php->SCMC)) {
+      mu.PHC[kk] = PH_ADSORPT;
+    }
+    // test and load  DCOMP and REACDC
     fillValue(dkey, '\0', MAXRKEYLEN);
     phase_descr.push_back(char_array_to_string(aPH->php->name, MAXFORMULA) +
                           " (Phase)");
@@ -596,7 +603,7 @@ void TRMults::PHmake() {
         item[sflast] = 0;
       }
     } /* jj */
-    switch (aPH->php->PphC) {
+    switch (mu.PHC[kk]) {
     case PH_AQUEL:
       mu.Laq = mu.Ll[kk];
       continue;
