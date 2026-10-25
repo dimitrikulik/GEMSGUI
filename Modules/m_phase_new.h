@@ -433,6 +433,7 @@ enum sorption_control {
   SC_DDL = 'D',
   SC_DDLM = 'D',
   SC_CCM = 'C',
+  SC_TCE = 'E', // Tournassat EIL for clay edge
   SC_MTL = 'M',
   SC_MXC = 'E',
   SC_NNE = 'X',

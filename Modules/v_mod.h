@@ -105,7 +105,7 @@ const int MAXPARAMKEY = 24, MNST = 6, DMCDC = 4, DNFCN = 4, MNCAS = 4,
 // New: Column index in SCMC array (rows for surface types/patches)
 const int SCMC_EILM_CODE = 0, SCMC_SACT_CODE = 1,
           // New: Column index in MSDT array (rows for surface types/patches)
-    MSDT_FSUTSA = 0, MSDT_ISOPAR1 = 1, MSDT_ISOPAR2 = 2, MSDT_CSPOVPAR = 3,
+    MSDT_FSUTSA = 0, MSDT_TCE_PA1 = 1, MSDT_TCE_PA2 = 2, MSDT_TCE_PA3 = 3,
           CAPT_A_CAPD = 0, CAPT_B_CAPD = 1, CAPT_C_CAPD = 2, CAPT_F_ZETA = 3,
           // New: column index in FsiT array (rows for site types)
     FSIT_S_DENSITY = 0, FSIT_S_CAPACITY = 1;
@@ -1144,8 +1144,9 @@ enum syseq_objects { // System
   o_stba,
   o_stvm,
   o_stdic,
-  // SCM Modernization SysEq database objects (appended for backward compatibility)
-  o_ssmcdc, // SCM plane charge distribution table mCDc [DM4][DMCDC]
+  // SCM Modernization SysEq database objects (appended for backward
+  // compatibility)
+  o_ssmcdc,  // SCM plane charge distribution table mCDc [DM4][DMCDC]
   o_ssxcapc, // SCM 4LM outer capacitance density C3 [sy.Fia][MNST]
   // Equstat work objects
   o_stdim,

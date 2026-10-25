@@ -247,9 +247,9 @@ typedef struct {        // Description of PHASE record (old part)
   float (*MASDT)[NMSDT]; /// Area fraction of surface type and other surface
                          /// type parameters [MNST=6][NMSDT=4] [i][0] Reactive
                          /// fraction of surface type in sorbent surface area;
-                         /// [i][1] SACT isotherm parameter p1 (FFG, BET)_
-                         /// [i][2]; SACT isotherm parameter p2 (QCA, BET)_
-                         /// [i][3] Permanent charge spillover parameter p3"
+                         /// [i][1] Tournassat parameter A1 for clay edge_
+                         /// [i][2] Tournassat parameter A2 for clay edge_
+                         /// [i][3] Tournassat parameter A3 for clay edge"
 #define MSDT MASDT
   float (*CapT)
       [NCAZP]; /// EIL capacitance densities & f_zeta [MNST=6][NCAZP=4]

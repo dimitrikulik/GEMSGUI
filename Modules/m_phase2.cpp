@@ -912,7 +912,8 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
           a0 = Z;
         if (fabs(bp) < 1e-20)
           bp = 0;
-        // SCM Modernization: MASDJ has DNFCN=4 (DEN, P1, P2, P3); charges are in mCDc
+        // SCM Modernization: MASDJ has DNFCN=4 (DEN, P1, P2, P3); charges are
+        // in mCDc
         if (!(php->DCC[i] == DC_SUR_CARRIER || php->DCC[i] == DC_SUR_MINAL ||
               php->DCC[i] == DC_PEL_CARRIER)) {
           php->MASDJ[i][PI_DEN] = Masdj0;
@@ -938,7 +939,8 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
           }
         }
       }
-      // SCM Modernization: transferred data to php->mCDc (charge allocation) array
+      // SCM Modernization: transferred data to php->mCDc (charge allocation)
+      // array
     }
 
   } // i
@@ -1294,10 +1296,14 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
           php->SCMC[i][SCMC_EILM_CODE] == A_NUL) {
         if (i == 0) {
           char scm = php->sol_t[MIX_TYP];
-          if (scm == 'B') scm = SC_BSM;
-          else if (scm == 'M') scm = SC_3LM;
-          else if (scm == 'E') scm = SC_4LM;
-          else if (scm == ' ' || scm == '\0') scm = SC_UNUSED;
+          if (scm == 'B')
+            scm = SC_BSM;
+          else if (scm == 'M')
+            scm = SC_3LM;
+          else if (scm == 'E')
+            scm = SC_4LM;
+          else if (scm == ' ' || scm == '\0')
+            scm = SC_UNUSED;
           php->SCMC[0][SCMC_EILM_CODE] = scm;
         } else {
           php->SCMC[i][SCMC_EILM_CODE] = SC_UNUSED;
@@ -1308,12 +1314,12 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
         php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_NCOMP; /* Default! */
       if (approximatelyZero(php->MSDT[i][MSDT_FSUTSA]))
         php->MSDT[i][MSDT_FSUTSA] = 1.0f / php->NsuT; //  aPa->pa.p.DNS;
-      if (approximatelyZero(php->MSDT[i][MSDT_ISOPAR1]))
-        php->MSDT[i][MSDT_ISOPAR1] = 1.0f; // 0.6022f; /* 1/nm2; = 1 mkmol/m2 */
-      if (approximatelyZero(php->MSDT[i][MSDT_ISOPAR2]))
-        php->MSDT[i][MSDT_ISOPAR2] = 0.0f;
-      if (approximatelyZero(php->MSDT[i][MSDT_CSPOVPAR]))
-        php->MSDT[i][MSDT_CSPOVPAR] = 0.0f;
+      if (approximatelyZero(php->MSDT[i][MSDT_TCE_PA1]))
+        php->MSDT[i][MSDT_TCE_PA1] = 1.1f; // 0.6022f; /* 1/nm2; = 1 mkmol/m2 */
+      if (approximatelyZero(php->MSDT[i][MSDT_TCE_PA2]))
+        php->MSDT[i][MSDT_TCE_PA2] = 11.0f;
+      if (approximatelyZero(php->MSDT[i][MSDT_TCE_PA3]))
+        php->MSDT[i][MSDT_TCE_PA3] = -0.02f;
       if (approximatelyZero(php->CapT[i][EIL_CAPDA]))
         php->CapT[i][EIL_CAPDA] = 1.0f; /* A plane, in F/m2 */
       if (approximatelyZero(php->CapT[i][EIL_CAPDB]))
@@ -1326,13 +1332,17 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
 
     for (i = 0; i < php->nDC;
          i++) { // Restoring defaults if zeros or null-character
-      if (!php->SATC[i][SURSP_INDIV_SACT_CODE] || php->SATC[i][SURSP_INDIV_SACT_CODE] == A_NUL)
+      if (!php->SATC[i][SURSP_INDIV_SACT_CODE] ||
+          php->SATC[i][SURSP_INDIV_SACT_CODE] == A_NUL)
         php->SATC[i][SURSP_INDIV_SACT_CODE] = SACT_INDEF;
-      if (!php->SATC[i][SURSP_ALLOC_SORBENT_EM] || php->SATC[i][SURSP_ALLOC_SORBENT_EM] == A_NUL)
+      if (!php->SATC[i][SURSP_ALLOC_SORBENT_EM] ||
+          php->SATC[i][SURSP_ALLOC_SORBENT_EM] == A_NUL)
         php->SATC[i][SURSP_ALLOC_SORBENT_EM] = CCA_VOL; /* Default! */
-      if (!php->SATC[i][SURSP_ALLOC_SURFTYPE] || php->SATC[i][SURSP_ALLOC_SURFTYPE] == A_NUL)
+      if (!php->SATC[i][SURSP_ALLOC_SURFTYPE] ||
+          php->SATC[i][SURSP_ALLOC_SURFTYPE] == A_NUL)
         php->SATC[i][SURSP_ALLOC_SURFTYPE] = CST_0;
-      if (!php->SATC[i][SURSP_COV_DENS_UNITS] || php->SATC[i][SURSP_COV_DENS_UNITS] == A_NUL)
+      if (!php->SATC[i][SURSP_COV_DENS_UNITS] ||
+          php->SATC[i][SURSP_COV_DENS_UNITS] == A_NUL)
         php->SATC[i][SURSP_COV_DENS_UNITS] = CST_0; /* Default! */
 
       /* Default MASDJ values TBD  */
