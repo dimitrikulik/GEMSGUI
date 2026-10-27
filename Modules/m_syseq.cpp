@@ -58,6 +58,70 @@ void TSysEq::setCalcFlag(bool ifC) {
 void TSysEq::RecInput(const char *key) {
   keyTest(key);
   TCModule::RecInput(key);
+
+  // SCM Modernization: Check if sorption data in syseq record has legacy array dimensions
+  is_legacy_scm = false;
+  bool need_realloc_t12 = false;
+  if (ssp->DM[20] > 0) {
+    if (aObj[o_ssnfsp]->GetM() != NSURFSITES * NFSIT ||
+        aObj[o_ssmasdt]->GetM() != MNST * NMSDT ||
+        aObj[o_ssscmt]->GetM() != MNST * NSCMC ||
+        aObj[o_ssxfiec]->GetM() != MNST * NCIEC ||
+        aObj[o_ssxcapa]->GetM() != MNST ||
+        aObj[o_ssxcapb]->GetM() != MNST ||
+        aObj[o_ssxcapc]->GetM() != MNST ||
+        aObj[o_ssxcapf]->GetM() != MNST ||
+        aObj[o_ssxlam]->GetM() != MNST) {
+      need_realloc_t12 = true;
+      is_legacy_scm = true;
+    }
+  }
+
+  bool need_realloc_t3 = false;
+  if (ssp->DM[4] > 0) {
+    if (aObj[o_sssatc]->GetM() != MNCAS ||
+        aObj[o_ssmasdj]->GetM() != DNFCN ||
+        aObj[o_ssmcdc]->GetM() != DMCDC) {
+      need_realloc_t3 = true;
+      is_legacy_scm = true;
+    }
+  }
+
+  if (need_realloc_t12) {
+    if (ssp->switches[28] != S_OFF) {
+      aObj[o_ssnfsp]->Alloc(ssp->DM[20], NSURFSITES * NFSIT, F_);
+      aObj[o_ssscmt]->Alloc(ssp->DM[20], MNST * NSCMC, A_);
+    }
+    if (ssp->switches[29] != S_OFF)
+      aObj[o_ssmasdt]->Alloc(ssp->DM[20], MNST * NMSDT, F_);
+    if (ssp->switches[31] != S_OFF)
+      aObj[o_ssxcapa]->Alloc(ssp->DM[20], MNST, F_);
+    if (ssp->switches[32] != S_OFF)
+      aObj[o_ssxcapb]->Alloc(ssp->DM[20], MNST, F_);
+    if (ssp->switches[30] != S_OFF) {
+      aObj[o_ssxcapc]->Alloc(ssp->DM[20], MNST, F_);
+      aObj[o_ssxcapf]->Alloc(ssp->DM[20], MNST, F_);
+    }
+    if (ssp->switches[33] != S_OFF)
+      aObj[o_ssxfiec]->Alloc(ssp->DM[20], MNST * NCIEC, F_);
+    if (ssp->switches[36] != S_OFF)
+      aObj[o_ssxlam]->Alloc(ssp->DM[20], MNST, F_);
+  }
+
+  if (need_realloc_t3) {
+    if (ssp->switches[19] != S_OFF)
+      aObj[o_sssatc]->Alloc(ssp->DM[4], MNCAS, A_);
+    if (ssp->switches[29] != S_OFF) {
+      aObj[o_ssmasdj]->Alloc(ssp->DM[4], DNFCN, F_);
+      aObj[o_ssmcdc]->Alloc(ssp->DM[4], DMCDC, F_);
+      if (ssp->XSMD) delete[] ssp->XSMD;
+      ssp->XSMD = new char[ssp->DM[4]][NSURFSITE]();
+    }
+  }
+
+  if (need_realloc_t12 || need_realloc_t3) {
+    dyn_set();
+  }
 }
 
 // Save record structure
@@ -563,15 +627,13 @@ void TSysEq::newSizeifChange() {
       for (k = 0; k < MNST; k++) {
         if (ssp->SCMC) {
           for (int c = 0; c < NSCMC; c++)
-            ssp->SCMC[j][k][c] =
-                ssp->SCMC[i][k]
-                         [c]; // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
+            ssp->SCMC[j][k][c] =  ssp->SCMC[i][k][c]; 
+                         // SCM Modernization: [sy.Fia][MNST=6][NSCMC=2]
         }
         if (ssp->MASDT) {
           for (int c = 0; c < NMSDT; c++)
-            ssp->MASDT[j][k][c] =
-                ssp->MASDT[i][k]
-                          [c]; // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
+            ssp->MASDT[j][k][c] =  ssp->MASDT[i][k][c]; 
+           // SCM Modernization: [sy.Fia][MNST=6][NMSDT=4]
         }
         if (ssp->XcapA)
           ssp->XcapA[j][k] = ssp->XcapA[i][k];
@@ -584,8 +646,8 @@ void TSysEq::newSizeifChange() {
         if (ssp->XfIEC) {
           for (int c = 0; c < NCIEC; c++)
             ssp->XfIEC[j][k][c] =
-                ssp->XfIEC[i][k]
-                          [c]; // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
+                ssp->XfIEC[i][k][c]; 
+                // SCM Modernization: [sy.Fia][MNST=6][NCIEC=2]
         }
         if (ssp->Xlam)
           ssp->Xlam[j][k] = ssp->Xlam[i][k];
@@ -602,7 +664,7 @@ void TSysEq::newSizeifChange() {
       j++;
     }
   ssp->DM[20] =
-      j; // number of sorption phases sy.Fia or solution phases mu.FIs ?
+      j; // number of sorption phases sy.Fia
 
   for (i = 0, j = 0; i < ssp->DM[10]; i++) // System phk
     if (ssp->phk[i] >= 0)                  // no delete num

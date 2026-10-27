@@ -4951,7 +4951,7 @@
                         "lenth": "_phSCM",
                         "locus": "+b+i",
                         "maxM": 1,
-                        "maxN": 6,
+                        "maxN": 3,
                         "type": "F_CHECKBOX"
                     },
                     {
@@ -4981,7 +4981,7 @@
                     {
                         "label": "FSI_t",
                         "lenth": 6,
-                        "locus": "+n+i",
+                        "locus": "+b+i",
                         "maxM": 1,
                         "maxN": 8,
                         "type": "F_FLOAT"
@@ -5121,11 +5121,11 @@
                     },
                     {
                         "label": "SAT_C",
-                        "lenth": 3,
+                        "lenth": "_phSAT",
                         "locus": "+t+i",
                         "maxM": 4,
                         "maxN": 30,
-                        "type": "F_STRING"
+                        "type": "F_CHECKBOX"
                     },
                     {
                         "label": "xSmD",
@@ -5136,7 +5136,23 @@
                         "type": "F_STRING"
                     },
                     {
-                        "label": "MaSDj",
+                        "label": "PhDCC",
+                        "lenth": "_phDCC",
+                        "locus": "+b+i",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_CHECKBOX"
+                    },
+                    {
+                        "label": "pDC_v_",
+                        "lenth": 26,
+                        "locus": "+t-i",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_STRING"
+                    },
+                    {
+                        "label": "CDc",
                         "lenth": 6,
                         "locus": "+t+i",
                         "maxM": 4,
@@ -5144,7 +5160,7 @@
                         "type": "F_FLOAT"
                     },
                     {
-                        "label": "CDc",
+                        "label": "MaSDj",
                         "lenth": 6,
                         "locus": "+t+i",
                         "maxM": 4,
@@ -5356,40 +5372,88 @@
                     {
                         "label": "SCM_C",
                         "lenth": "_phSCM",
-                        "locus": "-b+i",
+                        "locus": "+b+i",
+                        "maxM": 1,
+                        "maxN": 3,
+                        "type": "F_CHECKBOX"
+                    },
+                    {
+                        "label": "MsDt",
+                        "lenth": 6,
+                        "locus": "+t+i",
+                        "maxM": 1,
+                        "maxN": 6,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "Cap_t",
+                        "lenth": 6,
+                        "locus": "+t+i",
+                        "maxM": 1,
+                        "maxN": 6,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "XfIEC",
+                        "lenth": 6,
+                        "locus": "+t+i",
+                        "maxM": 1,
+                        "maxN": 6,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "FSI_t",
+                        "lenth": 6,
+                        "locus": "+b+i",
+                        "maxM": 1,
+                        "maxN": 8,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "PhDCC",
+                        "lenth": "_phDCC",
+                        "locus": "+b+i",
                         "maxM": 1,
                         "maxN": 30,
                         "type": "F_CHECKBOX"
                     },
                     {
-                        "label": "FSI_t",
-                        "lenth": 10,
-                        "locus": "-t+i",
+                        "label": "pDC_v_",
+                        "lenth": 26,
+                        "locus": "+t-i",
                         "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_STRING"
+                    },
+                    {
+                        "label": "SAT_C",
+                        "lenth": "_phSAT",
+                        "locus": "+t+i",
+                        "maxM": 4,
+                        "maxN": 30,
+                        "type": "F_CHECKBOX"
+                    },
+                    {
+                        "label": "xSmD",
+                        "lenth": 3,
+                        "locus": "+t+i",
+                        "maxM": 8,
+                        "maxN": 30,
+                        "type": "F_STRING"
+                    },
+                    {
+                        "label": "MaSDj",
+                        "lenth": 6,
+                        "locus": "+t+i",
+                        "maxM": 4,
                         "maxN": 30,
                         "type": "F_FLOAT"
                     },
                     {
-                        "label": "MsDt",
-                        "lenth": 10,
-                        "locus": "-t+i",
-                        "maxM": 1,
-                        "maxN": 30,
-                        "type": "F_FLOAT"
-                    },
-                    {
-                        "label": "Cap_t",
-                        "lenth": 10,
-                        "locus": "-t+i",
-                        "maxM": 1,
-                        "maxN": 30,
-                        "type": "F_FLOAT"
-                    },
-                    {
-                        "label": "XfIEC",
-                        "lenth": 10,
-                        "locus": "-t+i",
-                        "maxM": 1,
+                        "label": "CDc",
+                        "lenth": 6,
+                        "locus": "+t+i",
+                        "maxM": 4,
                         "maxN": 30,
                         "type": "F_FLOAT"
                     },

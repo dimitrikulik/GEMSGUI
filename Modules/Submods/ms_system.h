@@ -215,13 +215,12 @@ typedef struct { // SYSTEM is base to Project (local values)
   char (*SCMC)[MNST][NSCMC]; // SCM Modernization: Classifier of EIL models &
                              // patch SACT codes [mu.Fis][MNST=6][NSCMC=2]
 
-  #define MaSdj MASDJ
-  #define McdC mCDc
-  #define xSmD XSMD
-  #define MaSdt MASDT
-  #define SCMT SCMC
-  #define PMASDJ PMaSdj
-  #define PMASDT PMaSdt
+#define MaSdj MASDJ
+#define McdC mCDc
+#define MaSdt MASDT
+#define SCMT SCMC
+#define PMASDJ PMaSdj
+#define PMASDT PMaSdt
 } SYSTEM;
 
 // Data of SYSTEM

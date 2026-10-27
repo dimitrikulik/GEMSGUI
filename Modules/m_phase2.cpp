@@ -892,12 +892,15 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
       }
     }
 
+    if (php->PphC == PH_ADSORPT || php->PphC == PH_IONEX) {
+      // No EIL and SATC input data, all only site mole balances and K, no
+      // carrier DC, virtual mass and SSA must be given in phase
+    }
     if (php->PphC == PH_SORPTION || php->PphC == PH_POLYEL ||
-        php->PphC == PH_ADSSBEIL || php->PphC == PH_ADSORPT ||
-        php->PphC == PH_IONEX) {
-      // Transferring data into MaSdj array   KD 25.10.2004
-      // Now a0 and b0 contain CD (charge distribution) for 0 and beta planes,
-      // resp.
+        php->PphC == PH_ADSSBEIL) {
+      // Transferring data into XSMD, SATC, MASDJ, mCDc arrays
+      // KD 25.10.2004, 27.10.2026 Now a0 and b0 contain CD (charge
+      // distribution) for 0 and beta planes, resp.
       if (php->MASDJ) // && php->NR1 == DFCN
       {
         if (fabs(cN) < 1e-20)

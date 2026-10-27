@@ -219,9 +219,9 @@ private:
 
   void multi_sys_dc();
   void multi_sys_ph();
-  void ph_sur_param(int k, int kk);
-  void ph_surtype_assign(int k, int kk, int jb, int je, int car_l[], int car_c,
-                         int Cjs);
+  void ph_sur_param(int k);
+  void ph_sur_site_type_assign(int k, int jb, int je, int car_l[], int car_c,
+                               int Cjs);
   void sm_text_analyze(int nph, int Type, int JB, int JE, int jb, int je);
   void SolModLoad();
   // new TKinMet stuff

@@ -346,13 +346,17 @@
     {
         "label": "_phSAT",
         "values": [
-            "ILCQ1234FRPfBWNS?`"
+            "012345?`",
+            "LCQ1234FRPfBWSNI?`",
+            "IV012345?`",
+            "nmMg?`"
         ]
     },
     {
         "label": "_phSCM",
         "values": [
-            "N43TSDCEUNMXIP?`"
+            "43TSDCEIUN?`",
+            "LCQ1234FRPfBWSNI?`"
         ]
     },
     {

@@ -241,29 +241,32 @@ typedef struct {        // Description of PHASE record (old part)
 
   // Old sorption model stuff - used so far, before TSolMod is implemented
   // Data in NsuT rows for NsuT surface types (patches)
-  char (*SCMC)[NSCMC]; /// Classifier of EIL models [i][0] { 4 3 T B C D N I };
-                       /// Common isotherm (SACT) codes [i][1] for surface
-                       /// types|patches ( L Q 1 2 3 4 F R N I ) [MNST=6][2]
+  // Tier 1: input data per surface site type
+  char (*SCMC)[NSCMC];   /// Class of EIL model [i][0] { 4 3 T S D C E I U N };
+                         /// Common isotherm (SACT) codes [i][1] for surface
+                         /// types|patches ( L C Q 1 2 3 4 F R P f B W S N I )
+                         /// [MNST=4][2]
   float (*MASDT)[NMSDT]; /// Area fraction of surface type and other surface
-                         /// type parameters [MNST=6][NMSDT=4] [i][0] Reactive
+                         /// type parameters [MNST=4][NMSDT=4] [i][0] Reactive
                          /// fraction of surface type in sorbent surface area;
                          /// [i][1] Tournassat parameter A1 for clay edge_
                          /// [i][2] Tournassat parameter A2 for clay edge_
                          /// [i][3] Tournassat parameter A3 for clay edge"
 #define MSDT MASDT
   float (*CapT)
-      [NCAZP]; /// EIL capacitance densities & f_zeta [MNST=6][NCAZP=4]
+      [NCAZP]; /// EIL capacitance densities & f_zeta [MNST=4][NCAZP=4]
                /// [i][0] C1 - inner EIL capacitance density parameter, F/m2
                ///   (TLM, 3LM, BSM, CCM) default 1.0
                /// [i][1] C2 - outer EIL capacitance density, F/m2
                ///   (TLM, 3LM, 4LM) default 0.2
                /// [i][2] C3 - outer EIL capacitance density, F/m2 (4LM),
                /// def.0.2 [i][3] f_zeta - location parameter for slip plane for
-               /// zeta potential, fraction of Debye length (default 0.5) Stern
+               /// zeta potential, fraction of Debye length (default 0.5)
 
   float (*XfIEC)[NCIEC]; // Constant charge density or IEC on 0-plane on surface
-                         // type, 1/nm2 and capacity in eq/kg [MNST=6][NCIEC=2]
+                         // type, 1/nm2 and capacity in eq/kg [MNST=4[NCIEC=2]
 
+  // Tier 2: input data per surface site type
   // Data in nSiT rows for surface site types from 0 to 7, all surf species
   // related to given site(s) must link to the same surface type (patch)
   float (
@@ -272,12 +275,13 @@ typedef struct {        // Description of PHASE record (old part)
                      /// sorbent) | Index of surface type owning (linked to)
                      /// this site type | Reserved input property of site type
 
+  // Tier 3: input data per surface phase DCs (species)
   // Data for surface species (protolysis, surf complexes, exchange ions)
   char (*XSMD)[NSURFSITE]; /// SCM Modernization: denticity allocation of
                            /// surface species (per row) to up to 8 surface site
                            /// types (number of bonds 1 2 3 4 or 0 if no binding
                            /// to a given site type) [nDC][NSURFSITE=8]
-#define xSmD XSMD
+
   char (*SATC)[MNCAS]; /// SACT method codes & allocations of individual surface
                        /// species [nDC][MNCAS=4] [0] Allocation index of
                        /// surface species to surface type (patch) { 0 1 2 3 4 5

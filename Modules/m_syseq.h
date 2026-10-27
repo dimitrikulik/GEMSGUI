@@ -44,7 +44,33 @@ typedef struct {         /* Packed system state description */
       switches[40],      /* SYSTEM switches line */
       Px[14];            /* Switches of project index vectors */
 
-  short DM[24];  /* Fact dimensions of system */
+  short DM[24]; /* Fact dimensions of system */
+  /*
+  DM[0]    sy.N,     // N of IC at equilibrium state (IC on in B[])
+  DM[1]    sy.L,     // N of DC at equilibrium state
+  DM[2]    sy.Fi,    unused // N of phases at equilibrium state
+  DM[3]    sy.Fis,   unused // N of multi-component phases at equilibrium state
+  DM[4]    sy.Lsor  //  DC  ON   adsorption SACT data
+  DM[5]             unused
+  DM[6]             unused
+  DM[7]             unused
+  DM[8]             unused
+  DM[9]    sy.Fib    // N PHASE  on  in  Phm[]
+  DM[10]   sy.Fik    // N phase  on in PUL[]/PLL[]
+  DM[11]   sy.La     // N Compos on in XeA[]
+  DM[12]   sy.Lb     // N DComp  on in XeD[]
+  DM[13]   sy.Lk     // N DC on in DUL[]/DLL[]
+  DM[14]   sy.Na     // IC on in BI []
+  DM[15]   sy.LO     // index of H2O solvent
+  DM[16]             unused
+  DM[17]   MNST      // number of surface types
+  DM[18]   sy.Le     // N DC    ON  in GEX[], lnGmf[]
+  DM[19]   sy.Fie    // N PHASE ON  in YOF[], Aalp[]
+  DM[20]   sy.Fia    // N sorption phases with EDL SCM
+  DM[21]             unused
+  DM[22]   mu.FI-sy.Fi  // N phases off in system
+  DM[23]   mu.L-sy.L  // N  DC    OFF  in system
+  */
   float PPm[20]; // Parametres of System at all
   short     /* Project indices for non-zero increments to bulk composition */
       *nnc, /* IC     on  in  BI[]      [sy.Na]  */
@@ -57,7 +83,7 @@ typedef struct {         /* Packed system state description */
       *phf, /* PHASE OFF  in system  [mu.FI-sy.Fi] */
       *dcf, /* DC    OFF  in system  [mu.L-sy.L]   */
       *pha, /* PHASE ON   adsorption EDL data [sy.Fia] */
-      *dca, /* DC    ON   adsorption SAT data [sy.Lsor] */
+      *dca, /* DC    ON   adsorption SACT data [sy.Lsor] */
 
       /* Project indices for kinetic and metastability constraints */
       *phk, /* PHASE ON  in PUL[]/PLL[]     [sy.Fik] */
@@ -114,30 +140,47 @@ typedef struct {         /* Packed system state description */
                    // eqstate(res)[sy.Fik]
   // Adsorption / EDL models     default OFF
   /* SCM Modernization: Group 3 DC parameters [sy.Lsor] */
-  char (*SATC)[MNCAS]; // SACT method codes & allocations of surface species [sy.Lsor][MNCAS=4]
-  float (*MASDJ)[DNFCN]; // SCM Modernization: Density and SACT isotherm params [sy.Lsor][DNFCN=4]
-  float (*mCDc)[DMCDC]; // SCM Modernization: Charges of surface species DC allocated to EIL planes [sy.Lsor][DMCDC=4]
-  char (*XSMD)[NSURFSITE]; // SCM Modernization: Denticity allocation across site types [sy.Lsor][NSURFSITE=8]
+  char (*SATC)[MNCAS];   // SACT method codes & allocations of surface species
+                         // [sy.Lsor][MNCAS=4]
+  float (*MASDJ)[DNFCN]; // SCM Modernization: Density and SACT isotherm params
+                         // [sy.Lsor][DNFCN=4]
+  float (*mCDc)[DMCDC];  // SCM Modernization: Charges of surface species DC
+                         // allocated to EIL planes [sy.Lsor][DMCDC=4]
+  char (*XSMD)[NSURFSITE]; // SCM Modernization: Denticity allocation across
+                           // site types [sy.Lsor][NSURFSITE=8]
 
-  /* SCM Modernization: Group 2 Surface site types [sy.Fia][NSURFSITES=8][NFSIT=4] */
-  float (*Nfsp)[NSURFSITES][NFSIT]; // SCM Modernization: Site densities, capacities, and patch index [sy.Fia][NSURFSITES=8][NFSIT=4]
+  /* SCM Modernization: Group 2 Surface site types
+   * [sy.Fia][NSURFSITES=8][NFSIT=4] */
+  float (*Nfsp)[NSURFSITES]
+               [NFSIT]; // SCM Modernization: Site densities, capacities, and
+                        // patch index [sy.Fia][NSURFSITES=8][NFSIT=4]
 
   /* SCM Modernization: Group 1 Phase parameters [sy.Fia][MNST=6] */
-  char (*SCMC)[MNST][NSCMC]; /* SCM Modernization: Classifier of EIL models & patch SACT codes [sy.Fia][MNST=6][NSCMC=2] */
-  float (*MASDT)[MNST][NMSDT]; // SCM Modernization: Area fraction and patch isotherm parameters [sy.Fia][MNST=6][NMSDT=4]
-  // EIL capacitance densities and slip plane parameter (split per column transpose from CapT[NsuT][NCAZP=4])
-  float (*XcapA)[MNST]; // Inner-layer capacitance density C1 (TLM,CCM,BSM,3LM,4LM) for surface types, F/m2 [sy.Fia][MNST]
-  float (*XcapB)[MNST]; // Outer-layer capacitance density C2 (TLM,3LM,4LM) for surface types, F/m2 [sy.Fia][MNST]
-  float (*XcapC)[MNST]; // Outer-layer capacitance density C3 (4LM) for surface types, F/m2 [sy.Fia][MNST]
-  float (*XcapZ)[MNST]; // Parameter f_zeta to locate slip plane for zeta potential (fraction of Debye length) [sy.Fia][MNST]
-  float (*XfIEC)[MNST][NCIEC]; // SCM Modernization: Permanent charge density (1/nm2) and IEC (meq/g) [sy.Fia][MNST=6][NCIEC=2]
-  float (*Xlam)[MNST]; // Factor of discretnes IDL 0 < 1 - in PHASE [sy.Fia][6] */
+  char (*SCMC)[MNST][NSCMC];   // SCM Modernization: Classifier of EIL models &
+                               // patch SACT codes [sy.Fia][MNST=6][NSCMC=2]
+  float (*MASDT)[MNST][NMSDT]; // SCM Modernization: Area fraction and patch
+                               // isotherm parameters [sy.Fia][MNST=6][NMSDT=4]
+  // EIL capacitance densities and slip plane parameter (split per column
+  // transpose from CapT[NsuT][NCAZP=4])
+  float (
+      *XcapA)[MNST]; // Inner-layer capacitance density C1 (TLM,CCM,BSM,3LM,4LM)
+                     // for surface types, F/m2 [sy.Fia][MNST]
+  float (*XcapB)[MNST]; // Outer-layer capacitance density C2 (TLM,3LM,4LM) for
+                        // surface types, F/m2 [sy.Fia][MNST]
+  float (*XcapC)[MNST]; // Outer-layer capacitance density C3 (4LM) for surface
+                        // types, F/m2 [sy.Fia][MNST]
+  float (*XcapZ)[MNST]; // Parameter f_zeta to locate slip plane for zeta
+                        // potential (fraction of Debye length) [sy.Fia][MNST]
+  float (
+      *XfIEC)[MNST][NCIEC]; // SCM Modernization: Permanent charge density
+                            // (1/nm2) and IEC (meq/g) [sy.Fia][MNST=6][NCIEC=2]
+  float (
+      *Xlam)[MNST]; // Factor of discretnes IDL 0 < 1 - in PHASE [sy.Fia][6] */
 
-  #define MaSdj MASDJ
-  #define McdC mCDc
-  #define xSmD XSMD
-  #define SCMT SCMC
-  #define MaSdt MASDT
+#define MaSdj MASDJ
+#define McdC mCDc
+#define SCMT SCMC
+#define MaSdt MASDT
 
   char (
       *sdref)[V_SD_RKLEN]; /* List of SDref keys to sources of data [sy.Nsd] */
@@ -191,6 +234,7 @@ typedef struct { /* Packed equlibrium state description */
 class TSysEq : public TCModule {
   SYSPACK ss[2];
   EQSTAT st[2];
+  bool is_legacy_scm{false};
 
 protected:
   void resetFlags();
@@ -201,6 +245,8 @@ public:
 
   SYSPACK *ssp;
   EQSTAT *stp;
+
+  bool isLegacyScm() const { return is_legacy_scm; }
 
   TSysEq(uint nrt);
 

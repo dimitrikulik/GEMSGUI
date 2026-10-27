@@ -60,7 +60,7 @@ void TMulti::MultiSystemInit() {
   pm.Lads = syp->Lsor;
   pm.FI = syp->Fi;
   pm.FIs = syp->Fis;
-  //   pm.FIa = syp->N;
+  pm.FIa = syp->Fia; // new
 
   if (syp->DLLim == S_ON || syp->DULim == S_ON)
     pm.PLIM = 1;
@@ -453,7 +453,7 @@ bool TMulti::CompressPhaseIpxt(int kPH) {
 void TMulti::multi_sys_ph() {
   int k, i;
   bool non_sorption_phase, is_ss;
-  short kk, j, je, jb, ja = 0;
+  short kk, j, je, jb;
   time_t crt;
   //    double G;
   double PMM;                    // Phase mean mol. mass
@@ -467,7 +467,7 @@ void TMulti::multi_sys_ph() {
   pm.Ls = 0;
   pm.PG = 0;
   pm.FIs = syp->Fis;
-  pm.FIa = 0;
+  pm.FIa = syp->Fia;
   pm.Lads = 0; // Is this really needed?
                //    ja=0;
 
@@ -637,15 +637,15 @@ void TMulti::multi_sys_ph() {
     case PH_LIQUID:
     case PH_SINCOND:
     case PH_SIMELT:
-    case PH_IONEX:
+    case PH_IONEX:   // 'i' ClaySor planar IX NEM
+    case PH_ADSORPT: // 'q' ClaySor edge NEM
       break;
     case PH_ADSSBEIL:
-    case PH_ADSORPT:
+      //   case PH_ADSORPT:    'q'  ClaySor edge NEM
     case PH_POLYEL:
     case PH_SORPTION:
-      pm.FIa++;
       non_sorption_phase = false;
-      ph_sur_param(k, kk);
+      ph_sur_param(k);
       for (i = 0; i < 32; i++)
         car_l[i] = -1;
       car_c = 0; // cQ=0;
@@ -684,27 +684,31 @@ void TMulti::multi_sys_ph() {
       case DC_SUR_CARRIER:
         Cjs = j;
         PMM = pm.MM[j];
+        is_ss = true;
         car_l[car_c++] = j;
         pm.Lads++;
-        ja++;
+        //    ja++;
         break;
       case DC_SUR_MINAL:
+        is_ss = true;
         car_l[car_c++] = j;
         pm.Lads++;
-        ja++;
+        //   ja++;
         break;
         // cleaned up here on 17.10.2026 by DK
-      case DC_IESC_A:
-      case DC_IEWC_B:
+      // case DC_IESC_A:
+      // case DC_IEWC_B:
       case DC_SUR_SPECIES:
       case DC_SUR_GROUP:
       case DC_SUR_COMPLEX:
       case DC_SUR_IPAIR:
         pm.Lads++;
-        ja++;
-        break;
+        //    ja++;
+        break; // [[fallthrough]]; ?
+      case DC_IESC_A:
+      case DC_IEWC_B:
       case DC_SCM_SPECIES:
-        is_ss = true;
+        is_ss = false; // true;
         PMM += pm.MM[j];
         break;
         /* End extension */
@@ -744,10 +748,11 @@ void TMulti::multi_sys_ph() {
       PMM /= pm.L1[k]; // DK 28.02.2012
 
     if (pm.PHC[k] == PH_POLYEL || pm.PHC[k] == PH_SORPTION ||
-        pm.PHC[k] == PH_ADSSBEIL || pm.PHC[k] == PH_ADSORPT)
-      /* Analyzing assignment of surtypes */
-      ph_surtype_assign(k, kk, jb, je, car_l, car_c, Cjs);
-
+        pm.PHC[k] == PH_ADSSBEIL) { // || pm.PHC[k] == PH_ADSORPT)
+      /* Analyzing assignment of surface site types */
+      ph_sur_site_type_assign(k, jb, je, car_l, car_c, Cjs);
+      // ka++; kka++;
+    }
     if (syp->PYOF == S_OFF)
       pm.YOF[k] = 0.0;
     else
@@ -824,129 +829,139 @@ void TMulti::multi_sys_ph() {
 }
 
 // SCM Modernization: Loading surface type and site parameters
-void TMulti::ph_sur_param(int k, int kk) {
+// Corrected for keeping sizes of sorption input arrays pm.FIa
+// instead of pm.FIs
+void TMulti::ph_sur_param(int k /*, int ka, int kk, int kka */) {
   int i;
+  RMULTS *mup = TRMults::sm->GetMU();
   SYSTEM *syp = TSyst::sm->GetSY();
 
-  if (!pm.SCMC || pm.FIat <= 0 || k < 0 || k >= pm.FIs)
-    return;
+  int ka = k - (pm.FIs - pm.FIa);
+  int kk = pm.muk[k];
+  int kka = kk - (mup->Fis - mup->Fia);
+
+  if (!pm.SCMC || pm.FIat <= 0 || k < 0 || k >= pm.FIs || ka < 0 ||
+      ka >= pm.FIa || kka < 0 || kka >= mup->Fia)
+    return; // some problem with dimensions
 
   // Tier 1: Surface types / patches [MNST=6]
   for (i = 0; i < MNST; i++) {
     if (syp->PNfsp != S_OFF && syp->SCMC) {
-      pm.SCMC[k][i][0] = syp->SCMC[kk][i][0];
-      pm.SCMC[k][i][1] = syp->SCMC[kk][i][1];
+      pm.SCMC[ka][i][0] = syp->SCMC[kka][i][0];
+      pm.SCMC[ka][i][1] = syp->SCMC[kka][i][1];
     } else {
-      pm.SCMC[k][i][0] = SC_NOT_USED;
-      pm.SCMC[k][i][1] = '\0';
+      pm.SCMC[ka][i][0] = SC_NOT_USED;
+      pm.SCMC[ka][i][1] = '\0';
     }
 
-    if (pm.SCMC[k][i][0] == SC_NOT_USED ||
-        pm.SCMC[k][i][0] == '\0') { /* this type surface is not used */
-      pm.SCMC[k][i][0] = SC_NOT_USED;
-      pm.SCMC[k][i][1] = '\0';
+    if (pm.SCMC[ka][i][0] == SC_NOT_USED ||
+        pm.SCMC[ka][i][0] == '\0') { /* this type surface is not used */
+      pm.SCMC[ka][i][0] = SC_NOT_USED;
+      pm.SCMC[ka][i][1] = '\0';
       for (int p = 0; p < NMSDT; p++)
-        pm.MASDT[k][i][p] = 0.0;
-      pm.XcapA[k][i] = 0.0;
-      pm.XcapB[k][i] = 0.0;
-      pm.XcapC[k][i] = 0.0;
-      pm.XcapZ[k][i] = 0.0;
-      pm.XcapD[k][i] = 0.0;
-      pm.XdlA[k][i] = 0.0;
-      pm.XdlB[k][i] = 0.0;
-      pm.XdlC[k][i] = 0.0;
-      pm.XdlD[k][i] = 0.0;
-      pm.XlamA[k][i] = 0.0;
+        pm.MASDT[ka][i][p] = 0.0;
+      pm.XcapA[ka][i] = 0.0;
+      pm.XcapB[ka][i] = 0.0;
+      pm.XcapC[ka][i] = 0.0;
+      pm.XcapZ[ka][i] = 0.0;
+      pm.XcapD[ka][i] = 0.0;
+      pm.XdlA[ka][i] = 0.0;
+      pm.XdlB[ka][i] = 0.0;
+      pm.XdlC[ka][i] = 0.0;
+      pm.XdlD[ka][i] = 0.0;
+      pm.XlamA[ka][i] = 0.0;
       for (int p = 0; p < NCIEC; p++)
-        pm.XfIEC[k][i][p] = 0.0;
+        pm.XfIEC[ka][i][p] = 0.0;
       continue;
     }
 
-    // Tier 1 patch parameters: MASDT [NMSDT=4]
+    // Tier 1 surface type/patch parameters: MASDT [NMSDT=4]
     for (int p = 0; p < NMSDT; p++) {
       if (syp->PMaSdt != S_OFF && syp->MASDT &&
-          !IsFloatEmpty(syp->MASDT[kk][i][p]))
-        pm.MASDT[k][i][p] = syp->MASDT[kk][i][p];
+          !IsFloatEmpty(syp->MASDT[kka][i][p]))
+        pm.MASDT[ka][i][p] = syp->MASDT[kka][i][p];
       else
-        pm.MASDT[k][i][p] = 0.0;
+        pm.MASDT[ka][i][p] = 0.0;
     }
 
-    if (syp->PXcapA != S_OFF && syp->XcapA && !IsFloatEmpty(syp->XcapA[kk][i]))
-      pm.XcapA[k][i] = syp->XcapA[kk][i];
+    if (syp->PXcapA != S_OFF && syp->XcapA && !IsFloatEmpty(syp->XcapA[kka][i]))
+      pm.XcapA[ka][i] = syp->XcapA[kka][i];
     else
-      pm.XcapA[k][i] = 0.0;
+      pm.XcapA[ka][i] = 0.0;
 
-    if (syp->PXcapB != S_OFF && syp->XcapB && !IsFloatEmpty(syp->XcapB[kk][i]))
-      pm.XcapB[k][i] = syp->XcapB[kk][i];
+    if (syp->PXcapB != S_OFF && syp->XcapB && !IsFloatEmpty(syp->XcapB[kka][i]))
+      pm.XcapB[ka][i] = syp->XcapB[kka][i];
     else
-      pm.XcapB[k][i] = 0.0;
+      pm.XcapB[ka][i] = 0.0;
 
     // EIL C3 (4LM) capacitance density and slip plane parameter f_zeta
-    if (syp->PXcapC != S_OFF && syp->XcapC && !IsFloatEmpty(syp->XcapC[kk][i]))
-      pm.XcapC[k][i] = syp->XcapC[kk][i];
+    if (syp->PXcapC != S_OFF && syp->XcapC && !IsFloatEmpty(syp->XcapC[kka][i]))
+      pm.XcapC[ka][i] = syp->XcapC[kka][i];
     else
-      pm.XcapC[k][i] = 0.0;
+      pm.XcapC[ka][i] = 0.0;
 
-    if (syp->PXcapC != S_OFF && syp->XcapZ && !IsFloatEmpty(syp->XcapZ[kk][i]))
-      pm.XcapZ[k][i] = syp->XcapZ[kk][i];
+    if (syp->PXcapC != S_OFF && syp->XcapZ && !IsFloatEmpty(syp->XcapZ[kka][i]))
+      pm.XcapZ[ka][i] = syp->XcapZ[kka][i];
     else
-      pm.XcapZ[k][i] = 0.0;
+      pm.XcapZ[ka][i] = 0.0;
 
     if (syp->PXfIEC != S_OFF &&
         syp->XfIEC) { /* Permanent surface charge density / IEC */
       for (int p = 0; p < NCIEC; p++) {
-        if (!IsFloatEmpty(syp->XfIEC[kk][i][p]))
-          pm.XfIEC[k][i][p] = syp->XfIEC[kk][i][p];
+        if (!IsFloatEmpty(syp->XfIEC[kka][i][p]))
+          pm.XfIEC[ka][i][p] = syp->XfIEC[kka][i][p];
         else
-          pm.XfIEC[k][i][p] = 0.0;
+          pm.XfIEC[ka][i][p] = 0.0;
       }
     } else {
       for (int p = 0; p < NCIEC; p++)
-        pm.XfIEC[k][i][p] = 0.0;
+        pm.XfIEC[ka][i][p] = 0.0;
     }
 
-    if (syp->PXlam != S_OFF && syp->Xlam && !IsFloatEmpty(syp->Xlam[kk][i]))
-      pm.XlamA[k][i] = syp->Xlam[kk][i];
+    if (syp->PXlam != S_OFF && syp->Xlam && !IsFloatEmpty(syp->Xlam[kka][i]))
+      pm.XlamA[ka][i] = syp->Xlam[kka][i];
     else
-      pm.XlamA[k][i] = 0.0;
+      pm.XlamA[ka][i] = 0.0;
 
-    pm.XdlA[k][i] = 0.0;
-    pm.XdlB[k][i] = 0.0;
-    pm.XdlC[k][i] = 0.0;
-    pm.XdlD[k][i] = 0.0;
-    pm.XcapD[k][i] = 0.0;
+    pm.XdlA[ka][i] = 0.0;
+    pm.XdlB[ka][i] = 0.0;
+    pm.XdlC[ka][i] = 0.0;
+    pm.XdlD[ka][i] = 0.0;
+    pm.XcapD[ka][i] = 0.0;
   } /* end for i */
 
   // SCM Modernization: Tier 2: Surface Site Types [NSURFSITES=8][NFSIT=4]
   for (int s = 0; s < NSURFSITES; s++) {
     for (int p = 0; p < NFSIT; p++) {
       if (syp->PNfsp != S_OFF && syp->Nfsp &&
-          !IsFloatEmpty(syp->Nfsp[kk][s][p]))
-        pm.Nfsp[k][s][p] = syp->Nfsp[kk][s][p];
+          !IsFloatEmpty(syp->Nfsp[kka][s][p]))
+        pm.Nfsp[ka][s][p] = syp->Nfsp[kka][s][p];
       else
-        pm.Nfsp[k][s][p] = 0.0;
+        pm.Nfsp[ka][s][p] = 0.0;
     }
   }
 }
 
-// SCM Modernization: Assigning surface types to carrier and loading Tier 3
+// SCM Modernization: Assigning surface site types to carrier and loading Tier 3
 // species data
-void TMulti::ph_surtype_assign(int k, int kk, int jb, int je, int car_l[],
-                               int car_c, int Cjs) {
-  int j, jcl, ja;
+void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
+                                     int car_c, int Cjs) {
+  int j, jcl;
   long int ist, isi;
   RMULTS *mup = TRMults::sm->GetMU();
   SYSTEM *syp = TSyst::sm->GetSY();
 
   if (!pm.SATC || !pm.SATT || !pm.MASDJ || pm.Lads <= 0)
     return;
+  int ka = k - (pm.FIs - pm.FIa);
+  int kk = pm.muk[k];
 
   for (j = jb; j < je; j++) {
     if (pm.DCC[j] == DC_PEL_CARRIER || pm.DCC[j] == DC_SUR_CARRIER ||
         pm.DCC[j] == DC_SUR_MINAL)
       continue;
 
-    ja = j - (pm.Ls - pm.Lads);
+    int ja = j - (pm.Ls - pm.Lads);
     int jj = pm.muj[j];
     int jja = jj - (mup->Ls - mup->Lads);
 
@@ -1077,10 +1092,10 @@ void TMulti::ph_surtype_assign(int k, int kk, int jb, int je, int car_l[],
       pm.MASDJ[ja][PI_DEN] *= syp->Aalp[kk] * 1.66054; /* 1/nm2 to mkmol/g */
 
     if (approximatelyZero(pm.MASDJ[ja][PI_DEN])) {
-      if (pm.SATT[ja] == SAT_NCOMP && ist >= 0 && ist < MNST)
-        pm.MASDJ[ja][PI_DEN] =
-            pm.MASDT[k][ist]
-                    [0]; // SCM Modernization: patch reactive area fraction
+      if (pm.SATT[ja] == SAT_NCOMP && ist >= 0 && ist < MNST && ka >= 0 &&
+          ka < pm.FIa && pm.MASDT)
+        pm.MASDJ[ja][PI_DEN] = pm.MASDT[ka][ist][0];
+      // SCM Modernization: patch reactive area fraction
       else if (pm.SATT[ja] == SAT_COMP)
         pm.MASDJ[ja][PI_DEN] = 1.0;
     }

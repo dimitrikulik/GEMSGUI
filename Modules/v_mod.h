@@ -99,7 +99,7 @@ enum std_object {
 //---------------------------------
 
 #ifndef M_CONST_BASE_H
-const int MAXPARAMKEY = 24, MNST = 6, DMCDC = 4, DNFCN = 4, MNCAS = 4,
+const int MAXPARAMKEY = 24, MNST = 4, DMCDC = 4, DNFCN = 4, MNCAS = 4,
           NNCAZP = 4, NNMSDT = 4, NSURFSITE = 8, NSCMC = 2, NFSIT = 4,
           NCIEC = 2;
 // New: Column index in SCMC array (rows for surface types/patches)
@@ -183,6 +183,7 @@ enum param_objects {       // work objects
   o_muas,
   o_muav,
   o_musf2,
+  o_musf3, // new
   o_musm2,
   o_musm3,
   o_mudcc3,
@@ -471,6 +472,7 @@ enum param_objects {       // work objects
   o_wd_sm2,
   o_wd_sm3, //  new
   o_wd_sf2,
+  o_wd_sf3, // new
   o_wd_txtb,
   o_wi_rlc,
   o_wi_rsc,

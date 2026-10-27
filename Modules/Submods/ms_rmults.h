@@ -53,7 +53,7 @@ typedef struct {        // RMULTS is base to Project
       La,   // La  - of references to COMPOS records
       Ls,   // Ls  - total number of DC in multi-component phases
       Lads, // former Lx: total number of surface species
-      FiE,  // FIe - number of phases with sorption (and EDL)
+      Fia,  // FIa - number of phases with sorption (and EDL)  was FiE
       NfT,  // Total number of linked files sigma(Nfl)
 
       nAq,  // Index select aqueous phase
@@ -65,6 +65,7 @@ typedef struct {        // RMULTS is base to Project
 
   char (
       *SF2)[PH_RKLEN]; // List of multicomponent PHASE definition keys [Fis] DB
+  char (*SF3)[PH_RKLEN]; // List of sorption PHASE definition keys [Fia]   new
   char (*SM2)[DC_RKLEN]; // List of multicomp DC definition keys  [Ls]
   char (*SM3)[DC_RKLEN]; // List of adsorption DC definition keys  [Lads]  new
 

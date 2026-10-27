@@ -55,6 +55,8 @@ void TRMults::ods_link(int /*q*/) {
   aObj[o_mufn]->SetDim(mu.NfT, 1);
   aObj[o_musf2]->SetPtr(mu.SF2);
   aObj[o_musf2]->SetDim(mu.Fis, 1);
+  aObj[o_musf3]->SetPtr(mu.SF3);
+  aObj[o_musf3]->SetDim(mu.Fia, 1);
   aObj[o_musm2]->SetPtr(mu.SM2);
   aObj[o_musm2]->SetDim(mu.Ls, 1);
   aObj[o_musm3]->SetPtr(mu.SM3);
@@ -108,6 +110,7 @@ void TRMults::dyn_set(int /*q*/) {
   mu.SF = (char (*)[PH_RKLEN])aObj[o_musf]->GetPtr();
   mu.SM = (char (*)[DC_RKLEN])aObj[o_musm]->GetPtr();
   mu.SF2 = (char (*)[PH_RKLEN])aObj[o_musf2]->GetPtr();
+  mu.SF3 = (char (*)[PH_RKLEN])aObj[o_musf3]->GetPtr();
   mu.SM2 = (char (*)[DC_RKLEN])aObj[o_musm2]->GetPtr();
   mu.SM3 = (char (*)[DC_RKLEN])aObj[o_musm3]->GetPtr();
   // Added  Sveta 03/06/05
@@ -150,6 +153,7 @@ void TRMults::dyn_kill(int /*q*/) {
   mu.SF = (char (*)[PH_RKLEN])aObj[o_musf]->Free();
   mu.SM = (char (*)[DC_RKLEN])aObj[o_musm]->Free();
   mu.SF2 = (char (*)[PH_RKLEN])aObj[o_musf2]->Free();
+  mu.SF3 = (char (*)[PH_RKLEN])aObj[o_musf3]->Free();
   mu.SM2 = (char (*)[DC_RKLEN])aObj[o_musm2]->Free();
   mu.SM3 = (char (*)[DC_RKLEN])aObj[o_musm3]->Free();
   // Added  Sveta 03/06/05
@@ -228,6 +232,7 @@ void TRMults::dyn_new(int /*q*/) {
   if (mu.PmvPH == S_ON) {
     mu.SF = (char (*)[PH_RKLEN])aObj[o_musf]->Alloc(mu.Fi, 1, PH_RKLEN);
     mu.SF2 = (char (*)[PH_RKLEN])aObj[o_musf2]->Alloc(mu.Fis, 1, PH_RKLEN);
+    mu.SF3 = (char (*)[PH_RKLEN])aObj[o_musf3]->Alloc(mu.Fia, 1, PH_RKLEN);
     mu.Ll = (short *)aObj[o_mul1]->Alloc(mu.Fi, 1, I_);
     mu.PHC = (char *)aObj[o_muphc]->Alloc(mu.Fi, 1, A_);
     mu.nlPHv = (char (*)[MAXPHNAME])aObj[o_nlphv]->Alloc(mu.Fi, 1, MAXPHNAME);
@@ -275,8 +280,7 @@ void TRMults::dyn_new(int /*q*/) {
     aObj[o_nldchs]->SetDim(1, 0);
   }
   if (mu.PmvDF == S_ON) {
-    short DCFlen = mu.FiE;
-    mu.FiE = 0;
+    short DCFlen = mu.L;
     mu.DCF = (char *)aObj[o_mudcf]->Alloc(1, DCFlen * MAXFORMULA, S_);
   } else
     mu.DCF = (char *)aObj[o_mudcf]->Free();
@@ -390,7 +394,7 @@ void TRMults::DCListLoad(TCStringArray AqKey, TCStringArray GasKey, bool useLst,
   aPH->ods_link(0);
   // Build list of DCOMP&REACDC from PHASE
   kk = -1;
-  mu.Ls = mu.Lads = mu.Fis = 0;
+  mu.Ls = mu.Lads = mu.Fis = mu.Fia = 0;
 TEST2:
   for (k = 0; k < aPhaseList.size(); k++) {
     // test and load keys of DCOMP anf REACDC
@@ -413,8 +417,15 @@ TEST2:
     {
       mu.Ls += mu.Ll[kk];
       mu.Fis++;
-      if (aPH->php->NsuT > 0 && aPH->php->NsuT < 5)
+      char pphc = aPH->php->PphC;
+      if (pphc == PH_ADSSBEIL && (aPH->php->NsuT == 0 || !aPH->php->SCMC)) {
+        pphc = PH_ADSORPT;
+      }
+      if (pphc == PH_POLYEL || pphc == PH_ADSSBEIL ||
+          pphc == PH_SORPTION) {
         mu.Lads += mu.Ll[kk];
+        mu.Fia++;
+      }
     }
   } /* k */
   if (SPHP == 1) {
@@ -422,7 +433,7 @@ TEST2:
     goto TEST2;
   }
   mu.L = List.size();
-  mu.FiE = mu.L;
+  // mu.Fia = mu.L;       error
   mu.PmvDC = S_ON;
   mu.SM = (char (*)[DC_RKLEN])aObj[o_musm]->Alloc(mu.L, 1, DC_RKLEN);
   for (size_t i = 0; i < List.size(); i++) {
@@ -524,7 +535,8 @@ void TRMults::PHmake() {
   TReacDC *aRC = dynamic_cast<TReacDC *>(aMod[RT_REACDC].get());
   aRC->ods_link(0);
 
-  mu.FiE = 0;
+  mu.Fia = 0;
+  mu.Lads = 0;
   mu.Pg = 0;
   mu.Lhc = 0;
   mu.Laq = 0;
@@ -543,9 +555,9 @@ void TRMults::PHmake() {
     aPH->TryRecInp(mu.SF[kk], crt, 0);
     mu.PHC[kk] = aPH->php->PphC;
     // Backward compatibility for legacy ClaySor models:
-    // If phase class was 'z' (formerly PH_ADSORPT in older GEMS, now PH_ADSSBEIL)
-    // but the phase has no electrostatic surface types/SCM (NsuT == 0 or !SCMC),
-    // automatically substitute 'z' with 'q' (PH_ADSORPT).
+    // If phase class was 'z' (formerly PH_ADSORPT in older GEMS, now
+    // PH_ADSSBEIL) but the phase has no electrostatic surface types/SCM (NsuT
+    // == 0 or !SCMC), automatically substitute 'z' with 'q' (PH_ADSORPT).
     if (mu.PHC[kk] == PH_ADSSBEIL && (aPH->php->NsuT == 0 || !aPH->php->SCMC)) {
       mu.PHC[kk] = PH_ADSORPT;
     }
@@ -617,16 +629,18 @@ void TRMults::PHmake() {
       continue;
     case PH_SORPTION:
     case PH_ADSSBEIL:
-    case PH_ADSORPT:
-    case PH_IONEX:
+      //   case PH_ADSORPT:
+      //   case PH_IONEX:
     case PH_POLYEL:
-      mu.FiE += mu.Ll[kk];
+      mu.Fia++; // Bugfix: was  += mu.Ll[kk];
+      mu.Lads += mu.Ll[kk];
       continue;
     default:
       continue;
     }
   } /* kk */
-  mu.DCF = (char *)aObj[o_mudcf]->Alloc(1, sflast + 2, S_);
+  if (mu.PmvDF == S_ON)
+    mu.DCF = (char *)aObj[o_mudcf]->Alloc(1, sflast > 0 ? (sflast + 2) : 1, S_);
 }
 
 // realloc memory and load data to structure RMULTS
@@ -775,12 +789,17 @@ void TRMults::LoadRmults(bool NewRec, bool changePhases) {
 
   // insert data to short key lists
   memcpy(mu.SF2, mu.SF, mu.Fis * PH_RKLEN * sizeof(char));
+  if (mu.Fia && mu.SF3) // new - sorption phase names
+    memcpy(mu.SF3, mu.SF + mu.Fis - mu.Fia, mu.Fia * PH_RKLEN * sizeof(char));
   if (mu.Ls && mu.SM2) // Fix of a potential bug
     memcpy(mu.SM2, mu.SM, mu.Ls * DC_RKLEN * sizeof(char));
   if (mu.Lads && mu.SM3 && mu.DCC3) {
     memcpy(mu.SM3, mu.SM + mu.Ls - mu.Lads, mu.Lads * DC_RKLEN * sizeof(char));
     memcpy(mu.DCC3, mu.DCC + mu.Ls - mu.Lads, mu.Lads * sizeof(char));
   }
+  aObj[o_musf3]->SetDim(mu.Fia, 1);
+  aObj[o_musm3]->SetDim(mu.Lads, 1);
+  aObj[o_mudcc3]->SetDim(mu.Lads, 1);
   // Added Sveta 03/06/05
   if (mu.nlICv)
     for (int ii = 0; ii < mu.N; ii++)
@@ -1031,8 +1050,10 @@ void TRMults::TestIComp() {
         if (!memcmp(mu.SB[ii], aCMP->bcp->SB[i], MAXICNAME + MAXSYMB))
           ij++;
         else if (!memcmp(mu.SB[ii], aCMP->bcp->SB[i], MAXICNAME) &&
-                 ((mu.SB[ii][MAXICNAME] == IC_ADDIT && aCMP->bcp->SB[i][MAXICNAME] == IC_SSITE) ||
-                  (mu.SB[ii][MAXICNAME] == IC_SSITE && aCMP->bcp->SB[i][MAXICNAME] == IC_ADDIT)))
+                 ((mu.SB[ii][MAXICNAME] == IC_ADDIT &&
+                   aCMP->bcp->SB[i][MAXICNAME] == IC_SSITE) ||
+                  (mu.SB[ii][MAXICNAME] == IC_SSITE &&
+                   aCMP->bcp->SB[i][MAXICNAME] == IC_ADDIT)))
           ij++;
       }
       if (!ij) {

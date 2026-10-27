@@ -27,6 +27,7 @@
 #include "m_reacdc.h"
 #include "s_formula.h"
 #include "service.h"
+#include "v_mod.h"
 #include "visor.h"
 #include <cmath>
 
@@ -81,7 +82,7 @@ void TPhase::ods_link(int q) {
   aObj[o_phnotes]->SetPtr(ph[q].notes);
   aObj[o_phdim]->SetPtr(&ph[q].nDC);    // i 8
   aObj[o_phdisep]->SetPtr(&ph[q].Asur); // f 8
-  // SCM Modernization: Tier 1 fixed dimension MNST=6
+  // SCM Modernization: Tier 1 fixed dimension MNST=4
   aObj[o_phscmc]->SetPtr(ph[q].SCMC);
   aObj[o_phscmc]->SetDim(MNST, NSCMC);
   aObj[o_phxfiec]->SetPtr(ph[q].XfIEC);
@@ -90,15 +91,20 @@ void TPhase::ods_link(int q) {
   aObj[o_phmsdt]->SetDim(MNST, NMSDT);
   aObj[o_phcapt]->SetPtr(ph[q].CapT);
   aObj[o_phcapt]->SetDim(MNST, NCAZP);
+  // SCM modernization Tier 2
   aObj[o_phfsit]->SetPtr(ph[q].FsiT);
-  aObj[o_phfsit]->SetDim(ph[q].nSiT, NFSIT);
-  // nDC
+  aObj[o_phfsit]->SetDim(NSURFSITE, NFSIT);
+  // aObj[o_phfsit]->SetDim(ph[q].nSiT, NFSIT);
+  // SCM modernization Tier 3  nDC
+  aObj[o_phxsmd]->SetPtr(ph[q].XSMD);
+  aObj[o_phxsmd]->SetDim(ph[q].nDC, NSURFSITE);
   aObj[o_phsatc]->SetPtr(ph[q].SATC);
   aObj[o_phsatc]->SetDim(ph[q].nDC, MNCAS);
   aObj[o_phmasdj]->SetPtr(ph[q].MASDJ);
   aObj[o_phmasdj]->SetDim(ph[q].nDC, DNFCN); // SCM Modernization: DNFCN=4
   aObj[o_phmcdc]->SetPtr(ph[q].mCDc);
   aObj[o_phmcdc]->SetDim(ph[q].nDC, DMCDC);
+
   aObj[o_phpxres]->SetPtr(ph[q].ipxt); // changed 07.12.2006 KD
                                        // if(ph[q].ipxt)
   aObj[o_phpxres]->SetDim(ph[q].ncpN, ph[q].npxM);
@@ -159,8 +165,8 @@ void TPhase::ods_link(int q) {
   aObj[o_phfloat2]->SetPtr(&ph[q].Vpor); // f 8
 
   // dynamic
-  aObj[o_phxsmd]->SetPtr(ph[q].XSMD);
-  aObj[o_phxsmd]->SetDim(ph[q].nDC, NSURFSITE);
+  // aObj[o_phxsmd]->SetPtr(ph[q].XSMD);
+  // aObj[o_phxsmd]->SetDim(ph[q].nDC, NSURFSITE);
   aObj[o_phocprk]->SetPtr(ph[q].ocPRk);
   aObj[o_phocprk]->SetDim(ph[q].nPRk, 2);
 
@@ -449,19 +455,18 @@ void TPhase::dyn_new(int q) {
   //    	aObj[ o_phpxres]->SetDim( 0, 0 );
 
   if (ph[q].PFsuT == S_ON || ph[q].PFsuT == S_REM) {
-    // SCM Modernization: Tier 1 fixed dimension MNST=6
+    // SCM Modernization: Tier 1 fixed dimension MNST=4
     ph[q].SCMC =
         static_cast<char (*)[NSCMC]>(aObj[o_phscmc]->Alloc(MNST, NSCMC, A_));
     ph[q].FsiT = static_cast<float (*)[NFSIT]>(
-        aObj[o_phfsit]->Alloc(ph[q].nSiT, NFSIT, F_));
+        aObj[o_phfsit]->Alloc(NSURFSITE, NFSIT, F_));
+    // aObj[o_phfsit]->Alloc(ph[q].nSiT, NFSIT, F_));
     ph[q].XfIEC =
         static_cast<float (*)[NCIEC]>(aObj[o_phxfiec]->Alloc(MNST, NCIEC, F_));
     ph[q].MASDT =
         static_cast<float (*)[NMSDT]>(aObj[o_phmsdt]->Alloc(MNST, NMSDT, F_));
     ph[q].CapT =
         static_cast<float (*)[NCAZP]>(aObj[o_phcapt]->Alloc(MNST, NCAZP, F_));
-    //        ph[q].SATC =  (char (*)[2]>(aObj[ o_phsatc ]->Alloc( ph[q].nDC, 2,
-    //        A_);
     ph[q].SATC = static_cast<char (*)[MNCAS]>(
         aObj[o_phsatc]->Alloc(ph[q].nDC, MNCAS, A_));
     ph[q].MASDJ = static_cast<float (*)[DNFCN]>(
@@ -561,10 +566,13 @@ void TPhase::dyn_new(int q) {
   }
   if (ph[q].PsDiS == S_ON) {
     ph[q].XSMD = static_cast<char (*)[NSURFSITE]>(
-        aObj[o_phxsmd]->Alloc(ph[q].nDC, NSURFSITE, I_));
+        aObj[o_phxsmd]->Alloc(ph[q].nDC, NSURFSITE, A_));
+    ph[q].FsiT = static_cast<float (*)[NFSIT]>(
+        aObj[o_phfsit]->Alloc(NSURFSITE, NFSIT, F_));
     ph[q].IsoC = static_cast<char *>(aObj[o_phisoc]->Alloc(2, ph[q].nSiT, A_));
   } else {
     ph[q].XSMD = static_cast<char (*)[NSURFSITE]>(aObj[o_phxsmd]->Free());
+    ph[q].FsiT = static_cast<float (*)[NFSIT]>(aObj[o_phfsit]->Free());
     ph[q].IsoC = static_cast<char *>(aObj[o_phisoc]->Free());
   }
   if (ph[q].PrpCon == S_ON) {
@@ -1606,7 +1614,7 @@ bool TPhase::CompressRecord(int nDCused, TCIntArray &DCused,
           static_cast<float *>(aObj[o_phisop]->Alloc(php->nDC, php->nIsoC, F_));
     if (php->PsDiS == S_ON)
       php->XSMD = static_cast<char (*)[NSURFSITE]>(
-          aObj[o_phxsmd]->Alloc(php->nDC, NSURFSITE, I_));
+          aObj[o_phxsmd]->Alloc(php->nDC, NSURFSITE, A_));
     if (php->PumpCon == S_ON)
       php->umpCon = static_cast<float *>(
           aObj[o_phumpcon]->Alloc(php->nDC, php->numpC, F_));
