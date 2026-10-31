@@ -337,7 +337,7 @@ void TMulti::multi_sys_dc() {
 
       if (syp->XSMD && pm.XSMD) {
         for (kk = 0; kk < NSURFSITE; kk++)
-          pm.XSMD[ja][kk] = syp->XSMD[jja][kk];
+          pm.XSMD[ja][kk] = syp->XSMD[jja][kk] - '0';
       }
 
       if (syp->mCDc && pm.mCDc) {
@@ -490,6 +490,14 @@ void TMulti::multi_sys_ph() {
     {
       memcpy(pm.SF2[k], mup->SF[kk], MAXSYMB);
       memcpy(pm.SF2[k] + MAXSYMB, mup->SF[kk] + MAXSYMB + MAXPHSYMB, MAXPHNAME);
+    }
+    if (pm.FIa > 0 && pm.SF3) {
+      int ka = k - (pm.FIs - pm.FIa);
+      if (ka >= 0 && ka < pm.FIa) {
+        memcpy(pm.SF3[ka], mup->SF[kk], MAXSYMB);
+        memcpy(pm.SF3[ka] + MAXSYMB, mup->SF[kk] + MAXSYMB + MAXPHSYMB,
+               MAXPHNAME);
+      }
     }
     if (pm.pNP && pm.pBAL && pm.pKMM > 0)
       goto PARLOAD;
@@ -1044,7 +1052,7 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
       }
       if (pm.XSMD) {
         for (int s = 0; s < NSURFSITE; s++) {
-          pm.XSMD[ja][s] = syp->XSMD[jja][s];
+          pm.XSMD[ja][s] = syp->XSMD[jja][s] - '0';
         }
       }
     }

@@ -434,14 +434,14 @@ void TMulti::ods_link(int) {
   aObj[o_wi_mcdc]->SetDim(pm.Lads, DMCDC);
   aObj[o_wi_isopc]->SetPtr(pm.IsoPc);
   aObj[o_wi_isosc]->SetPtr(pm.IsoSc);
-  aObj[o_wi_fwgts]->SetPtr(pm.FWGTS);
-  aObj[o_wi_fwgts]->SetDim(pm.FIs, 1);
-  aObj[o_wi_lnsact]->SetPtr(pm.lnSACT);
-  aObj[o_wi_lnsact]->SetDim(pm.Ls, 1);
-  aObj[o_wi_lngamf]->SetPtr(pm.lnGammF);
-  aObj[o_wi_lngamf]->SetDim(pm.Ls, 1);
-  aObj[o_wi_cterms]->SetPtr(pm.CTerms);
-  aObj[o_wi_cterms]->SetDim(pm.Ls, 1);
+  aObj[o_w_fwgts]->SetPtr(pm.FWGTS);
+  aObj[o_w_fwgts]->SetDim(pm.FIs, 1);
+  aObj[o_wo_lnsact]->SetPtr(pm.lnSACT);
+  aObj[o_wo_lnsact]->SetDim(pm.Ls, 1);
+  aObj[o_wo_lngamf]->SetPtr(pm.lnGammF);
+  aObj[o_wo_lngamf]->SetDim(pm.Ls, 1);
+  aObj[o_wo_cterms]->SetPtr(pm.CTerms);
+  aObj[o_wo_cterms]->SetDim(pm.Ls, 1);
   aObj[o_wi_isoct]->SetPtr(pm.IsoCt);
   // TKinMet stuff
   aObj[o_wi_lskin]->SetPtr(pm.LsKin);
@@ -658,10 +658,10 @@ void TMulti::dyn_set(int /*q*/) {
   pm.mCDc = (double (*)[DMCDC])aObj[o_wi_mcdc]->GetPtr(); // new 10.10.2026
   pm.IsoPc = (double *)aObj[o_wi_isopc]->GetPtr();
   pm.IsoSc = (double *)aObj[o_wi_isosc]->GetPtr();
-  pm.FWGTS = (double *)aObj[o_wi_fwgts]->GetPtr();
-  pm.lnSACT = (double *)aObj[o_wi_lnsact]->GetPtr();
-  pm.lnGammF = (double *)aObj[o_wi_lngamf]->GetPtr();
-  pm.CTerms = (double *)aObj[o_wi_cterms]->GetPtr();
+  pm.FWGTS = (double *)aObj[o_w_fwgts]->GetPtr();
+  pm.lnSACT = (double *)aObj[o_wo_lnsact]->GetPtr();
+  pm.lnGammF = (double *)aObj[o_wo_lngamf]->GetPtr();
+  pm.CTerms = (double *)aObj[o_wo_cterms]->GetPtr();
   pm.IsoCt = (char *)aObj[o_wi_isoct]->GetPtr();
   // TKinMet stuff
   pm.LsKin = (long int *)aObj[o_wi_lskin]->GetPtr();
@@ -866,10 +866,10 @@ void TMulti::dyn_kill(int /*q*/) {
                 ->Free(); // SCM Modernization: [Lads][DMCDC=4]
   pm.IsoPc = (double *)aObj[o_wi_isopc]->Free();
   pm.IsoSc = (double *)aObj[o_wi_isosc]->Free();
-  pm.FWGTS = (double *)aObj[o_wi_fwgts]->Free();
-  pm.lnSACT = (double *)aObj[o_wi_lnsact]->Free();
-  pm.lnGammF = (double *)aObj[o_wi_lngamf]->Free();
-  pm.CTerms = (double *)aObj[o_wi_cterms]->Free();
+  pm.FWGTS = (double *)aObj[o_w_fwgts]->Free();
+  pm.lnSACT = (double *)aObj[o_wo_lnsact]->Free();
+  pm.lnGammF = (double *)aObj[o_wo_lngamf]->Free();
+  pm.CTerms = (double *)aObj[o_wo_cterms]->Free();
   pm.IsoCt = (char *)aObj[o_wi_isoct]->Free();
   // TKinMet stuff
   pm.LsKin = (long int *)aObj[o_wi_lskin]->Free();
@@ -1221,10 +1221,10 @@ void TMulti::dyn_new(int /*q*/) {
   pm.mCDc = (double (*)[DMCDC])aObj[o_wi_mcdc]->Alloc(pm.Lads, DMCDC, D_);
   // pm.IsoPc   = (double *)aObj[ o_wi_isopc]->Alloc( pm.Fs, 1, D_ );
   // pm.IsoSc   = (double *)aObj[ o_wi_isosc]->Alloc( pm.Fs, 1, D_ );
-  pm.FWGTS = (double *)aObj[o_wi_fwgts]->Alloc(pm.FIs, 1, D_);
-  pm.lnSACT = (double *)aObj[o_wi_lnsact]->Alloc(pm.Ls, 1, D_);
-  pm.lnGammF = (double *)aObj[o_wi_lngamf]->Alloc(pm.Ls, 1, D_);
-  pm.CTerms = (double *)aObj[o_wi_cterms]->Alloc(pm.Ls, 1, D_);
+  pm.FWGTS = (double *)aObj[o_w_fwgts]->Alloc(pm.FIs, 1, D_);
+  pm.lnSACT = (double *)aObj[o_wo_lnsact]->Alloc(pm.Ls, 1, D_);
+  pm.lnGammF = (double *)aObj[o_wo_lngamf]->Alloc(pm.Ls, 1, D_);
+  pm.CTerms = (double *)aObj[o_wo_cterms]->Alloc(pm.Ls, 1, D_);
   // pm.IsoCt   = (char *)aObj[ o_wi_isoct]->Alloc( pm.FIs, 1, A_ );
   //  TKinMet stuff
   pm.LsKin = (long int *)aObj[o_wi_lskin]->Alloc(pm.FI, 6, L_);

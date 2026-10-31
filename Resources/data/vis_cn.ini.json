@@ -1842,14 +1842,6 @@
                         "type": "F_FLOAT"
                     },
                     {
-                        "label": "PHnam2",
-                        "lenth": 20,
-                        "locus": "-t-h",
-                        "maxM": 1,
-                        "maxN": 30,
-                        "type": "F_RECORD"
-                    },
-                    {
                         "label": "PHnam",
                         "lenth": 20,
                         "locus": "+b-h",
@@ -1895,6 +1887,30 @@
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 30,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "PHnam2",
+                        "lenth": 20,
+                        "locus": "+b-h",
+                        "maxM": 1,
+                        "maxN": 20,
+                        "type": "F_RECORD"
+                    },
+                    {
+                        "label": "Xwa",
+                        "lenth": 12,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 20,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "FWGTS",
+                        "lenth": 12,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 20,
                         "type": "F_FLOAT"
                     }
                 ],
@@ -2036,32 +2052,64 @@
                         "type": "F_STRING"
                     },
                     {
-                        "label": "PHnam2",
+                        "label": "PHnam3",
                         "lenth": 20,
                         "locus": "+b-h",
                         "maxM": 1,
-                        "maxN": 30,
+                        "maxN": 10,
                         "type": "F_RECORD"
                     },
                     {
-                        "label": "etaA",
-                        "lenth": 10,
+                        "label": "etaF",
+                        "lenth": 7,
                         "locus": "+t-o",
                         "maxM": 1,
-                        "maxN": 30,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "etaA",
+                        "lenth": 7,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 10,
                         "type": "F_FLOAT"
                     },
                     {
                         "label": "psiA",
-                        "lenth": 10,
+                        "lenth": 7,
                         "locus": "+t-o",
                         "maxM": 1,
-                        "maxN": 30,
+                        "maxN": 10,
                         "type": "F_FLOAT"
                     },
                     {
+                        "label": "capA",
+                        "lenth": 7,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "dlhA",
+                        "lenth": 7,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "PHnam3",
+                        "lenth": 20,
+                        "locus": "+b-h",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_RECORD"
+                    },
+                    {
                         "label": "etaB",
-                        "lenth": 10,
+                        "lenth": 7,
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 30,
@@ -2069,11 +2117,59 @@
                     },
                     {
                         "label": "psiB",
-                        "lenth": 10,
+                        "lenth": 7,
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 30,
                         "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "capB",
+                        "lenth": 7,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "dlhB",
+                        "lenth": 7,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "etaC",
+                        "lenth": 7,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "psiC",
+                        "lenth": 7,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "dlhC",
+                        "lenth": 7,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "PHnam3",
+                        "lenth": 20,
+                        "locus": "+b-h",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_RECORD"
                     },
                     {
                         "label": "etaD",
@@ -2092,7 +2188,23 @@
                         "type": "F_FLOAT"
                     },
                     {
-                        "label": "etaF",
+                        "label": "dlhD",
+                        "lenth": 7,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "locZf",
+                        "lenth": 10,
+                        "locus": "+t-h",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "psiZ",
                         "lenth": 10,
                         "locus": "+t-h",
                         "maxM": 1,
@@ -2100,11 +2212,11 @@
                         "type": "F_FLOAT"
                     },
                     {
-                        "label": "PHnam2",
+                        "label": "PHnam3",
                         "lenth": 20,
                         "locus": "+b+h",
                         "maxM": 1,
-                        "maxN": 30,
+                        "maxN": 10,
                         "type": "F_RECORD"
                     },
                     {
@@ -2112,31 +2224,71 @@
                         "lenth": 3,
                         "locus": "+t-i",
                         "maxM": 1,
-                        "maxN": 30,
+                        "maxN": 10,
                         "type": "F_STRING"
                     },
                     {
-                        "label": "nfsp",
+                        "label": "Xfts",
                         "lenth": 10,
-                        "locus": "+t-i",
+                        "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 30,
                         "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "PHnam3",
+                        "lenth": 20,
+                        "locus": "+b+h",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_RECORD"
                     },
                     {
                         "label": "masdt",
                         "lenth": 10,
                         "locus": "+t-i",
                         "maxM": 1,
-                        "maxN": 30,
+                        "maxN": 10,
                         "type": "F_FLOAT"
                     },
                     {
-                        "label": "Xfts",
+                        "label": "PHnam3",
+                        "lenth": 20,
+                        "locus": "+b+h",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_RECORD"
+                    },
+                    {
+                        "label": "nfsp",
                         "lenth": 10,
                         "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "DCnam3",
+                        "lenth": 16,
+                        "locus": "+b-h",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_RECORD"
+                    },
+                    {
+                        "label": "DCC3",
+                        "lenth": "vDCC",
+                        "locus": "-t-i",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_CHECKBOX"
+                    },
+                    {
+                        "label": "lnSAT",
+                        "lenth": 8,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 30,
                         "type": "F_FLOAT"
                     },
                     {
@@ -2180,11 +2332,83 @@
                         "type": "F_FLOAT"
                     },
                     {
-                        "label": "lnSAT",
-                        "lenth": 12,
+                        "label": "DCnam3",
+                        "lenth": 16,
+                        "locus": "+b-h",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_RECORD"
+                    },
+                    {
+                        "label": "DCC3",
+                        "lenth": "vDCC",
+                        "locus": "-t-i",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_CHECKBOX"
+                    },
+                    {
+                        "label": "mCDc",
+                        "lenth": 7,
+                        "locus": "+t-i",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "xSMd",
+                        "lenth": 7,
+                        "locus": "+t-i",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_NUM"
+                    },
+                    {
+                        "label": "DCnam2",
+                        "lenth": 16,
+                        "locus": "+b-h",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_RECORD"
+                    },
+                    {
+                        "label": "CTerms",
+                        "lenth": 8,
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 30,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "lnSACT",
+                        "lenth": 8,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "lnGamF",
+                        "lenth": 8,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "Xwa",
+                        "lenth": 12,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 20,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "FWGTS",
+                        "lenth": 12,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 20,
                         "type": "F_FLOAT"
                     }
                 ],
@@ -4361,7 +4585,7 @@
                     {
                         "label": "PHnam2",
                         "lenth": 20,
-                        "locus": "+n-h",
+                        "locus": "+b-h",
                         "maxM": 1,
                         "maxN": 20,
                         "type": "F_RECORD"
@@ -4947,46 +5171,6 @@
                         "type": "F_STRING"
                     },
                     {
-                        "label": "SCM_C",
-                        "lenth": "_phSCM",
-                        "locus": "+b+i",
-                        "maxM": 1,
-                        "maxN": 3,
-                        "type": "F_CHECKBOX"
-                    },
-                    {
-                        "label": "MsDt",
-                        "lenth": 6,
-                        "locus": "+t+i",
-                        "maxM": 1,
-                        "maxN": 6,
-                        "type": "F_FLOAT"
-                    },
-                    {
-                        "label": "Cap_t",
-                        "lenth": 6,
-                        "locus": "+t+i",
-                        "maxM": 1,
-                        "maxN": 6,
-                        "type": "F_FLOAT"
-                    },
-                    {
-                        "label": "XfIEC",
-                        "lenth": 6,
-                        "locus": "+t+i",
-                        "maxM": 1,
-                        "maxN": 6,
-                        "type": "F_FLOAT"
-                    },
-                    {
-                        "label": "FSI_t",
-                        "lenth": 6,
-                        "locus": "+b+i",
-                        "maxM": 1,
-                        "maxN": 8,
-                        "type": "F_FLOAT"
-                    },
-                    {
                         "label": "ixsolv",
                         "lenth": 6,
                         "locus": "+n?w",
@@ -5118,54 +5302,6 @@
                         "maxM": 1,
                         "maxN": 30,
                         "type": "F_STRING"
-                    },
-                    {
-                        "label": "SAT_C",
-                        "lenth": "_phSAT",
-                        "locus": "+t+i",
-                        "maxM": 4,
-                        "maxN": 30,
-                        "type": "F_CHECKBOX"
-                    },
-                    {
-                        "label": "xSmD",
-                        "lenth": 3,
-                        "locus": "+t+i",
-                        "maxM": 8,
-                        "maxN": 30,
-                        "type": "F_STRING"
-                    },
-                    {
-                        "label": "PhDCC",
-                        "lenth": "_phDCC",
-                        "locus": "+b+i",
-                        "maxM": 1,
-                        "maxN": 30,
-                        "type": "F_CHECKBOX"
-                    },
-                    {
-                        "label": "pDC_v_",
-                        "lenth": 26,
-                        "locus": "+t-i",
-                        "maxM": 1,
-                        "maxN": 30,
-                        "type": "F_STRING"
-                    },
-                    {
-                        "label": "CDc",
-                        "lenth": 6,
-                        "locus": "+t+i",
-                        "maxM": 4,
-                        "maxN": 30,
-                        "type": "F_FLOAT"
-                    },
-                    {
-                        "label": "MaSDj",
-                        "lenth": 6,
-                        "locus": "+t+i",
-                        "maxM": 4,
-                        "maxN": 30,
-                        "type": "F_FLOAT"
                     }
                 ],
                 "page": "Page &2"
@@ -5370,6 +5506,30 @@
                         "type": "F_NUM"
                     },
                     {
+                        "label": "PEIpc",
+                        "lenth": "three",
+                        "locus": "+n?i",
+                        "maxM": 6,
+                        "maxN": -1,
+                        "type": "F_CHECKBOX"
+                    },
+                    {
+                        "label": "nEIl",
+                        "lenth": 6,
+                        "locus": "+n?i",
+                        "maxM": 4,
+                        "maxN": -1,
+                        "type": "F_NUM"
+                    },
+                    {
+                        "label": "nIsoC",
+                        "lenth": 6,
+                        "locus": "+n+i",
+                        "maxM": 5,
+                        "maxN": -1,
+                        "type": "F_NUM"
+                    },
+                    {
                         "label": "SCM_C",
                         "lenth": "_phSCM",
                         "locus": "+b+i",
@@ -5426,6 +5586,38 @@
                         "type": "F_STRING"
                     },
                     {
+                        "label": "CDc",
+                        "lenth": 7,
+                        "locus": "+t+i",
+                        "maxM": 4,
+                        "maxN": 30,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "MaSDj",
+                        "lenth": 7,
+                        "locus": "+t+i",
+                        "maxM": 4,
+                        "maxN": 30,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "PhDCC",
+                        "lenth": "_phDCC",
+                        "locus": "+b+i",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_CHECKBOX"
+                    },
+                    {
+                        "label": "pDC_v_",
+                        "lenth": 26,
+                        "locus": "+t-i",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_STRING"
+                    },
+                    {
                         "label": "SAT_C",
                         "lenth": "_phSAT",
                         "locus": "+t+i",
@@ -5442,22 +5634,6 @@
                         "type": "F_STRING"
                     },
                     {
-                        "label": "MaSDj",
-                        "lenth": 6,
-                        "locus": "+t+i",
-                        "maxM": 4,
-                        "maxN": 30,
-                        "type": "F_FLOAT"
-                    },
-                    {
-                        "label": "CDc",
-                        "lenth": 6,
-                        "locus": "+t+i",
-                        "maxM": 4,
-                        "maxN": 30,
-                        "type": "F_FLOAT"
-                    },
-                    {
                         "label": "kin_t",
                         "lenth": "kin_t",
                         "locus": "+b?i",
@@ -5466,33 +5642,9 @@
                         "type": "F_CHECKBOX"
                     },
                     {
-                        "label": "PEIpc",
-                        "lenth": "three",
-                        "locus": "+n?i",
-                        "maxM": 6,
-                        "maxN": -1,
-                        "type": "F_CHECKBOX"
-                    },
-                    {
-                        "label": "nEIl",
-                        "lenth": 6,
-                        "locus": "+b?i",
-                        "maxM": 4,
-                        "maxN": -1,
-                        "type": "F_NUM"
-                    },
-                    {
-                        "label": "nIsoC",
-                        "lenth": 6,
-                        "locus": "+n?i",
-                        "maxM": 5,
-                        "maxN": -1,
-                        "type": "F_NUM"
-                    },
-                    {
                         "label": "Vpor",
                         "lenth": 8,
-                        "locus": "+b+i",
+                        "locus": "+n+i",
                         "maxM": 4,
                         "maxN": -1,
                         "type": "F_FLOAT"
@@ -9056,8 +9208,8 @@
                         "type": "F_STRING"
                     },
                     {
-                        "label": "Ph_v2",
-                        "lenth": 32,
+                        "label": "Ph_v3",
+                        "lenth": 29,
                         "locus": "+b-w",
                         "maxM": 1,
                         "maxN": 10,
@@ -9065,31 +9217,39 @@
                     },
                     {
                         "label": "SCMT_",
-                        "lenth": 3,
-                        "locus": "-t+i",
+                        "lenth": 6,
+                        "locus": "+t+i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_STRING"
                     },
                     {
-                        "label": "Nfsp_",
-                        "lenth": 8,
-                        "locus": "+t+i",
+                        "label": "Ph_v3",
+                        "lenth": 29,
+                        "locus": "+b-w",
                         "maxM": 1,
                         "maxN": 10,
-                        "type": "F_FLOAT"
+                        "type": "F_RECORD"
                     },
                     {
                         "label": "MaSdt_",
-                        "lenth": 8,
+                        "lenth": 6,
                         "locus": "+t+i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
                     },
                     {
+                        "label": "Ph_v3",
+                        "lenth": 29,
+                        "locus": "+b-w",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_RECORD"
+                    },
+                    {
                         "label": "XcapA_",
-                        "lenth": 8,
+                        "lenth": 6,
                         "locus": "+t+i",
                         "maxM": 1,
                         "maxN": 10,
@@ -9097,7 +9257,31 @@
                     },
                     {
                         "label": "XcapB_",
-                        "lenth": 8,
+                        "lenth": 6,
+                        "locus": "+t+i",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "XcapC_",
+                        "lenth": 6,
+                        "locus": "+t+i",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "Ph_v3",
+                        "lenth": 29,
+                        "locus": "+b-w",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_RECORD"
+                    },
+                    {
+                        "label": "LocZf_",
+                        "lenth": 6,
                         "locus": "+t+i",
                         "maxM": 1,
                         "maxN": 10,
@@ -9105,7 +9289,23 @@
                     },
                     {
                         "label": "XfIEC_",
-                        "lenth": 8,
+                        "lenth": 6,
+                        "locus": "+t+i",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "Ph_v3",
+                        "lenth": 29,
+                        "locus": "+b-w",
+                        "maxM": 1,
+                        "maxN": 10,
+                        "type": "F_RECORD"
+                    },
+                    {
+                        "label": "Nfsp_",
+                        "lenth": 6,
                         "locus": "+t+i",
                         "maxM": 1,
                         "maxN": 10,
@@ -9128,12 +9328,12 @@
                         "type": "F_CHECKBOX"
                     },
                     {
-                        "label": "SATC_",
-                        "lenth": 3,
-                        "locus": "-t+i",
+                        "label": "McdC_",
+                        "lenth": 6,
+                        "locus": "+t+i",
                         "maxM": 1,
                         "maxN": 20,
-                        "type": "F_STRING"
+                        "type": "F_FLOAT"
                     },
                     {
                         "label": "MaSdj_",
@@ -9142,6 +9342,30 @@
                         "maxM": 1,
                         "maxN": 20,
                         "type": "F_FLOAT"
+                    },
+                    {
+                        "label": "DC_v3",
+                        "lenth": 29,
+                        "locus": "+b-w",
+                        "maxM": 1,
+                        "maxN": 20,
+                        "type": "F_RECORD"
+                    },
+                    {
+                        "label": "SATC_",
+                        "lenth": 6,
+                        "locus": "-t+i",
+                        "maxM": 1,
+                        "maxN": 20,
+                        "type": "F_STRING"
+                    },
+                    {
+                        "label": "xSMd_",
+                        "lenth": 6,
+                        "locus": "+t+i",
+                        "maxM": 1,
+                        "maxN": 20,
+                        "type": "F_STRING"
                     }
                 ],
                 "page": "&Surfaces"

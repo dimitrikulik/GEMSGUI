@@ -18,6 +18,7 @@
 //-------------------------------------------------------------------
 //
 
+#include "GEMS3K/m_const_base.h"
 #include "m_syseq.h"
 #include "visor.h"
 
@@ -136,6 +137,8 @@ void TSyst::ods_link(int /*q*/) {
   // SCM Modernization: Group 3 Surface species DC parameters
   aObj[o_symasdj]->SetPtr(sy.MASDJ);
   aObj[o_symasdj]->SetDim(mup->Lads, DNFCN); // SCM Modernization: DNFCN=4
+  aObj[o_syxsmd]->SetPtr(sy.XSMD);
+  aObj[o_syxsmd]->SetDim(mup->Lads, NSURFSITES);
   aObj[o_symcdc]->SetPtr(sy.mCDc);
   aObj[o_symcdc]->SetDim(mup->Lads, DMCDC); // SCM Modernization: DMCDC=4
   aObj[o_syaalp]->SetPtr(sy.Aalp);
@@ -216,6 +219,8 @@ void TSyst::dyn_set(int /*q*/) {
   sy.lnGmf = (double *)aObj[o_sylngmf]->GetPtr();
   sy.MASDJ =
       (float (*)[DNFCN])aObj[o_symasdj]->GetPtr(); // SCM Modernization: DNFCN=4
+  sy.XSMD =
+      (char (*)[NSURFSITES])aObj[o_syxsmd]->GetPtr(); // Modified: NSURFSITES=8
   sy.mCDc =
       (float (*)[DMCDC])aObj[o_symcdc]->GetPtr(); // SCM Modernization: DMCDC=4
   sy.Aalp = (double *)aObj[o_syaalp]->GetPtr();
@@ -277,12 +282,9 @@ void TSyst::dyn_kill(int /*q*/) {
   sy.lnGmf = (double *)aObj[o_sylngmf]->Free();
   sy.MASDJ =
       (float (*)[DNFCN])aObj[o_symasdj]->Free(); // SCM Modernization: DNFCN=4
+  sy.XSMD = (char (*)[NSURFSITES])aObj[o_syxsmd]->Free(); // Modified:
   sy.mCDc =
       (float (*)[DMCDC])aObj[o_symcdc]->Free(); // SCM Modernization: DMCDC=4
-  if (sy.XSMD) {
-    delete[] sy.XSMD;
-    sy.XSMD = nullptr;
-  }
   sy.Aalp = (double *)aObj[o_syaalp]->Free();
   sy.Sigm = (double (*)[2])aObj[o_sysigm]->Free();
   sy.Xr0h0 = (double (*)[2])aObj[o_syxr0h0]->Free();
@@ -424,16 +426,17 @@ void TSyst::dyn_new(int /*q*/) {
         mup->Lads, DNFCN, F_); // SCM Modernization: DNFCN=4
     sy.mCDc = (float (*)[DMCDC])aObj[o_symcdc]->Alloc(
         mup->Lads, DMCDC, F_); // SCM Modernization: DMCDC=4
-    if (sy.XSMD)
-      delete[] sy.XSMD;
-    sy.XSMD = (mup->Lads > 0) ? new char[mup->Lads][NSURFSITE]() : nullptr;
+    sy.XSMD =
+        (char (*)[NSURFSITES])aObj[o_syxsmd]->Alloc(mup->Lads, NSURFSITES, A_);
+    // sy.XSMD = (mup->Lads > 0) ? new char[mup->Lads][NSURFSITE]() : nullptr;
   } else {
     sy.MASDJ = (float (*)[DNFCN])aObj[o_symasdj]->Free();
     sy.mCDc = (float (*)[DMCDC])aObj[o_symcdc]->Free();
-    if (sy.XSMD) {
-      delete[] sy.XSMD;
-      sy.XSMD = nullptr;
-    }
+    sy.XSMD = (char (*)[NSURFSITES])aObj[o_syxsmd]->Free();
+    // if (sy.XSMD) {
+    //   delete[] sy.XSMD;
+    //   sy.XSMD = nullptr;
+    // }
   }
 
   if (sy.PlnGf != S_OFF)
@@ -1185,7 +1188,8 @@ void TSyst::unpackData() {
   }
 
   // SCM Modernization: Tier 1, Tier 2, and Tier 3 sorption data
-  // For legacy syseq records, keep the clean modernized definitions from phase_data_load()
+  // For legacy syseq records, keep the clean modernized definitions from
+  // phase_data_load()
   if (!STat->isLegacyScm()) {
     for (i = 0; i < STat->ssp->DM[20]; i++) // pha Phase ON adsorption
     {
@@ -1244,16 +1248,18 @@ void TSyst::unpackData() {
       if (ind < 0 || ind >= mup->Lads)
         continue;
       if (sy.PSATT != S_OFF && sy.SATC && STat->ssp->SATC) {
-        for (int kk = 0; kk < MNCAS; kk++)           // SCM Modernization: MNCAS=4
+        for (int kk = 0; kk < MNCAS; kk++) // SCM Modernization: MNCAS=4
           sy.SATC[ind][kk] = STat->ssp->SATC[i][kk]; // DC SACT codes etc.
       }
       if (sy.PMaSdj != S_OFF) {
         if (sy.MASDJ && STat->ssp->MASDJ) {
           for (int kk = 0; kk < DNFCN; kk++) // SCM Modernization: DNFCN=4
-            sy.MASDJ[ind][kk] = STat->ssp->MASDJ[i][kk]; // DC species parameters
+            sy.MASDJ[ind][kk] =
+                STat->ssp->MASDJ[i][kk]; // DC species parameters
         }
         if (sy.XSMD && STat->ssp->XSMD) {
-          for (int kk = 0; kk < NSURFSITE; kk++) // SCM Modernization: NSURFSITE=8
+          for (int kk = 0; kk < NSURFSITE;
+               kk++) // SCM Modernization: NSURFSITE=8
             sy.XSMD[ind][kk] = STat->ssp->XSMD[i][kk]; // species denticity map
         }
         if (sy.mCDc && STat->ssp->mCDc) {
@@ -1550,7 +1556,7 @@ void TSyst::packData() {
           for (int c = 0; c < NFSIT; c++)
             STat->ssp->Nfsp[i5][j][c] =
                 sy.Nfsp[ka][j][c]; // SCM Modernization:
-                                  // [sy.Fia][NSURFSITES=8][NFSIT=4]
+                                   // [sy.Fia][NSURFSITES=8][NFSIT=4]
         }
       }
       i5++;
@@ -1785,7 +1791,7 @@ void TSyst::packData(TCIntArray PHon, TCIntArray PHoff, TCIntArray DCon,
           for (int c = 0; c < NFSIT; c++)
             STat->ssp->Nfsp[i5][j][c] =
                 sy.Nfsp[ka][j][c]; // SCM Modernization:
-                                  // [sy.Fia][NSURFSITES=8][NFSIT=4]
+                                   // [sy.Fia][NSURFSITES=8][NFSIT=4]
         }
       }
       i5++;

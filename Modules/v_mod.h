@@ -275,6 +275,7 @@ enum param_objects {       // work objects
   o_sylngmf,
   o_syaalp,
   o_symasdj,
+  o_syxsmd,
   o_symcdc,
   o_sysigm,
   o_syxr0h0,
@@ -516,10 +517,10 @@ enum param_objects {       // work objects
   o_wi_mcdc,
   o_wi_isopc,
   o_wi_isosc,
-  o_wi_fwgts, // new, was o_wi_lnscal
-  o_wi_lnsact,
-  o_wi_lngamf,
-  o_wi_cterms,
+  o_w_fwgts, // new, was o_wi_lnscal
+  o_wo_lnsact,
+  o_wo_lngamf,
+  o_wo_cterms,
   o_wi_isoct,
   // TKinMet stuff
   o_wi_lskin,

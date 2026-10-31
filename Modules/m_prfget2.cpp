@@ -538,13 +538,16 @@ void TProfil::ShowDBWindow(const char *objName, int nLine) {
     TCompos::pm->Show(window(), title, false /*true*/);
     break;
   case 'P': // Phase : Ph_v__ or Ph_v2 or Ph_v3 or Phnam or Phnam2 or Phnam3
-    if (strncmp(objName, aObj[o_musf]->GetKeywd(), MAXKEYWD) == 0 ||
-        strncmp(objName, aObj[o_musf2]->GetKeywd(), MAXKEYWD) == 0 ||
-        strncmp(objName, aObj[o_musf3]->GetKeywd(), MAXKEYWD) == 0)
+    if (strncmp(objName, aObj[o_musf3]->GetKeywd(), MAXKEYWD) == 0)
+      s = char_array_to_string(mup->SF[nLine + (mup->Fis - mup->Fia)], PH_RKLEN);
+    else if (strncmp(objName, aObj[o_musf]->GetKeywd(), MAXKEYWD) == 0 ||
+             strncmp(objName, aObj[o_musf2]->GetKeywd(), MAXKEYWD) == 0)
       s = char_array_to_string(mup->SF[nLine], PH_RKLEN);
+    else if (strncmp(objName, aObj[o_wd_sf3]->GetKeywd(), MAXKEYWD) == 0)
+      s = char_array_to_string(
+          mup->SF[pmp->muk[nLine + (pmp->FIs - pmp->FIa)]], PH_RKLEN);
     else if (strncmp(objName, aObj[o_wd_sf]->GetKeywd(), MAXKEYWD) == 0 ||
-             strncmp(objName, aObj[o_wd_sf2]->GetKeywd(), MAXKEYWD) == 0 ||
-             strncmp(objName, aObj[o_wd_sf3]->GetKeywd(), MAXKEYWD) == 0)
+             strncmp(objName, aObj[o_wd_sf2]->GetKeywd(), MAXKEYWD) == 0)
       s = char_array_to_string(mup->SF[pmp->muk[nLine]], PH_RKLEN);
     else
       break;
@@ -1084,14 +1087,22 @@ void TProfil::ShowPhaseWindow(QWidget *par, const char *objName, int nLine) {
   case 'P': // Phase : Ph_v__ or Ph_v2 or Ph_v3 or Phnam or Phnam2 or Phnam3
     xph = nLine;
     xdc = -1;
-    if (strncmp(objName, aObj[o_musf]->GetKeywd(), MAXKEYWD) == 0 ||
-        strncmp(objName, aObj[o_musf2]->GetKeywd(), MAXKEYWD) == 0 ||
-        strncmp(objName, aObj[o_musf3]->GetKeywd(), MAXKEYWD) == 0) {
+    if (strncmp(objName, aObj[o_musf3]->GetKeywd(), MAXKEYWD) == 0) {
+      system = true;
+      xph = nLine + (rmults->GetMU()->Fis - rmults->GetMU()->Fia);
+      phname = char_array_to_string(rmults->GetMU()->SF[xph], PH_RKLEN);
+    } else if (strncmp(objName, aObj[o_musf]->GetKeywd(), MAXKEYWD) == 0 ||
+               strncmp(objName, aObj[o_musf2]->GetKeywd(), MAXKEYWD) == 0) {
       system = true;
       phname = char_array_to_string(rmults->GetMU()->SF[xph], PH_RKLEN);
+    } else if (strncmp(objName, aObj[o_wd_sf3]->GetKeywd(), MAXKEYWD) == 0) {
+      system = false;
+      xph = nLine + (multi_internal->GetPM()->FIs -
+                     multi_internal->GetPM()->FIa);
+      phname = char_array_to_string(multi_internal->GetPM()->SF[xph],
+                                    MAXSYMB + MAXPHNAME);
     } else if (strncmp(objName, aObj[o_wd_sf]->GetKeywd(), MAXKEYWD) == 0 ||
-               strncmp(objName, aObj[o_wd_sf2]->GetKeywd(), MAXKEYWD) == 0 ||
-               strncmp(objName, aObj[o_wd_sf3]->GetKeywd(), MAXKEYWD) == 0) {
+               strncmp(objName, aObj[o_wd_sf2]->GetKeywd(), MAXKEYWD) == 0) {
       system = false;
       phname = char_array_to_string(multi_internal->GetPM()->SF[xph],
                                     MAXSYMB + MAXPHNAME);
