@@ -152,8 +152,11 @@ typedef struct {         /* Packed system state description */
   /* SCM Modernization: Group 2 Surface site types
    * [sy.Fia][NSURFSITES=8][NFSIT=4] */
   float (*Nfsp)[NSURFSITES]
-               [NFSIT]; // SCM Modernization: Site densities, capacities, and
-                        // patch index [sy.Fia][NSURFSITES=8][NFSIT=4]
+               [NFSIT]; // SCM Modernization:[sy.Fia][NSURFSITES=8][NFSIT=4]
+                        /// | Density of sites of this site type, 1/nm2
+                        /// | Capacity of sites of this type, mol/(kg sorbent)
+                        /// | Index of surface type owning this site type
+                        /// | Reserved input property of this site type
 
   /* SCM Modernization: Group 1 Phase parameters [sy.Fia][MNST=6] */
   char (*SCMC)[MNST][NSCMC];   // SCM Modernization: Classifier of EIL models &
@@ -173,7 +176,7 @@ typedef struct {         /* Packed system state description */
                         // potential (fraction of Debye length) [sy.Fia][MNST]
   float (
       *XfIEC)[MNST][NCIEC]; // SCM Modernization: Permanent charge density
-                            // (1/nm2) and IEC (meq/g) [sy.Fia][MNST=6][NCIEC=2]
+                            // (1/nm2) and IEC (eq/kg) [sy.Fia][MNST=6][NCIEC=2]
   float (
       *Xlam)[MNST]; // Factor of discretnes IDL 0 < 1 - in PHASE [sy.Fia][6] */
 

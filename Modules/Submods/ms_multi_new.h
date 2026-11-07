@@ -178,7 +178,7 @@ protected:
   void alloc_PhLin(long int PhLinSum) override;
   void alloc_lPhc(long int lPhcSum) override;
   void alloc_XSMD(long int xSMdSum) override;
-  void alloc_xSMd(long int xSMdSum) override { alloc_XSMD(xSMdSum); }
+  // void alloc_xSMd(long int xSMdSum) override { alloc_XSMD(xSMdSum); }
   void alloc_IsoPc(long int IsoPcSum) override;
   void alloc_IsoSc(long int IsoScSum) override;
   void alloc_IsoCt(long int IsoCtSum) override;

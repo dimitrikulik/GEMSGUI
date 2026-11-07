@@ -192,7 +192,7 @@ typedef struct { // SYSTEM is base to Project (local values)
   // [mu.Fis][NSURFSITES=8][NFSIT=4]
   float (*Nfsp)[NSURFSITES]
                [NFSIT]; // SCM Modernization: Site densities, capacities, and
-                        // patch index [mu.Fis][NSURFSITES=8][NFSIT=4]
+                        // surface patch index [mu.Fis][NSURFSITES=8][NFSIT=4]
 
   // SCM Modernization: Group 1 Surface types / patches [mu.Fis][MNST=6]
   float (*MASDT)[MNST][NMSDT]; // SCM Modernization: Area fraction and patch
@@ -209,7 +209,7 @@ typedef struct { // SYSTEM is base to Project (local values)
                         // potential (fraction of Debye length) [mu.Fis][MNST]
   float (
       *XfIEC)[MNST][NCIEC]; // SCM Modernization: Permanent charge density
-                            // (1/nm2) and IEC (meq/g) [mu.Fis][MNST=6][NCIEC=2]
+                            // (1/nm2) and IEC (eq/kg) [mu.Fis][MNST=6][NCIEC=2]
   float (
       *Xlam)[MNST]; // Factor of discretnes IDL 0 < 1 - in PHASE  [mu.Fis][MNST]
   char (*SCMC)[MNST][NSCMC]; // SCM Modernization: Classifier of EIL models &

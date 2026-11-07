@@ -251,8 +251,7 @@ typedef struct {        // Description of PHASE record (old part)
                          /// fraction of surface type in sorbent surface area;
                          /// [i][1] Tournassat parameter A1 for clay edge_
                          /// [i][2] Tournassat parameter A2 for clay edge_
-                         /// [i][3] Tournassat parameter A3 for clay edge"
-#define MSDT MASDT
+                         /// [i][3] Tournassat parameter A3 for clay edge
   float (*CapT)
       [NCAZP]; /// EIL capacitance densities & f_zeta [MNST=4][NCAZP=4]
                /// [i][0] C1 - inner EIL capacitance density parameter, F/m2
@@ -269,11 +268,11 @@ typedef struct {        // Description of PHASE record (old part)
   // Tier 2: input data per surface site type
   // Data in nSiT rows for surface site types from 0 to 7, all surf species
   // related to given site(s) must link to the same surface type (patch)
-  float (
-      *FsiT)[NFSIT]; /// [nSiT=8][NFSIT] | Density of sites of this site type,
-                     /// 1/nm2 | Capacity of sites of this type, mol/(kg
-                     /// sorbent) | Index of surface type owning (linked to)
-                     /// this site type | Reserved input property of site type
+  float (*FsiT)[NFSIT]; /// [nSiT=8][NFSIT]
+                        /// | Density of sites of this site type, 1/nm2
+                        /// | Capacity of sites of this type, mol/(kg sorbent)
+                        /// | Index of surface type owning this site type
+                        /// | Reserved input property of this site type
 
   // Tier 3: input data per surface phase DCs (species)
   // Data for surface species (protolysis, surf complexes, exchange ions)

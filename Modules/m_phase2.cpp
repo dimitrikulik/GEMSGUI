@@ -795,8 +795,8 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
 
   memset(dcn, 0, MAXRKEYLEN);
   float Masdj0 = 1.f; // fraction of surface type 0?
-  if (php->MSDT && !approximatelyZero(php->MSDT[0][MSDT_FSUTSA])) {
-    Masdj0 = php->MSDT[0][MSDT_FSUTSA];
+  if (php->MASDT && !approximatelyZero(php->MASDT[0][MSDT_FSUTSA])) {
+    Masdj0 = php->MASDT[0][MSDT_FSUTSA];
   }
   for (i = 0; i < php->nDC; i++) { /*Get key */
     memcpy(dcn, php->SM[i], DC_RKLEN);
@@ -919,26 +919,26 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
         // in mCDc
         if (!(php->DCC[i] == DC_SUR_CARRIER || php->DCC[i] == DC_SUR_MINAL ||
               php->DCC[i] == DC_PEL_CARRIER)) {
-          php->MASDJ[i][PI_DEN] = Masdj0;
-          php->MASDJ[i][PI_P1] = Fi;
-          php->MASDJ[i][PI_P2] = cN;
-          php->MASDJ[i][PI_P3] = 0.0f;
-          if (php->mCDc) {
-            php->mCDc[i][0] = a0;
-            php->mCDc[i][1] = bp;
-            php->mCDc[i][2] = 0.0f;
-            php->mCDc[i][3] = Z;
-          }
+          /*   php->MASDJ[i][PI_DEN] = Masdj0;  // Temporarily disabled
+             php->MASDJ[i][PI_P1] = Fi;
+             php->MASDJ[i][PI_P2] = cN;
+             php->MASDJ[i][PI_P3] = 0.0f;
+             if (php->mCDc) {
+               php->mCDc[i][0] = a0;
+               php->mCDc[i][1] = bp;
+               php->mCDc[i][2] = 0.0f;
+               php->mCDc[i][3] = Z;
+             } */
         } else { //  Sorbent has no data for surface charges
-          php->MASDJ[i][PI_DEN] = 0.0f;
-          php->MASDJ[i][PI_P1] = 0.0f;
-          php->MASDJ[i][PI_P2] = 0.0f;
-          php->MASDJ[i][PI_P3] = 0.0f;
+          php->MASDJ[i][PI_DEN] = FLOAT_EMPTY;
+          php->MASDJ[i][PI_P1] = FLOAT_EMPTY;
+          php->MASDJ[i][PI_P2] = FLOAT_EMPTY;
+          php->MASDJ[i][PI_P3] = FLOAT_EMPTY;
           if (php->mCDc) {
-            php->mCDc[i][0] = 0.0f;
-            php->mCDc[i][1] = 0.0f;
-            php->mCDc[i][2] = 0.0f;
-            php->mCDc[i][3] = 0.0f;
+            php->mCDc[i][0] = FLOAT_EMPTY;
+            php->mCDc[i][1] = FLOAT_EMPTY;
+            php->mCDc[i][2] = FLOAT_EMPTY;
+            php->mCDc[i][3] = FLOAT_EMPTY;
           }
         }
       }
@@ -1296,41 +1296,83 @@ void TPhase::AssemblePhase(const std::string &key, const char *part,
     php->NsuT = MNST;
     for (i = 0; i < php->NsuT; i++) {
       if (!php->SCMC[i][SCMC_EILM_CODE] ||
-          php->SCMC[i][SCMC_EILM_CODE] == A_NUL) {
+          php->SCMC[i][SCMC_EILM_CODE] == A_NUL ||
+          php->SCMC[i][SCMC_EILM_CODE] == CHAR_EMPTY) {
         if (i == 0) {
-          char scm = php->sol_t[MIX_TYP];
-          if (scm == 'B')
-            scm = SC_BSM;
-          else if (scm == 'M')
-            scm = SC_3LM;
-          else if (scm == 'E')
-            scm = SC_4LM;
-          else if (scm == ' ' || scm == '\0')
-            scm = SC_UNUSED;
-          php->SCMC[0][SCMC_EILM_CODE] = scm;
+          //        char scm = php->sol_t[MIX_TYP];
+          //        if (scm == 'B')
+          //          scm = SC_BSM;
+          //        else if (scm == 'M')
+          //          scm = SC_3LM;
+          //        else if (scm == 'E')
+          //          scm = SC_4LM;
+          //        else if (scm == ' ' || scm == '\0')
+          //          scm = SC_UNUSED;
+          php->SCMC[i][SCMC_EILM_CODE] = SC_TLM;
         } else {
-          php->SCMC[i][SCMC_EILM_CODE] = SC_UNUSED;
+          php->SCMC[i][SCMC_EILM_CODE] = SC_NOT_USED;
         }
       }
       if (!php->SCMC[i][SCMC_SACT_CODE] ||
-          php->SCMC[i][SCMC_SACT_CODE] == A_NUL)
-        php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_NCOMP; /* Default! */
-      if (approximatelyZero(php->MSDT[i][MSDT_FSUTSA]))
-        php->MSDT[i][MSDT_FSUTSA] = 1.0f / php->NsuT; //  aPa->pa.p.DNS;
-      if (approximatelyZero(php->MSDT[i][MSDT_TCE_PA1]))
-        php->MSDT[i][MSDT_TCE_PA1] = 1.1f; // 0.6022f; /* 1/nm2; = 1 mkmol/m2 */
-      if (approximatelyZero(php->MSDT[i][MSDT_TCE_PA2]))
-        php->MSDT[i][MSDT_TCE_PA2] = 11.0f;
-      if (approximatelyZero(php->MSDT[i][MSDT_TCE_PA3]))
-        php->MSDT[i][MSDT_TCE_PA3] = -0.02f;
-      if (approximatelyZero(php->CapT[i][EIL_CAPDA]))
-        php->CapT[i][EIL_CAPDA] = 1.0f; /* A plane, in F/m2 */
-      if (approximatelyZero(php->CapT[i][EIL_CAPDB]))
-        php->CapT[i][EIL_CAPDB] = 0.2f; /* B plane */
-      if (approximatelyZero(php->CapT[i][EIL_CAPDC]))
-        php->CapT[i][EIL_CAPDC] = 0.2f; /* Cplane */
-      if (approximatelyZero(php->CapT[i][EIL_SLPLF]))
-        php->CapT[i][EIL_SLPLF] = 0.5f; /* Slip plane location */
+          php->SCMC[i][SCMC_SACT_CODE] == A_NUL ||
+          php->SCMC[i][SCMC_SACT_CODE] == CHAR_EMPTY)
+        php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_COMP; /* Default! */
+
+      if (approximatelyZero(php->MASDT[i][MSDT_FSUTSA]))
+        php->MASDT[i][MSDT_FSUTSA] = 1.0f; // / php->NsuT;
+
+      if (php->SCMC[i][SCMC_EILM_CODE] == SC_TCE) {
+        // SC_TCE = 'E', Tournassat 2013, 2016 param defaults
+        if (approximatelyZero(php->MASDT[i][MSDT_TCE_PA1]))
+          php->MASDT[i][MSDT_TCE_PA1] = 1.1f;
+        if (approximatelyZero(php->MASDT[i][MSDT_TCE_PA2]))
+          php->MASDT[i][MSDT_TCE_PA2] = 11.0f;
+        if (approximatelyZero(php->MASDT[i][MSDT_TCE_PA3]))
+          php->MASDT[i][MSDT_TCE_PA3] = -0.02f;
+      } else {
+        php->MASDT[i][MSDT_TCE_PA1] = FLOAT_EMPTY;
+        php->MASDT[i][MSDT_TCE_PA2] = FLOAT_EMPTY;
+        php->MASDT[i][MSDT_TCE_PA3] = FLOAT_EMPTY;
+      }
+      // Setting default EIL layer capacitances in F/m2 and slip plane location
+      // in fraction of Debye length
+      switch (php->SCMC[i][SCMC_EILM_CODE]) {
+      case SC_4LM: // = '4', Four-layer model
+        if (approximatelyZero(php->CapT[i][EIL_CAPDC]))
+          php->CapT[i][EIL_CAPDC] = 0.2f; /* C plane */
+      case SC_3LM: // = '3', Three-layer EIL model for CD-MUSIC
+      case SC_TLM: // = 'T', Triple-layer model
+        if (approximatelyZero(php->CapT[i][EIL_CAPDB]))
+          php->CapT[i][EIL_CAPDB] = 0.2f; /* B plane */
+      case SC_BSM:                        // = 'S', Basic Stern model
+      case SC_CCM:                        // = 'C', Constant-capacitance model
+        if (approximatelyZero(php->CapT[i][EIL_CAPDA]))
+          php->CapT[i][EIL_CAPDA] = 1.0f; /* A plane */
+        if (approximatelyZero(php->CapT[i][EIL_SLPLF]))
+          php->CapT[i][EIL_SLPLF] =
+              0.5f; // Slip plane location counted from d-plane
+        break;
+      case SC_TCE: // = 'E', Tournassat EIL for clay edge zero plane potential
+        if (approximatelyZero(php->CapT[i][EIL_CAPDB]))
+          php->CapT[i][EIL_CAPDB] = 0.2f; /* B plane */
+        if (approximatelyZero(php->CapT[i][EIL_CAPDA]))
+          php->CapT[i][EIL_CAPDA] = 1.0f; /* A plane */
+        if (approximatelyZero(php->CapT[i][EIL_SLPLF]))
+          php->CapT[i][EIL_SLPLF] =
+              1.0; // Slip plane location counted from A (0) plane
+        break;
+      case SC_DDL:
+        if (approximatelyZero(php->CapT[i][EIL_SLPLF]))
+          php->CapT[i][EIL_SLPLF] =
+              1.0f; // Slip plane location counted from A (0) plane
+      default:
+        // Set all parameters to empty values for NEM etc.
+        php->CapT[i][EIL_CAPDA] = FLOAT_EMPTY;
+        php->CapT[i][EIL_CAPDB] = FLOAT_EMPTY;
+        php->CapT[i][EIL_CAPDC] = FLOAT_EMPTY;
+        php->CapT[i][EIL_SLPLF] = FLOAT_EMPTY;
+        break;
+      }
     }
 
     for (i = 0; i < php->nDC;

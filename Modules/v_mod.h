@@ -108,7 +108,8 @@ const int SCMC_EILM_CODE = 0, SCMC_SACT_CODE = 1,
     MSDT_FSUTSA = 0, MSDT_TCE_PA1 = 1, MSDT_TCE_PA2 = 2, MSDT_TCE_PA3 = 3,
           CAPT_A_CAPD = 0, CAPT_B_CAPD = 1, CAPT_C_CAPD = 2, CAPT_F_ZETA = 3,
           // New: column index in FsiT array (rows for site types)
-    FSIT_S_DENSITY = 0, FSIT_S_CAPACITY = 1;
+    FSIT_S_DENSITY = 0, FSIT_S_CAPACITY = 1, FSIT_S_SURTYPE = 2,
+          FSIT_S_RESERVE = 3;
 #else
 const int MAXPARAMKEY = 24, NNCAZP = 4, NNMSDT = 4, NSURFSITE = 8;
 #endif
@@ -396,6 +397,7 @@ enum param_objects {       // work objects
   o_wo_xdlb,
   o_wo_xdlc,
   o_wo_xdld,
+  o_wo_xdlz,
   o_wo_psia,
   o_wo_psib,
   o_wo_psic,

@@ -726,7 +726,7 @@ void TPhase::set_def(int q) {
   ph[q].SCMC = nullptr;
   ph[q].FsiT = nullptr;
   ph[q].XfIEC = nullptr;
-  ph[q].MSDT = nullptr;
+  ph[q].MASDT = nullptr;
   ph[q].CapT = nullptr;
   ph[q].SATC = nullptr;
   ph[q].MaSdj = nullptr;
@@ -1129,27 +1129,28 @@ AGAIN_SETUP:
         php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_NCOMP;
       }
 
-      if (approximatelyZero(php->MASDT[i][MSDT_FSUTSA]))
+      if (IsFloatEmpty(php->MASDT[i][MSDT_FSUTSA]) ||
+          approximatelyZero(php->MASDT[i][MSDT_FSUTSA]))
         php->MASDT[i][MSDT_FSUTSA] = 1.0f / php->NsuT;
-      if (approximatelyZero(php->MASDT[i][MSDT_TCE_PA1]))
+      if (IsFloatEmpty(php->MASDT[i][MSDT_TCE_PA1]))
         php->MASDT[i][MSDT_TCE_PA1] = 1.4f;
-      if (approximatelyZero(php->MASDT[i][MSDT_TCE_PA2]))
+      if (IsFloatEmpty(php->MASDT[i][MSDT_TCE_PA2]))
         php->MASDT[i][MSDT_TCE_PA2] = 11.0f;
-      if (approximatelyZero(php->MASDT[i][MSDT_TCE_PA3]))
+      if (IsFloatEmpty(php->MASDT[i][MSDT_TCE_PA3]))
         php->MASDT[i][MSDT_TCE_PA3] = -0.02f;
 
-      if (approximatelyZero(php->CapT[i][EIL_CAPDA]))
+      if (IsFloatEmpty(php->CapT[i][EIL_CAPDA]))
         php->CapT[i][EIL_CAPDA] = 1.0f; // C1 inner capacitance if F/m2
-      if (approximatelyZero(php->CapT[i][EIL_CAPDB]))
+      if (IsFloatEmpty(php->CapT[i][EIL_CAPDB]))
         php->CapT[i][EIL_CAPDB] = 0.2f; // C2 outer capacitance
-      if (approximatelyZero(php->CapT[i][EIL_CAPDC]))
+      if (IsFloatEmpty(php->CapT[i][EIL_CAPDC]))
         php->CapT[i][EIL_CAPDC] = 0.2f; // C3 outer capacitance
-      if (approximatelyZero(php->CapT[i][EIL_SLPLF]))
+      if (IsFloatEmpty(php->CapT[i][EIL_SLPLF]))
         php->CapT[i][EIL_SLPLF] = 0.5f; // fraction of Debye length to locate
                                         // the slip plane for zeta potential
       if (php->XfIEC) { // SCM Modernization: 2D XfIEC[NsuT][NCIEC]
         for (int c = 0; c < NCIEC; c++) {
-          if (approximatelyZero(php->XfIEC[i][c]))
+          if (php->XfIEC[i][c] == FLOAT_EMPTY)
             php->XfIEC[i][c] = 0.0f;
         }
       }

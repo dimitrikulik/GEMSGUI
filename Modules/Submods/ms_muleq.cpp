@@ -382,6 +382,8 @@ void TMulti::EqstatExpand( /*const char *key,*/ bool calcActivityModels/*, bool 
         CalculateActivityCoefficients( LINK_TP_MODE );
        // Computing DQF, FugPure and G wherever necessary; Activity coeffs are restored from lnGmo
         //   pmp->FitVar[3]=FitVar3;  // Debugging
+        CalculateActivityCoefficients( LINK_UX_MODE );
+
         if(pmp->E && pmp->LO && pmp->Lads )  // Calling this only when sorption models are present
         {
             jb = 0;
@@ -397,9 +399,7 @@ void TMulti::EqstatExpand( /*const char *key,*/ bool calcActivityModels/*, bool 
 		       GouyChapman( jb, je, k );
                }
             }
-            //CalculateActivityCoefficients( LINK_UX_MODE );
         }
-        CalculateActivityCoefficients( LINK_UX_MODE );
       }
       else
       {   double  LnGam = 0.;

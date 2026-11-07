@@ -20,6 +20,8 @@
 //-------------------------------------------------------------------
 //
 
+#include "GEMS3K/m_const_base.h"
+#include "GEMS3K/v_detail.h"
 #include "m_param.h"
 #include "s_formula.h"
 #include "v_mod.h"
@@ -73,7 +75,7 @@ void TMulti::MultiSystemInit() {
     pm.E = 0;
 
   if (syp->NsTm > 0 && syp->PNfsp != S_OFF)
-    pm.FIat = MNST; // SCM Modernization: MNST=6
+    pm.FIat = MNST; // SCM Modernization: MNST=4
   else
     pm.FIat = 0;
 
@@ -161,7 +163,7 @@ void TMulti::SystemToLookup() {
 }
 
 // Load data for DC from Modelling Project definition to MULTI structure
-//
+// (runs before data for phases are copied to MULTI)
 void TMulti::multi_sys_dc() {
   int j, ii, L, iZ = 0;
   short jj, jja, ja, kk;
@@ -322,7 +324,7 @@ void TMulti::multi_sys_dc() {
     if (!(j < pm.Ls && j >= pm.Ls - pm.Lads))
       continue; // the following is not done for non-surface species
 
-    if (!pm.SATC || !pm.MASDJ || pm.Lads <= 0)
+    if (!pm.SATX || !pm.MASDJ || pm.Lads <= 0)
       continue;
 
     ja = (j - (pm.Ls - pm.Lads));
@@ -348,72 +350,81 @@ void TMulti::multi_sys_dc() {
             pm.mCDc[ja][kk] = 0.0;
       }
     }
-    if (syp->PSATT !=
-        S_OFF) { // Loading SATC - codes of methods for SAT calculation
+    if (syp->PSATT != S_OFF) { // Loading codes of isotherms & SACT calculation
       pm.SATT[ja] = syp->SATC[jja][SURSP_INDIV_SACT_CODE];
 
-      // Loading allocation to surface types
-      switch (syp->SATC[jja][SURSP_ALLOC_SURFTYPE]) {
-      default:
-      case CST_0:
-        pm.SATC[ja][XL_ST] = 0;
-        break;
-      case CST_1:
-        pm.SATC[ja][XL_ST] = 1;
-        break;
-      case CST_2:
-        pm.SATC[ja][XL_ST] = 2;
-        break;
-      case CST_3:
-        pm.SATC[ja][XL_ST] = 3;
-        break;
-      case CST_4:
-        pm.SATC[ja][XL_ST] = 4;
-        break;
-      case CST_5:
-        pm.SATC[ja][XL_ST] = 5;
-        break;
-      }
+      // Loading allocation index to surface types
+      // (from char syp->SATC to intpm.SATX)
+      if (syp->SATC[jja][SURSP_ALLOC_SURFTYPE] != CHAR_EMPTY) // '`'
+        pm.SATX[ja][XL_ST] = syp->SATC[jja][SURSP_ALLOC_SURFTYPE] - '0';
+      // conversion from char digit to int: ASCII '0'..'9' -> 0..9
+      else
+        pm.SATX[ja][XL_ST] = -1; // -1 error: no index to surface type
+                                 // default for error: 0 (main surf.type)?
 
       // Loading allocation to carrier end-members
       switch (syp->SATC[jja][SURSP_ALLOC_SORBENT_EM]) {
       case CCA_0:
-        pm.SATC[ja][XL_EM] = 0;
+        pm.SATX[ja][XL_EM] = 0; // currently not used (TBD)
         break;
       case CCA_1:
-        pm.SATC[ja][XL_EM] = 1;
+        pm.SATX[ja][XL_EM] = 1; // currently not used (TBD)
         break;
       case CCA_2:
-        pm.SATC[ja][XL_EM] = 2;
+        pm.SATX[ja][XL_EM] = 2; // currently not used (TBD)
         break;
       case CCA_3:
-        pm.SATC[ja][XL_EM] = 3;
+        pm.SATX[ja][XL_EM] = 3; // currently not used (TBD)
         break;
       case CCA_4:
-        pm.SATC[ja][XL_EM] = 4;
+        pm.SATX[ja][XL_EM] = 4; // currently not used (TBD)
         break;
       case CCA_5:
-        pm.SATC[ja][XL_EM] = 5;
+        pm.SATX[ja][XL_EM] = 5; // currently not used (TBD)
         break;
       case CCA_VOL:
-        pm.SATC[ja][XL_EM] = -1; // whole sorbent
+        pm.SATX[ja][XL_EM] = -1; // whole sorbent, now the only used option
         break;
       default:
-        pm.SATC[ja][XL_EM] = -2; // main DC of the sorbent
+        pm.SATX[ja][XL_EM] = -2; // main DC of the sorbent - currently not used
         break;
       }
-
-      // SCM Modernization: Loading allocation to surface sites from XSMD
-      pm.SATC[ja][XL_SI] = 0;
+      // SCM Modernization: Number of different bound surface sites from XSMD
+      pm.SATX[ja][XL_SI] = -1;
       if (syp->XSMD) {
-        for (int s = 0; s < NSURFSITE; s++) {
-          if (syp->XSMD[jja][s] > 0) {
-            pm.SATC[ja][XL_SI] = s;
+        int sits = 0;
+        for (int ss = 0; ss < NSURFSITE; ss++) {
+          if (syp->XSMD[jja][ss] > 0) {
+            sits++;
+          }
+        }
+        pm.SATX[ja][XL_SI] = sits;
+      }
+      /*
+            // Checking if all sites bound to this species are on the
+            // same surface type? TBD in phase2.cpp? Denticity?
+            int sst = pm.SATX[ja][XL_ST]; // index of surface type for this
+         species for (int ss = 0; ss < NSURFSITE; ss++) { for (int st = 0; st <
+         NFSIT; st++) {
+                // How to get ka - index of sorption phase among sorption
+         phases?
+                // int ka = 0;  TBD
+                if ((int)syp->Nfsp[ka][ss][FSIT_S_SURTYPE] != sst) {
+                  Error("Multi",
+                        "This species is bound to more than one surface type");
+                }
+              }
+            }
+      */
+      pm.SATX[ja][XL_SP] = -1; // Allocation to farthest EIL plane
+      if (syp->mCDc) {
+        for (int pl = 0; pl < DMCDC; pl++) {
+          if (fabs(syp->mCDc[jja][pl]) > 1e-6) {
+            pm.SATX[ja][XL_SP] = pl;
             break;
           }
         }
       }
-      pm.SATC[ja][XL_SP] = 0; // Obsolete: plane charges now handled via mCDc
     }
   }
 }
@@ -536,8 +547,9 @@ void TMulti::multi_sys_ph() {
     /*
     long int
     *xSKrC,  ///< new: Collected array of aq/gas/sorption species indexes used
-    in activity products (-> += LsKin[k][1]) *ocPRkC; ///< new: Collected array
-    of operation codes for kinetic parallel reaction terms (-> += LsKin[k][0])
+    in activity products (-> += LsKin[k][1]) *ocPRkC; ///< new: Collected
+    array of operation codes for kinetic parallel reaction terms (-> +=
+    LsKin[k][0])
     */
 
     if (kk < mup->Fis &&
@@ -606,9 +618,9 @@ void TMulti::multi_sys_ph() {
       long int
       *LsESmo, ///< new: number of EIL model layers; EIL params per layer; CD
       coefs per DC; reserved  [Fis][4] *LsISmo, ///< new: number of surface
-      sites; isotherm coeffs per site; isotherm coeffs per DC; max.denticity of
-      DC [Fis][4] *xSMd;   ///< new: denticity of surface species per surface
-      site (site allocation) (-> L1[k]*LsISmo[k][3]] )
+      sites; isotherm coeffs per site; isotherm coeffs per DC; max.denticity
+      of DC [Fis][4] *XSMD;   ///< new: denticity of surface species per
+      surface site (site allocation) (-> L1[k]*LsISmo[k][3]] )
       */
     } else // nothing to read in the Phase record
       if (k < pm.FIs) {
@@ -751,8 +763,8 @@ void TMulti::multi_sys_ph() {
         vfMessage(window(), "Inconsistent DC in sorption phase", buf);
       }
     } /* j */
-    if (PMM > 0.) // cannot calculate better before the composition of the phase
-                  // is known
+    if (PMM > 0.)      // cannot calculate better before the composition of the
+                       // phase is known
       PMM /= pm.L1[k]; // DK 28.02.2012
 
     if (pm.PHC[k] == PH_POLYEL || pm.PHC[k] == PH_SORPTION ||
@@ -852,38 +864,38 @@ void TMulti::ph_sur_param(int k /*, int ka, int kk, int kka */) {
       ka >= pm.FIa || kka < 0 || kka >= mup->Fia)
     return; // some problem with dimensions
 
-  // Tier 1: Surface types / patches [MNST=6]
+  // Tier 1: Surface types / patches [MNST=4]
   for (i = 0; i < MNST; i++) {
     if (syp->PNfsp != S_OFF && syp->SCMC) {
       pm.SCMC[ka][i][0] = syp->SCMC[kka][i][0];
       pm.SCMC[ka][i][1] = syp->SCMC[kka][i][1];
     } else {
       pm.SCMC[ka][i][0] = SC_NOT_USED;
-      pm.SCMC[ka][i][1] = '\0';
+      pm.SCMC[ka][i][1] = SACT_INDEF;
     }
 
     if (pm.SCMC[ka][i][0] == SC_NOT_USED ||
-        pm.SCMC[ka][i][0] == '\0') { /* this type surface is not used */
+        pm.SCMC[ka][i][0] == '\0') { /* this surface type is not used */
       pm.SCMC[ka][i][0] = SC_NOT_USED;
-      pm.SCMC[ka][i][1] = '\0';
+      pm.SCMC[ka][i][1] = SACT_INDEF;
       for (int p = 0; p < NMSDT; p++)
-        pm.MASDT[ka][i][p] = 0.0;
-      pm.XcapA[ka][i] = 0.0;
-      pm.XcapB[ka][i] = 0.0;
-      pm.XcapC[ka][i] = 0.0;
-      pm.XcapZ[ka][i] = 0.0;
-      pm.XcapD[ka][i] = 0.0;
-      pm.XdlA[ka][i] = 0.0;
-      pm.XdlB[ka][i] = 0.0;
-      pm.XdlC[ka][i] = 0.0;
-      pm.XdlD[ka][i] = 0.0;
-      pm.XlamA[ka][i] = 0.0;
+        pm.MASDT[ka][i][p] = DOUBLE_EMPTY;
+      pm.XcapA[ka][i] = DOUBLE_EMPTY;
+      pm.XcapB[ka][i] = DOUBLE_EMPTY;
+      pm.XcapC[ka][i] = DOUBLE_EMPTY;
+      pm.XcapZ[ka][i] = DOUBLE_EMPTY;
+      pm.XcapD[ka][i] = DOUBLE_EMPTY;
+      pm.XdlA[ka][i] = DOUBLE_EMPTY;
+      pm.XdlB[ka][i] = DOUBLE_EMPTY;
+      pm.XdlC[ka][i] = DOUBLE_EMPTY;
+      pm.XdlD[ka][i] = DOUBLE_EMPTY;
+      pm.XlamA[ka][i] = DOUBLE_EMPTY;
       for (int p = 0; p < NCIEC; p++)
-        pm.XfIEC[ka][i][p] = 0.0;
+        pm.XfIEC[ka][i][p] = DOUBLE_EMPTY;
       continue;
     }
 
-    // Tier 1 surface type/patch parameters: MASDT [NMSDT=4]
+    // Tier 1 surface type (patch) parameters: MASDT [NMSDT=4]
     for (int p = 0; p < NMSDT; p++) {
       if (syp->PMaSdt != S_OFF && syp->MASDT &&
           !IsFloatEmpty(syp->MASDT[kka][i][p]))
@@ -950,8 +962,8 @@ void TMulti::ph_sur_param(int k /*, int ka, int kk, int kka */) {
   }
 }
 
-// SCM Modernization: Assigning surface site types to carrier and loading Tier 3
-// species data
+// SCM Modernization: Assigning surface site types to carrier and loading Tier
+// 3 species data
 void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
                                      int car_c, int Cjs) {
   int j, jcl;
@@ -959,7 +971,7 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
   RMULTS *mup = TRMults::sm->GetMU();
   SYSTEM *syp = TSyst::sm->GetSY();
 
-  if (!pm.SATC || !pm.SATT || !pm.MASDJ || pm.Lads <= 0)
+  if (!pm.SATX || !pm.SATT || !pm.MASDJ || pm.Lads <= 0)
     return;
   int ka = k - (pm.FIs - pm.FIa);
   int kk = pm.muk[k];
@@ -984,22 +996,16 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
       switch (syp->SATC[jja][SURSP_ALLOC_SURFTYPE]) {
       default:
       case CST_0:
-        pm.SATC[ja][XL_ST] = 0;
+        pm.SATX[ja][XL_ST] = 0;
         break;
       case CST_1:
-        pm.SATC[ja][XL_ST] = 1;
+        pm.SATX[ja][XL_ST] = 1;
         break;
       case CST_2:
-        pm.SATC[ja][XL_ST] = 2;
+        pm.SATX[ja][XL_ST] = 2;
         break;
       case CST_3:
-        pm.SATC[ja][XL_ST] = 3;
-        break;
-      case CST_4:
-        pm.SATC[ja][XL_ST] = 4;
-        break;
-      case CST_5:
-        pm.SATC[ja][XL_ST] = 5;
+        pm.SATX[ja][XL_ST] = 3;
         break;
       }
 
@@ -1032,21 +1038,21 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
         break;
       }
 
-      pm.SATC[ja][XL_SP] = 0; // Obsolete: plane charges now handled via mCDc
+      pm.SATX[ja][XL_SP] = 0; // Obsolete: plane charges now handled via mCDc
     } else {
       pm.SATT[ja] = SAT_INDEF;
-      pm.SATC[ja][XL_ST] = 0;
+      pm.SATX[ja][XL_ST] = 0;
       jcl = -1;
-      pm.SATC[ja][XL_SP] = 0;
+      pm.SATX[ja][XL_SP] = 0;
     }
 
-    // Tier 3: Loading allocation to surface sites from XSMD (species denticity
-    // map)
-    pm.SATC[ja][XL_SI] = 0;
+    // Tier 3: Loading allocation to surface sites from XSMD (species
+    // denticity map)
+    pm.SATX[ja][XL_SI] = 0;
     if (syp->XSMD) {
       for (int s = 0; s < NSURFSITE; s++) {
         if (syp->XSMD[jja][s] > 0) {
-          pm.SATC[ja][XL_SI] = s;
+          pm.SATX[ja][XL_SI] = s;
           break;
         }
       }
@@ -1082,22 +1088,23 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
 
     // Assigning carrier end-member DC
     if (jcl < car_c && jcl >= 0)
-      pm.SATC[ja][XL_EM] = car_l[jcl];
+      pm.SATX[ja][XL_EM] = car_l[jcl];
     else if (jcl >= car_c || jcl == -1)
-      pm.SATC[ja][XL_EM] = -1; /* whole carrier */
+      pm.SATX[ja][XL_EM] = -1; /* whole carrier */
     else
-      pm.SATC[ja][XL_EM] = Cjs; /* main carrier DC */
+      pm.SATX[ja][XL_EM] = Cjs; /* main carrier DC */
 
-    ist = pm.SATC[ja][XL_ST];
-    isi = pm.SATC[ja][XL_SI];
-    if (pm.D && ist >= 0 && ist < MNST && isi >= 0 && isi < MNST)
-      pm.D[ist][isi] = 0.0; // cleaning the totals for sites
-
-    // Convert surface density from 1/nm2 to mkmol/g using specific surface area
-    // Aalp
-    if (pm.SATT[ja] != SAT_COMP && syp->PAalp != S_OFF && syp->Aalp &&
-        !IsFloatEmpty(syp->Aalp[kk]))
-      pm.MASDJ[ja][PI_DEN] *= syp->Aalp[kk] * 1.66054; /* 1/nm2 to mkmol/g */
+    ist = pm.SATX[ja][XL_ST];
+    isi = pm.SATX[ja][XL_SI];
+    if (pm.D && ist >= 0 && ist < MNST && isi >= 0 && isi < MNST) {
+      pm.D[isi][ist] = 0.0;    // cleaning the totals for sites
+      pm.XFTS[isi][ist] = 0.0; // cleaning the totals for species
+    }
+    // Convert surface density from 1/nm2 to mkmol/g using specific surface
+    // area Aalp   (now obsolete)
+    // if (pm.SATT[ja] != SAT_COMP && syp->PAalp != S_OFF && syp->Aalp &&
+    // !IsFloatEmpty(syp->Aalp[kk]))
+    //   pm.MASDJ[ja][PI_DEN] *= syp->Aalp[kk] * 1.66054; /* 1/nm2 to mkmol/g */
 
     if (approximatelyZero(pm.MASDJ[ja][PI_DEN])) {
       if (pm.SATT[ja] == SAT_NCOMP && ist >= 0 && ist < MNST && ka >= 0 &&
