@@ -42,7 +42,7 @@ TPhase *TPhase::pm;
 
 TPhase::TPhase(uint nrt) : TCModule(nrt) {
   nQ = 1;
-  aFldKeysHelp.push_back("Code of phase state { a g f p l m h s d x i z }");
+  aFldKeysHelp.push_back("Code of phase state { a g f p l m h s d i q x y z }");
   aFldKeysHelp.push_back("Group identifier for such phases (letters, digits)");
   aFldKeysHelp.push_back("Name of this phase definition (letters, digits)");
   aFldKeysHelp.push_back("Phase class { c d l gm ss ssd ls aq xsa xc }");
@@ -1002,7 +1002,7 @@ AGAIN_SETUP:
   // test sizes
   if (php->nscM < 0 || php->npxM < 0 || php->ncpN < 0 || php->ncpM < 0 ||
       php->ncpN * php->ncpM > MAXPNCOEF || php->Nsd < 0 || php->Nsd > 16 ||
-      php->NsuT < 0 || php->NsuT > 6) {
+      php->NsuT < 0 || php->NsuT > 4) {
     if (vfQuestion(window(), GetName(),
                    "W06PHrem: Invalid number of coeffs in the non-ideal "
                    "solution model!\n Repeat (Y) or Cancel (N)?"))
@@ -1097,75 +1097,90 @@ AGAIN_SETUP:
   }
 
   //---------------------------------------------------------------------
-  // old  part
+  // old sorption models part (i.e. not yet TSorpMod) all except PH_ADSORPT
   if (php->NsuT > 0 && (php->PFsuT == S_REM ||
                         php->PFsuT == S_ON)) { /* Setup of default values */
     if (php->PphC != PH_ADSSBEIL && php->PphC != PH_ADSORPT &&
         php->PphC != PH_IONEX && php->PphC != PH_POLYEL) {
       php->PphC = PH_SORPTION;
     }
-    php->NsuT = MNST;
-    php->nCDc = DMCDC;
+    php->NsuT = MNST;  // Here setting fixed number of surf types to MNST=4
+    php->nCDc = DMCDC; // here setting fixed number of EIL planes to DMCDC=4
     for (int i = 0; i < php->NsuT; i++) {
       if (!php->SCMC[i][SCMC_EILM_CODE] ||
           php->SCMC[i][SCMC_EILM_CODE] == A_NUL) {
         if (i == 0) {
           char scm = php->sol_t[MIX_TYP];
-          if (scm == 'B')
-            scm = SC_BSM;
-          else if (scm == 'M')
-            scm = SC_3LM;
-          else if (scm == 'E')
-            scm = SC_4LM;
-          else if (scm == ' ' || scm == '\0')
+          if (scm == MR_SORP_SMB) {
+            // site-mole-balance based SCM (with EIL but without SACT model
+            php->PphC = PH_ADSSBEIL;
+          } else if (scm == MR_SORP_ELEM) {
+            // SCM only in elemental stoichiometry (with EIL and SACT models
+            php->PphC = PH_SORPTION;
+          } else if (scm == '`' || scm == A_NUL || scm == ' ' || scm == '\0') {
             scm = SC_UNUSED;
-          php->SCMC[0][SCMC_EILM_CODE] = scm;
+            php->SCMC[0][SCMC_EILM_CODE] = scm;
+          }
         } else {
           php->SCMC[i][SCMC_EILM_CODE] = SC_UNUSED;
+          // Assuming single surface type & sigle site type SCM
         }
       }
-      if (!php->SCMC[i][SCMC_SACT_CODE] ||
-          php->SCMC[i][SCMC_SACT_CODE] == A_NUL) {
-        php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_NCOMP;
-      }
+      if (php->SCMC[i][SCMC_EILM_CODE] != SC_UNUSED) {
+        // Default settings of the surface complexation model parameters
+        if (php->sol_t[MIX_TYP] == MR_SORP_ELEM) {
+          if (!php->SCMC[i][SCMC_SACT_CODE] ||
+              php->SCMC[i][SCMC_SACT_CODE] == A_NUL) {
+            if (php->PphC == PH_SORPTION || php->PphC == PH_POLYEL)
+              php->SCMC[i][SCMC_SACT_CODE] = SACT_LAN_COMP;
+            else
+              php->SCMC[i][SCMC_SACT_CODE] = SACT_INDEF; // site-balance model
+          } else
+            php->SCMC[i][SCMC_SACT_CODE] = SACT_INDEF;
+        }
 
-      if (IsFloatEmpty(php->MASDT[i][MSDT_FSUTSA]) ||
-          approximatelyZero(php->MASDT[i][MSDT_FSUTSA]))
-        php->MASDT[i][MSDT_FSUTSA] = 1.0f / php->NsuT;
-      if (IsFloatEmpty(php->MASDT[i][MSDT_TCE_PA1]))
-        php->MASDT[i][MSDT_TCE_PA1] = 1.4f;
-      if (IsFloatEmpty(php->MASDT[i][MSDT_TCE_PA2]))
-        php->MASDT[i][MSDT_TCE_PA2] = 11.0f;
-      if (IsFloatEmpty(php->MASDT[i][MSDT_TCE_PA3]))
-        php->MASDT[i][MSDT_TCE_PA3] = -0.02f;
+        if (IsFloatEmpty(php->MASDT[i][MSDT_FSUTSA]) ||
+            approximatelyZero(php->MASDT[i][MSDT_FSUTSA]))
+          php->MASDT[i][MSDT_FSUTSA] = 1.0f;
+        if (IsFloatEmpty(php->MASDT[i][MSDT_TCE_PA1]))
+          php->MASDT[i][MSDT_TCE_PA1] = 0.0f; // 1.4f;
+        // Tournassat 3 parameters can be set only for SC_TCE = 'E' EIL model
+        if (IsFloatEmpty(php->MASDT[i][MSDT_TCE_PA2]))
+          php->MASDT[i][MSDT_TCE_PA2] = 0.0f; // 11.0f;
+        if (IsFloatEmpty(php->MASDT[i][MSDT_TCE_PA3]))
+          php->MASDT[i][MSDT_TCE_PA3] = 0.0f; // -0.02f;
 
-      if (IsFloatEmpty(php->CapT[i][EIL_CAPDA]))
-        php->CapT[i][EIL_CAPDA] = 1.0f; // C1 inner capacitance if F/m2
-      if (IsFloatEmpty(php->CapT[i][EIL_CAPDB]))
-        php->CapT[i][EIL_CAPDB] = 0.2f; // C2 outer capacitance
-      if (IsFloatEmpty(php->CapT[i][EIL_CAPDC]))
-        php->CapT[i][EIL_CAPDC] = 0.2f; // C3 outer capacitance
-      if (IsFloatEmpty(php->CapT[i][EIL_SLPLF]))
-        php->CapT[i][EIL_SLPLF] = 0.5f; // fraction of Debye length to locate
-                                        // the slip plane for zeta potential
-      if (php->XfIEC) { // SCM Modernization: 2D XfIEC[NsuT][NCIEC]
-        for (int c = 0; c < NCIEC; c++) {
-          if (php->XfIEC[i][c] == FLOAT_EMPTY)
-            php->XfIEC[i][c] = 0.0f;
+        if (IsFloatEmpty(php->CapT[i][EIL_CAPDA]))
+          php->CapT[i][EIL_CAPDA] = 1.0f; // C1 inner capacitance if F/m2
+        if (IsFloatEmpty(php->CapT[i][EIL_CAPDB]))
+          php->CapT[i][EIL_CAPDB] = 0.2f; // C2 outer capacitance
+        if (IsFloatEmpty(php->CapT[i][EIL_CAPDC]))
+          php->CapT[i][EIL_CAPDC] = 0.2f; // C3 outer capacitance
+        if (IsFloatEmpty(php->CapT[i][EIL_SLPLF]))
+          php->CapT[i][EIL_SLPLF] = 0.5f; // fraction of Debye length to locate
+                                          // the slip plane for zeta potential
+        if (php->XfIEC) { // SCM Modernization: 2D XfIEC[NsuT][NCIEC]
+          for (int c = 0; c < NCIEC; c++) {
+            if (php->XfIEC[i][c] == FLOAT_EMPTY)
+              php->XfIEC[i][c] = 0.0f;
+          }
         }
       }
     }
-    for (int j = 0; j < php->nDC; j++) {
-      if (php->SATC) {
-        php->SATC[j][SURSP_ALLOC_SURFTYPE] = CST_0; // default - 0 surface type
-        php->SATC[j][SURSP_INDIV_SACT_CODE] =
-            SACT_LAN_COMP; // default Langmuir comp.
-        php->SATC[j][SURSP_ALLOC_SORBENT_EM] =
-            CCA_VOL;                                // default per whole sorbent
-        php->SATC[j][SURSP_COV_DENS_UNITS] = CST_0; // default - 0: 1/nm2
+    if (php->PphC == PH_SORPTION || php->PphC == PH_POLYEL) {
+      for (int j = 0; j < php->nDC; j++) {
+        if (php->SATC) {
+          php->SATC[j][SURSP_ALLOC_SURFTYPE] =
+              CST_0; // default - 0 surface type
+          php->SATC[j][SURSP_INDIV_SACT_CODE] =
+              SACT_LAN_COMP; // default Langmuir comp.
+          php->SATC[j][SURSP_ALLOC_SORBENT_EM] =
+              CCA_VOL; // default per whole sorbent
+          php->SATC[j][SURSP_COV_DENS_UNITS] = SDU_N; // default - 'n': 1/nm2
+        }
       }
+      php->PFsuT = S_ON;
     }
-    php->PFsuT = S_ON;
   }
 
   //---------------------------------------------------------------------

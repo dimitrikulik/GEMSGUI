@@ -173,7 +173,7 @@ BASE_PARAM dfBase[5] = {
         -0.01, /* DGC */ 1.0,       /* GAR */ 1000.,    /* GAH */
         1e-3,  /* GAS */ 12.044,    /* DNS */ 1e-13,    /* XwMin, */
         1e-13, /* ScMin, */ 1e-33,  /* DcMin, */ 1e-20, /* PhMin, */
-        1e-5,  /* ICmin */ 1e-10,   /* EPS */ 5e-3,     /* IEPS */
+        1e-5,  /* ICmin */ 1e-10,   /* EPS */ 1e-3,     /* IEPS */
         1e-10, /* DKIN  */ nullptr,                     /* tprn */
     },
     {

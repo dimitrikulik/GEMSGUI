@@ -339,7 +339,7 @@ typedef struct {        // Description of PHASE record (old part)
   char (*eimPl)[MAXDCNAME]; // new: EIL model CD parameters comment list per DC
                             // [nCDc]
   char (*eimLl)[MAXDCNAME]; // new: EIL model parameters comment list per layer
-                            // [nEIp]
+                            // [nEIp]  provisionally []
                             //
   char *DCC, // DC classes { TESKWL GVCHNI JMFD QPR <0-9>  AB  XYZ O } [nDC]
       *DCS,  // Source of input data for DC { r d } d-DCOMP r-REACT    [nDC]

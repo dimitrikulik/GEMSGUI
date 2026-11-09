@@ -2077,7 +2077,7 @@
                     },
                     {
                         "label": "etaA",
-                        "lenth": 8,
+                        "lenth": 10,
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 10,
@@ -2085,7 +2085,7 @@
                     },
                     {
                         "label": "psiA",
-                        "lenth": 8,
+                        "lenth": 10,
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 10,
@@ -2117,18 +2117,18 @@
                     },
                     {
                         "label": "etaB",
-                        "lenth": 8,
+                        "lenth": 10,
                         "locus": "+t-o",
                         "maxM": 1,
-                        "maxN": 30,
+                        "maxN": 10,
                         "type": "F_FLOAT"
                     },
                     {
                         "label": "psiB",
-                        "lenth": 8,
+                        "lenth": 10,
                         "locus": "+t-o",
                         "maxM": 1,
-                        "maxN": 30,
+                        "maxN": 10,
                         "type": "F_FLOAT"
                     },
                     {
@@ -2157,7 +2157,7 @@
                     },
                     {
                         "label": "etaC",
-                        "lenth": 8,
+                        "lenth": 10,
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 10,
@@ -2165,7 +2165,7 @@
                     },
                     {
                         "label": "psiC",
-                        "lenth": 8,
+                        "lenth": 10,
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 10,
@@ -2197,7 +2197,7 @@
                     },
                     {
                         "label": "etaD",
-                        "lenth": 8,
+                        "lenth": 10,
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 10,
@@ -2205,7 +2205,7 @@
                     },
                     {
                         "label": "psiD",
-                        "lenth": 8,
+                        "lenth": 10,
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 10,
@@ -2237,7 +2237,7 @@
                     },
                     {
                         "label": "psiZ",
-                        "lenth": 8,
+                        "lenth": 10,
                         "locus": "+t-h",
                         "maxM": 1,
                         "maxN": 30,
@@ -2269,11 +2269,11 @@
                     },
                     {
                         "label": "SCM",
-                        "lenth": 3,
+                        "lenth": "_phSCM",
                         "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
-                        "type": "F_STRING"
+                        "type": "F_CHECKBOX"
                     },
                     {
                         "label": "Xfts",
@@ -2340,6 +2340,14 @@
                         "type": "F_FLOAT"
                     },
                     {
+                        "label": "phM",
+                        "lenth": 12,
+                        "locus": "+t-o",
+                        "maxM": 1,
+                        "maxN": 20,
+                        "type": "F_FLOAT"
+                    },
+                    {
                         "label": "DCnam3",
                         "lenth": 16,
                         "locus": "+b-h",
@@ -2357,7 +2365,7 @@
                     },
                     {
                         "label": "lnSAT",
-                        "lenth": 8,
+                        "lenth": 10,
                         "locus": "+t-o",
                         "maxM": 1,
                         "maxN": 30,
@@ -4648,11 +4656,11 @@
                     },
                     {
                         "label": "SCM",
-                        "lenth": 2,
+                        "lenth": "_phSCM",
                         "locus": "+t-h",
                         "maxM": 1,
                         "maxN": 20,
-                        "type": "F_STRING"
+                        "type": "F_CHECKBOX"
                     },
                     {
                         "label": "nfsp",
@@ -8369,16 +8377,16 @@
                     },
                     {
                         "label": "tSCMT",
-                        "lenth": 2,
-                        "locus": "-t+i",
+                        "lenth": "_phSCM",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
-                        "type": "F_STRING"
+                        "type": "F_CHECKBOX"
                     },
                     {
                         "label": "tNfsp",
                         "lenth": 4,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -8386,7 +8394,7 @@
                     {
                         "label": "tMaSdt",
                         "lenth": 4,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -8402,7 +8410,7 @@
                     {
                         "label": "tXcapA",
                         "lenth": 4,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -8410,7 +8418,7 @@
                     {
                         "label": "tXcapB",
                         "lenth": 4,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -8418,7 +8426,7 @@
                     {
                         "label": "tXcapF",
                         "lenth": 4,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -8426,7 +8434,7 @@
                     {
                         "label": "tXlam",
                         "lenth": 4,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -9273,11 +9281,11 @@
                     },
                     {
                         "label": "SCMT_",
-                        "lenth": 6,
-                        "locus": "+t+i",
+                        "lenth": "_phSCM",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
-                        "type": "F_STRING"
+                        "type": "F_CHECKBOX"
                     },
                     {
                         "label": "Ph_v3",
@@ -9290,7 +9298,7 @@
                     {
                         "label": "MaSdt_",
                         "lenth": 6,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -9306,7 +9314,7 @@
                     {
                         "label": "XcapA_",
                         "lenth": 6,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -9314,7 +9322,7 @@
                     {
                         "label": "XcapB_",
                         "lenth": 6,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -9322,7 +9330,7 @@
                     {
                         "label": "XcapC_",
                         "lenth": 6,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -9338,7 +9346,7 @@
                     {
                         "label": "LocZf_",
                         "lenth": 6,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -9346,7 +9354,7 @@
                     {
                         "label": "XfIEC_",
                         "lenth": 6,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -9362,7 +9370,7 @@
                     {
                         "label": "Nfsp_",
                         "lenth": 6,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 10,
                         "type": "F_FLOAT"
@@ -9378,7 +9386,7 @@
                     {
                         "label": "mDCC3",
                         "lenth": "vDCC",
-                        "locus": "-t+i",
+                        "locus": "-t-i",
                         "maxM": 1,
                         "maxN": 20,
                         "type": "F_CHECKBOX"
@@ -9386,7 +9394,7 @@
                     {
                         "label": "McdC_",
                         "lenth": 6,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 20,
                         "type": "F_FLOAT"
@@ -9394,7 +9402,7 @@
                     {
                         "label": "MaSdj_",
                         "lenth": 12,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 20,
                         "type": "F_FLOAT"
@@ -9410,7 +9418,7 @@
                     {
                         "label": "SATC_",
                         "lenth": 6,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 20,
                         "type": "F_STRING"
@@ -9418,7 +9426,7 @@
                     {
                         "label": "xSMd_",
                         "lenth": 6,
-                        "locus": "+t+i",
+                        "locus": "+t-i",
                         "maxM": 1,
                         "maxN": 20,
                         "type": "F_STRING"

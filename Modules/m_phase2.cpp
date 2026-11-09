@@ -462,7 +462,7 @@ void TPhase::Set_KinMet_Phase_coef() {
 }
 
 void TPhase::Set_SorpMod_Phase_coef() {
-  // new
+  // new, TBD for TSorpMod implementation
 }
 
 //--------------------------------------------------------------------------------
