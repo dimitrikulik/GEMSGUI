@@ -59,7 +59,7 @@ void TMulti::MultiSystemInit() {
   pm.LO = syp->Lw /*-1*/;
   pm.PG = syp->Lg;
   pm.PSOL = syp->Lhc;
-  pm.Lads = syp->Lsor;
+  pm.Lads = (syp->Fia > 0) ? syp->Lsor : 0;
   pm.FI = syp->Fi;
   pm.FIs = syp->Fis;
   pm.FIa = syp->Fia; // new
@@ -74,7 +74,7 @@ void TMulti::MultiSystemInit() {
   else
     pm.E = 0;
 
-  if (syp->NsTm > 0 && syp->PNfsp != S_OFF)
+  if (syp->Fia > 0)
     pm.FIat = MNST; // SCM Modernization: MNST=4
   else
     pm.FIat = 0;
@@ -210,7 +210,7 @@ void TMulti::multi_sys_dc() {
       decomp_descr.push_back(TRMults::sm->component_description(jj));
       if (j < syp->Ls)
         memcpy(pm.SM2[j], mup->SM[jj] + MAXSYMB + MAXDRGROUP, MAXDCNAME);
-      if (j < syp->Ls &&
+      if (syp->Fia > 0 && j < syp->Ls &&
           j >= syp->Ls - syp->Lsor) { // assembling DC name list for sorption
                                       // surface species
         ja = (j - (syp->Ls - syp->Lsor));
@@ -338,8 +338,15 @@ void TMulti::multi_sys_dc() {
           pm.MASDJ[ja][kk] = 0.0;
 
       if (syp->XSMD && pm.XSMD) {
-        for (kk = 0; kk < NSURFSITE; kk++)
-          pm.XSMD[ja][kk] = syp->XSMD[jja][kk] - '0';
+        for (kk = 0; kk < NSURFSITE; kk++) {
+          char val = syp->XSMD[jja][kk];
+          if (val >= '1' && val <= '9')
+            pm.XSMD[ja][kk] = val - '0';
+          else if (val >= 1 && val <= 9)
+            pm.XSMD[ja][kk] = val;
+          else
+            pm.XSMD[ja][kk] = 0;
+        }
       }
 
       if (syp->mCDc && pm.mCDc) {
@@ -354,13 +361,39 @@ void TMulti::multi_sys_dc() {
       pm.SATT[ja] = syp->SATC[jja][SURSP_INDIV_SACT_CODE];
 
       // Loading allocation index to surface types
-      // (from char syp->SATC to intpm.SATX)
-      if (syp->SATC[jja][SURSP_ALLOC_SURFTYPE] != CHAR_EMPTY) // '`'
-        pm.SATX[ja][XL_ST] = syp->SATC[jja][SURSP_ALLOC_SURFTYPE] - '0';
-      // conversion from char digit to int: ASCII '0'..'9' -> 0..9
-      else
-        pm.SATX[ja][XL_ST] = -1; // -1 error: no index to surface type
-                                 // default for error: 0 (main surf.type)?
+      // (from char syp->SATC to int pm.SATX)
+      char st_c = syp->SATC[jja][SURSP_ALLOC_SURFTYPE];
+      int st_val = -1;
+      if (st_c >= '0' && st_c <= '9')
+        st_val = st_c - '0';
+      else if (st_c >= 0 && st_c <= 9)
+        st_val = st_c;
+      if (st_val < 0)
+        st_val = 0;
+      // If species binds to a site type via XSMD and Nfsp defines its surface type,
+      // ensure consistency with the site's allocated surface type
+      int ka = 0;
+      if (pm.FIa > 0) {
+        int k_curr = 0, sumL = 0;
+        for (k_curr = 0; k_curr < pm.FIs; k_curr++) {
+          if (j < sumL + pm.L1[k_curr]) break;
+          sumL += pm.L1[k_curr];
+        }
+        ka = k_curr - (pm.FIs - pm.FIa);
+      }
+      if (st_val == 0 && syp->XSMD && syp->Nfsp && ka >= 0 && ka < pm.FIa) {
+        for (int ss = 0; ss < NSURFSITE; ss++) {
+          char val = syp->XSMD[jja][ss];
+          if ((val >= '1' && val <= '9') || (val >= 1 && val <= 9)) {
+            int site_st = (int)syp->Nfsp[ka][ss][FSIT_S_SURTYPE];
+            if (site_st >= 0 && site_st < MNST) {
+              st_val = site_st;
+              break;
+            }
+          }
+        }
+      }
+      pm.SATX[ja][XL_ST] = (st_val >= 0 && st_val < MNST) ? st_val : 0;
 
       // Loading allocation to carrier end-members
       switch (syp->SATC[jja][SURSP_ALLOC_SORBENT_EM]) {
@@ -394,7 +427,8 @@ void TMulti::multi_sys_dc() {
       if (syp->XSMD) {
         int sits = 0;
         for (int ss = 0; ss < NSURFSITE; ss++) {
-          if (syp->XSMD[jja][ss] > 0) {
+          char val = syp->XSMD[jja][ss];
+          if ((val >= '1' && val <= '9') || (val >= 1 && val <= 9)) {
             sits++;
           }
         }
@@ -666,6 +700,8 @@ void TMulti::multi_sys_ph() {
     case PH_SORPTION:
       non_sorption_phase = false;
       ph_sur_param(k);
+      if (pm.LsISmo) pm.LsISmo[k * 4 + 3] = NSURFSITES;
+      if (pm.LsESmo) pm.LsESmo[k * 4 + 2] = DMCDC;
       for (i = 0; i < 32; i++)
         car_l[i] = -1;
       car_c = 0; // cQ=0;
@@ -870,13 +906,14 @@ void TMulti::ph_sur_param(int k /*, int ka, int kk, int kka */) {
       pm.SCMC[ka][i][0] = syp->SCMC[kka][i][0];
       pm.SCMC[ka][i][1] = syp->SCMC[kka][i][1];
     } else {
-      pm.SCMC[ka][i][0] = SC_NOT_USED;
+      pm.SCMC[ka][i][0] = SC_UNUSED;
       pm.SCMC[ka][i][1] = SACT_INDEF;
     }
 
-    if (pm.SCMC[ka][i][0] == SC_NOT_USED ||
+    if (pm.SCMC[ka][i][0] == SC_UNUSED ||
+        pm.SCMC[ka][i][0] == ' ' ||
         pm.SCMC[ka][i][0] == '\0') { /* this surface type is not used */
-      pm.SCMC[ka][i][0] = SC_NOT_USED;
+      pm.SCMC[ka][i][0] = SC_UNUSED;
       pm.SCMC[ka][i][1] = SACT_INDEF;
       for (int p = 0; p < NMSDT; p++)
         pm.MASDT[ka][i][p] = DOUBLE_EMPTY;
@@ -993,21 +1030,27 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
       pm.SATT[ja] = syp->SATC[jja][SURSP_INDIV_SACT_CODE];
 
       // Allocation of surface species to surface type (patch)
-      switch (syp->SATC[jja][SURSP_ALLOC_SURFTYPE]) {
-      default:
-      case CST_0:
-        pm.SATX[ja][XL_ST] = 0;
-        break;
-      case CST_1:
-        pm.SATX[ja][XL_ST] = 1;
-        break;
-      case CST_2:
-        pm.SATX[ja][XL_ST] = 2;
-        break;
-      case CST_3:
-        pm.SATX[ja][XL_ST] = 3;
-        break;
+      char st_c = syp->SATC[jja][SURSP_ALLOC_SURFTYPE];
+      int st_val = -1;
+      if (st_c >= '0' && st_c <= '9')
+        st_val = st_c - '0';
+      else if (st_c >= 0 && st_c <= 9)
+        st_val = st_c;
+      if (st_val < 0)
+        st_val = 0;
+      if (st_val == 0 && syp->XSMD && syp->Nfsp && ka >= 0 && ka < pm.FIa) {
+        for (int ss = 0; ss < NSURFSITE; ss++) {
+          char val = syp->XSMD[jja][ss];
+          if ((val >= '1' && val <= '9') || (val >= 1 && val <= 9)) {
+            int site_st = (int)syp->Nfsp[ka][ss][FSIT_S_SURTYPE];
+            if (site_st >= 0 && site_st < MNST) {
+              st_val = site_st;
+              break;
+            }
+          }
+        }
       }
+      pm.SATX[ja][XL_ST] = (st_val >= 0 && st_val < MNST) ? st_val : 0;
 
       // Allocation of surface species to sorbent (or its end-members)
       switch (syp->SATC[jja][SURSP_ALLOC_SORBENT_EM]) {
@@ -1048,20 +1091,23 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
 
     // Tier 3: Loading allocation to surface sites from XSMD (species
     // denticity map)
-    pm.SATX[ja][XL_SI] = 0;
+    pm.SATX[ja][XL_SI] = -1;
     if (syp->XSMD) {
       for (int s = 0; s < NSURFSITE; s++) {
-        if (syp->XSMD[jja][s] > 0) {
+        char val = syp->XSMD[jja][s];
+        long int dent = 0;
+        if (val >= '1' && val <= '9')
+          dent = val - '0';
+        else if (val >= 1 && val <= 9)
+          dent = val;
+        if (pm.XSMD)
+          pm.XSMD[ja][s] = dent;
+        if (dent > 0 && pm.SATX[ja][XL_SI] < 0) {
           pm.SATX[ja][XL_SI] = s;
-          break;
-        }
-      }
-      if (pm.XSMD) {
-        for (int s = 0; s < NSURFSITE; s++) {
-          pm.XSMD[ja][s] = syp->XSMD[jja][s] - '0';
         }
       }
     }
+    if (pm.SATX[ja][XL_SI] < 0) pm.SATX[ja][XL_SI] = 0;
 
     // Tier 3: Loading MASDJ (parameters for SACT and Frumkin/isotherms)
     if (syp->PMaSdj != S_OFF && syp->MASDJ) {

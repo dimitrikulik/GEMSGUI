@@ -547,13 +547,13 @@ void TSysEq::dyn_new(int q) {
   else
     ss[q].GEX = (double *)aObj[o_ssgex]->Free();
 
-  if (ss[q].switches[29] != S_OFF && ss[q].DM[4] > 0)
+  if (ss[q].switches[22] != S_OFF && ss[q].DM[4] > 0)
     ss[q].MASDJ =
         (float (*)[DNFCN])aObj[o_ssmasdj]->Alloc(ss[q].DM[4], DNFCN, F_); // SCM Modernization: DNFCN=4
   else
     ss[q].MASDJ = (float (*)[DNFCN])aObj[o_ssmasdj]->Free();
 
-  if (ss[q].switches[29] != S_OFF && ss[q].DM[4] > 0) {
+  if (ss[q].switches[22] != S_OFF && ss[q].DM[4] > 0) {
     ss[q].mCDc =
         (float (*)[DMCDC])aObj[o_ssmcdc]->Alloc(ss[q].DM[4], DMCDC, F_); // SCM Modernization: DMCDC=4
     if (ss[q].XSMD) delete[] ss[q].XSMD;

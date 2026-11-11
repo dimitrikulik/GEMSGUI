@@ -282,14 +282,16 @@ void TSyst::make_syst_sizes() {
       break;
     case DC_SUR_MINAL:
       //            sy.Ls++;
-      sy.Lsor++;
+      if (j >= mup->Ls - mup->Lads)
+        sy.Lsor++;
       break;
     case DC_PEL_CARRIER:
     case DC_SUR_CARRIER:
       if (aPa->pa.p.GAR > 0)              // DAK testing
         sy.lnGmf[j] = log(aPa->pa.p.GAR); // 27.10.99
                                           //            sy.Ls++;
-      sy.Lsor++;
+      if (j >= mup->Ls - mup->Lads)
+        sy.Lsor++;
       break;
       /* one component phase */
     case DC_SCP_CONDEN:
@@ -303,7 +305,8 @@ void TSyst::make_syst_sizes() {
     case DC_IEWC_B:
       if (aPa->pa.p.GAH > 0)              // DAK Testing 27.10.99
         sy.lnGmf[j] = log(aPa->pa.p.GAH); // Adsorption FIA
-      sy.Lsor++;
+      if (j >= mup->Ls - mup->Lads)
+        sy.Lsor++;
       //            sy.Ls++;
       break;
     default:
@@ -317,6 +320,7 @@ void TSyst::make_syst_sizes() {
   sy.Fi = 0;
   sy.Lhc = 0;
   sy.Fis = 0;
+  sy.Fia = 0;
   sy.Fik = 0;
   for (k = 0; k < mup->Fi; k++) {
     if (sy.Pcl[k] == S_OFF)
@@ -325,6 +329,10 @@ void TSyst::make_syst_sizes() {
     if (k < mup->Fis) {
       sy.Fis++;
       sy.Ls += sy.Ll[k];
+      if (mup->PHC[k] == PH_SORPTION ||
+          mup->PHC[k] == PH_ADSSBEIL ||
+          mup->PHC[k] == PH_POLYEL)
+        sy.Fia++;
     }
     switch (mup->PHC[k]) {
     case PH_AQUEL:
@@ -359,6 +367,16 @@ void TSyst::make_syst_sizes() {
     default:; /* error code of phase */
     }
   }
+
+  sy.Lsor = 0;
+  if (sy.Fia > 0) {
+    for (i = 0; i < mup->Ls; i++) {
+      if (i >= (mup->Ls - mup->Lads) && sy.Dcl[i] != S_OFF &&
+          (strchr(SORPTION_DC, mup->DCC[i]) != NULL))
+        sy.Lsor++;
+    }
+  }
+
   sy.N = 0;
   for (i = 0; i < mup->N; i++) {
     if (sy.Icl[i] == S_OFF)

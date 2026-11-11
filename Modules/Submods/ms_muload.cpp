@@ -520,7 +520,7 @@ void TMulti::SolModLoad() {
       aObj[o_nas]->SetDim(pmp->L1[k], pmp->N);
       aObj[o_nxa]->SetPtr(pmp->XF + k);
       aObj[o_nxaa]->SetPtr(pmp->XFA + k);
-      if (pmp->FIat > 0) {
+      if (pmp->FIat > 0 && pmp->FIa > 0 && pmp->XFTS && pmp->XfIEC) {
         aObj[o_nxast]->SetPtr(pmp->XFTS[k]);
         aObj[o_nxcec]->SetPtr(pmp->XfIEC[k][1]);
       } else {

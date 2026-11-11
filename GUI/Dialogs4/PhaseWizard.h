@@ -44,7 +44,6 @@ class PhaseWizard : public QDialog
     KeysTableProxy* lDCr_keys_table = nullptr;
     TCStringArray lDCr_old_selection;
 
-    int ndxInPhPs_0;
     void 	resetNextButton();
     void 	resetBackButton();
 

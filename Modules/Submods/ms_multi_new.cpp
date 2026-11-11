@@ -200,12 +200,12 @@ void TMulti::pm_GC_ods_link(long int k, long int jb, long int jpb, long int jdb,
   aObj[o_nas]->SetDim(pm.L1[k], pm.N);
   aObj[o_nxa]->SetPtr(pm.XF + k);
   aObj[o_nxaa]->SetPtr(pm.XFA + k);
-  if (pm.FIat > 0) {
+  if (pm.FIat > 0 && pm.FIa > 0 && pm.XfIEC) {
     //    aObj[o_nxast]->SetPtr(pm.XFTS[k]);
     aObj[o_nxcec]->SetPtr(pm.XfIEC[k][1]);
   } else {
     //    aObj[o_nxast]->SetPtr(0);
-    aObj[o_nxcec]->SetPtr(0);
+    aObj[o_nxcec]->SetPtr(nullptr);
   }
   //
   aObj[o_nbmol]->SetPtr(pm.FVOL + k); // phase volume

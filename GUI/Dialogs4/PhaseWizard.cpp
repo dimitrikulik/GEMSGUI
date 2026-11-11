@@ -37,12 +37,6 @@ void PhaseWizard::CmNext()
 {
     int ndx = ui->stackedWidget->currentIndex();
 
-    if( ndx == 0 && ndxInPhPs_0 != ui->pPhPs_0->currentIndex())
-    {
-        vfMessage(this, "PhaseWizard",
-                  "Key of Phase record will be changed");
-    }
-
     if( ndx == ui->stackedWidget->count() - 2)
     {
         auto rd_sel = rd_keys_table->allSelectedKeys();
@@ -125,10 +119,12 @@ QWidget* parent):
     if( ii >= 0  )
         ui->SCM_code->setCurrentIndex(ii);
 
-    ii = ui->pPhPs_0->findText(QChar(flgs[6]), Qt::MatchStartsWith|Qt::MatchCaseSensitive);
+    char keyPhC = (pkey && pkey[0] != '\0' && pkey[0] != ' ' && pkey[0] != '*' && pkey[0] != '?')
+                      ? pkey[0]
+                      : flgs[6];
+    ii = ui->pPhPs_0->findText(QChar(keyPhC), Qt::MatchStartsWith|Qt::MatchCaseSensitive);
     if( ii >= 0  )
         ui->pPhPs_0->setCurrentIndex(ii);
-    ndxInPhPs_0 = ui->pPhPs_0->currentIndex();
     QObject::connect( ui->pPhPs_0, SIGNAL(currentIndexChanged(int)), this, SLOT(phaseClassChanged(int)));
 
     //Page 2

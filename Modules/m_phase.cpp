@@ -850,7 +850,11 @@ void TPhase::MakeQuery() {
   double r2 = php->Asur;
 
   p_key = db->PackKey();
+  if (!p_key.empty() && p_key[0] != ' ' && p_key[0] != '*' && p_key[0] != '?') {
+    php->PphC = p_key[0];
+  }
   memcpy(flgs, php->sol_t, 37);
+  flgs[6] = php->PphC;
   size[0] = php->Nsd;
   size[1] = php->ncpN;
   size[2] = php->ncpM;
@@ -1167,7 +1171,8 @@ AGAIN_SETUP:
         }
       }
     }
-    if (php->PphC == PH_SORPTION || php->PphC == PH_POLYEL) {
+    if (php->PphC == PH_SORPTION || php->PphC == PH_POLYEL ||
+        php->PphC == PH_ADSSBEIL) {
       for (int j = 0; j < php->nDC; j++) {
         if (php->SATC) {
           php->SATC[j][SURSP_ALLOC_SURFTYPE] =

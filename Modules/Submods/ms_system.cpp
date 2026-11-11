@@ -560,6 +560,9 @@ void TSyst::set_def(int /*q*/) {
     sy.PMaSdt = '+';
     sy.PXcapA = '+';
     sy.PXcapB = '+';
+    sy.PXcapC = '+';
+    sy.PXfIEC = '+';
+    sy.PXlam = '+';
   }
   memset(&sy.N, 0, 22 * sizeof(short));
   memset(&sy.Pmin, 0, 20 * sizeof(float));
@@ -624,10 +627,38 @@ void TSyst::loadData(bool newRec, int reBuildType) {
   TSysEq *STat = dynamic_cast<TSysEq *>(aMod[RT_SYSEQ].get());
   RMULTS *mup = TRMults::sm->GetMU();
 
+  if (mup->Fia > 0 || STat->ssp->DM[20] > 0) {
+    STat->ssp->DM[17] = MNST;
+    STat->ssp->switches[28] = S_REM; // PNfsp
+    STat->ssp->switches[29] = S_REM; // PMaSdt
+    STat->ssp->switches[30] = S_REM; // PXcapC
+    STat->ssp->switches[31] = S_REM; // PXcapA
+    STat->ssp->switches[32] = S_REM; // PXcapB
+    STat->ssp->switches[33] = S_REM; // PXfIEC
+    STat->ssp->switches[36] = S_REM; // PXlam
+    STat->ssp->switches[19] = S_REM; // PSATT
+    STat->ssp->switches[22] = S_REM; // PMaSdj
+    STat->ssp->switches[24] = S_REM; // PAalp
+    STat->ssp->switches[9] = '+';   // PBeq
+  }
+
   {
     memcpy(&sy.PE, STat->ssp->switches, 38);
     memcpy(&sy.N, STat->ssp->DM, 22 * sizeof(short));
     memcpy(&sy.Pmin, STat->ssp->PPm, 20 * sizeof(float));
+    if (mup->Fia > 0 || STat->ssp->DM[20] > 0) {
+      sy.NsTm = MNST;
+      sy.PNfsp = '+';
+      sy.PMaSdt = '+';
+      sy.PXcapA = '+';
+      sy.PXcapB = '+';
+      sy.PXcapC = '+';
+      sy.PXfIEC = '+';
+      sy.PXlam = '+';
+      sy.PSATT = '+';
+      sy.PMaSdj = '+';
+      sy.PBeq = '+';
+    }
     dyn_new();
   }
   if (newRec == false) {
@@ -835,7 +866,7 @@ void TSyst::setDefData() {
       }
     }
   }
-  if (sy.PNfsp == S_REM && sy.NsTm > 0 && sy.SCMC && sy.Nfsp) {
+  if (sy.PNfsp != S_OFF && sy.NsTm > 0 && sy.SCMC && sy.Nfsp) {
     memset(sy.SCMC, A_EMPTY, mup->Fia * MNST * NSCMC);
     for (k = 0; k < mup->Fia; k++) {
       for (i = 0; i < NSURFSITES; i++) {
@@ -1274,6 +1305,8 @@ void TSyst::unpackData() {
         }
       }
     }
+  } else {
+    phase_data_load();
   }
   if (sy.PULim != S_OFF || sy.PLLim != S_OFF)
     for (i = 0; i < sy.Fik; i++) // phk  no zero in PUL/PLL
@@ -1395,7 +1428,9 @@ void TSyst::setSizes() {
       sy.Fie++;
     if (i >= mup->Fis)
       continue;
-    if (sy.Pcl[i] != S_OFF && mup->PHC[i] == 'x')
+    if (sy.Pcl[i] != S_OFF && (mup->PHC[i] == PH_SORPTION ||
+                               mup->PHC[i] == PH_ADSSBEIL ||
+                               mup->PHC[i] == PH_POLYEL))
       sy.Fia++;
   }
   // DCOMP
@@ -1418,7 +1453,8 @@ void TSyst::setSizes() {
     if (i >= mup->Ls)
       continue;
 
-    if (sy.Dcl[i] != S_OFF && (strchr(SORPTION_DC, mup->DCC[i]) != NULL))
+    if (sy.Fia > 0 && i >= (mup->Ls - mup->Lads) && sy.Dcl[i] != S_OFF &&
+        (strchr(SORPTION_DC, mup->DCC[i]) != NULL))
       sy.Lsor++;
   }
   // copy static data
@@ -1518,8 +1554,10 @@ void TSyst::packData() {
     }
     if (i >= mup->Fis)
       continue;
-    // pha Phase ON adsorbtion  ( mup->PHC[]=='x' )
-    if (sy.Pcl[i] != S_OFF && mup->PHC[i] == 'x') {
+    // pha Phase ON adsorbtion  ( mup->PHC[]=='x' || 'z' || 'y' )
+    if (sy.Pcl[i] != S_OFF && (mup->PHC[i] == PH_SORPTION ||
+                               mup->PHC[i] == PH_ADSSBEIL ||
+                               mup->PHC[i] == PH_POLYEL)) {
       ErrorIf(i5 >= sy.Fia, GetName(), "sy.Fia Invalid count");
       STat->ssp->pha[i5] = i;
       int ka = i - (mup->Fis - mup->Fia);
@@ -1619,7 +1657,8 @@ void TSyst::packData() {
       continue;
 
     // dca dcomp ON adsorption  ( mup->DCC[]=='X' ) Sveta 12/09/99 ? to Dima
-    if (sy.Dcl[i] != S_OFF && (strchr(SORPTION_DC, mup->DCC[i]) != NULL)) {
+    if (sy.Fia > 0 && i >= (mup->Ls - mup->Lads) && sy.Dcl[i] != S_OFF &&
+        (strchr(SORPTION_DC, mup->DCC[i]) != NULL)) {
       int ia, kk;
       ErrorIf(i5 >= sy.Lsor, GetName(), "sy.Lsor invalid count");
       ia = i - (mup->Ls - mup->Lads);
@@ -1752,8 +1791,10 @@ void TSyst::packData(TCIntArray PHon, TCIntArray PHoff, TCIntArray DCon,
     }
     if (i >= mup->Fis)
       continue;
-    // pha Phase ON adsorbtion  ( mup->PHC[]=='x' )
-    if (sy.Pcl[i] != S_OFF && mup->PHC[i] == 'x') {
+    // pha Phase ON adsorbtion  ( mup->PHC[]=='x' || 'z' || 'y' )
+    if (sy.Pcl[i] != S_OFF && (mup->PHC[i] == PH_SORPTION ||
+                               mup->PHC[i] == PH_ADSSBEIL ||
+                               mup->PHC[i] == PH_POLYEL)) {
       ErrorIf(i5 >= sy.Fia, GetName(), "sy.Fia Invalid count");
       STat->ssp->pha[i5] = (short)PHon[i];
       int ka = i - (mup->Fis - mup->Fia);
@@ -1862,7 +1903,8 @@ void TSyst::packData(TCIntArray PHon, TCIntArray PHoff, TCIntArray DCon,
       continue;
 
     // dca dcomp ON adsorption  ( mup->DCC[]=='X' ) Sveta 12/09/99 ? to Dima
-    if (sy.Dcl[i] != S_OFF && (strchr(SORPTION_DC, mup->DCC[i]) != NULL)) {
+    if (sy.Fia > 0 && i >= (mup->Ls - mup->Lads) && sy.Dcl[i] != S_OFF &&
+        (strchr(SORPTION_DC, mup->DCC[i]) != NULL)) {
       int ia, kk;
       ErrorIf(i5 >= sy.Lsor, GetName(), "sy.Lsor invalid count");
       ia = i - (mup->Ls - mup->Lads);

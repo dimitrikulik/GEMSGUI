@@ -63,6 +63,18 @@ void TSysEq::RecInput(const char *key) {
   is_legacy_scm = false;
   bool need_realloc_t12 = false;
   if (ssp->DM[20] > 0) {
+    if (ssp->DM[17] < MNST || ssp->switches[28] == S_OFF) {
+      ssp->DM[17] = MNST;
+      ssp->switches[28] = S_REM;
+      ssp->switches[29] = S_REM;
+      ssp->switches[30] = S_REM;
+      ssp->switches[31] = S_REM;
+      ssp->switches[32] = S_REM;
+      ssp->switches[33] = S_REM;
+      ssp->switches[36] = S_REM;
+      ssp->switches[24] = S_REM;
+      ssp->switches[9] = '+';
+    }
     if (aObj[o_ssnfsp]->GetM() != NSURFSITES * NFSIT ||
         aObj[o_ssmasdt]->GetM() != MNST * NMSDT ||
         aObj[o_ssscmt]->GetM() != MNST * NSCMC ||
@@ -79,6 +91,10 @@ void TSysEq::RecInput(const char *key) {
 
   bool need_realloc_t3 = false;
   if (ssp->DM[4] > 0) {
+    if (ssp->switches[19] == S_OFF || ssp->switches[22] == S_OFF) {
+      ssp->switches[19] = S_REM;
+      ssp->switches[22] = S_REM;
+    }
     if (aObj[o_sssatc]->GetM() != MNCAS ||
         aObj[o_ssmasdj]->GetM() != DNFCN ||
         aObj[o_ssmcdc]->GetM() != DMCDC) {
@@ -88,35 +104,23 @@ void TSysEq::RecInput(const char *key) {
   }
 
   if (need_realloc_t12) {
-    if (ssp->switches[28] != S_OFF) {
-      aObj[o_ssnfsp]->Alloc(ssp->DM[20], NSURFSITES * NFSIT, F_);
-      aObj[o_ssscmt]->Alloc(ssp->DM[20], MNST * NSCMC, A_);
-    }
-    if (ssp->switches[29] != S_OFF)
-      aObj[o_ssmasdt]->Alloc(ssp->DM[20], MNST * NMSDT, F_);
-    if (ssp->switches[31] != S_OFF)
-      aObj[o_ssxcapa]->Alloc(ssp->DM[20], MNST, F_);
-    if (ssp->switches[32] != S_OFF)
-      aObj[o_ssxcapb]->Alloc(ssp->DM[20], MNST, F_);
-    if (ssp->switches[30] != S_OFF) {
-      aObj[o_ssxcapc]->Alloc(ssp->DM[20], MNST, F_);
-      aObj[o_ssxcapf]->Alloc(ssp->DM[20], MNST, F_);
-    }
-    if (ssp->switches[33] != S_OFF)
-      aObj[o_ssxfiec]->Alloc(ssp->DM[20], MNST * NCIEC, F_);
-    if (ssp->switches[36] != S_OFF)
-      aObj[o_ssxlam]->Alloc(ssp->DM[20], MNST, F_);
+    aObj[o_ssnfsp]->Alloc(ssp->DM[20], NSURFSITES * NFSIT, F_);
+    aObj[o_ssscmt]->Alloc(ssp->DM[20], MNST * NSCMC, A_);
+    aObj[o_ssmasdt]->Alloc(ssp->DM[20], MNST * NMSDT, F_);
+    aObj[o_ssxcapa]->Alloc(ssp->DM[20], MNST, F_);
+    aObj[o_ssxcapb]->Alloc(ssp->DM[20], MNST, F_);
+    aObj[o_ssxcapc]->Alloc(ssp->DM[20], MNST, F_);
+    aObj[o_ssxcapf]->Alloc(ssp->DM[20], MNST, F_);
+    aObj[o_ssxfiec]->Alloc(ssp->DM[20], MNST * NCIEC, F_);
+    aObj[o_ssxlam]->Alloc(ssp->DM[20], MNST, F_);
   }
 
   if (need_realloc_t3) {
-    if (ssp->switches[19] != S_OFF)
-      aObj[o_sssatc]->Alloc(ssp->DM[4], MNCAS, A_);
-    if (ssp->switches[29] != S_OFF) {
-      aObj[o_ssmasdj]->Alloc(ssp->DM[4], DNFCN, F_);
-      aObj[o_ssmcdc]->Alloc(ssp->DM[4], DMCDC, F_);
-      if (ssp->XSMD) delete[] ssp->XSMD;
-      ssp->XSMD = new char[ssp->DM[4]][NSURFSITE]();
-    }
+    aObj[o_sssatc]->Alloc(ssp->DM[4], MNCAS, A_);
+    aObj[o_ssmasdj]->Alloc(ssp->DM[4], DNFCN, F_);
+    aObj[o_ssmcdc]->Alloc(ssp->DM[4], DMCDC, F_);
+    if (ssp->XSMD) delete[] ssp->XSMD;
+    ssp->XSMD = new char[ssp->DM[4]][NSURFSITE]();
   }
 
   if (need_realloc_t12 || need_realloc_t3) {
@@ -203,15 +207,16 @@ int TSysEq::RecBuild(const char *key, int mode) {
     ssp->switches[20] = S_REM;
   }
   /* Check for surface types (sorption) */
-  if (ssp->switches[28] != S_OFF &&
-      ssp->switches[24] != S_OFF) { /* ssp->switches[28] = S_REM; */
+  if (ssp->DM[20] > 0 || (ssp->switches[28] != S_OFF && ssp->switches[24] != S_OFF)) {
     ssp->DM[17] = MNST;
+    ssp->switches[24] = S_REM;
+    ssp->switches[28] = S_REM;
     ssp->switches[29] = S_REM;
     ssp->switches[30] = S_REM;
-    /* ssp->switches[]PCSTS = S_REM; */
     ssp->switches[19] = S_REM;
     ssp->switches[22] = S_REM;
     ssp->switches[33] = S_REM;
+    ssp->switches[36] = S_REM;
     if (ssp->switches[9] != S_OFF) {
       ssp->switches[31] = S_REM;
       ssp->switches[32] = S_REM;
@@ -224,6 +229,8 @@ int TSysEq::RecBuild(const char *key, int mode) {
     ssp->switches[32] = S_OFF; /* ssp->switches[]PCSTS  = S_OFF; */
     ssp->switches[29] = S_OFF;
     ssp->switches[30] = S_OFF;
+    ssp->switches[33] = S_OFF;
+    ssp->switches[36] = S_OFF;
     ssp->DM[17] = 0;
   }
   // TProfil *aPa= dynamic_cast<TProfil *>( aMod[RT_PARAM].get());

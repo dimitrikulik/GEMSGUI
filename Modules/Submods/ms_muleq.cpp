@@ -384,7 +384,7 @@ void TMulti::EqstatExpand( /*const char *key,*/ bool calcActivityModels/*, bool 
         //   pmp->FitVar[3]=FitVar3;  // Debugging
         CalculateActivityCoefficients( LINK_UX_MODE );
 
-        if(pmp->E && pmp->LO && pmp->Lads )  // Calling this only when sorption models are present
+        if(pmp->E && pmp->LO && pmp->Lads && pmp->FIa )  // Calling this only when sorption models are present
         {
             jb = 0;
             je = 0;
