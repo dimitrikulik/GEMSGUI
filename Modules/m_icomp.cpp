@@ -29,7 +29,7 @@ TIComp::TIComp( uint nrt ):
         TCModule( nrt )
 {
     aFldKeysHelp.push_back("Symbol of Independent Component (IC)");
-    aFldKeysHelp.push_back("Class of Independent Component { e o h a i z v }");
+    aFldKeysHelp.push_back("Class of Independent Component { e o h a i z v s }");
     aFldKeysHelp.push_back("Comment to IC definition");
     icp=&ic[0];
     set_def();
@@ -166,7 +166,7 @@ void TIComp::GetElements( bool isotopes, TCStringArray& aIC, TCIntArray& aIndMT 
  for( uint ii=0; ii<aIC1.size(); ii++ )
  {
     RecInput( aIC1[ii].c_str() );
-    if( *db->FldKey( 1 ) == 'a' || *db->FldKey( 1 ) == 'v' ) // addition
+    if( *db->FldKey( 1 ) == 'a' || *db->FldKey( 1 ) == 'v' || *db->FldKey( 1 ) == 's' ) // addition, volume, sorption site
       aIndMT.push_back( -1 );
     else
       if( isotopes || *db->FldKey( 1 ) == 'e' || *db->FldKey( 1 ) == 'z' ||

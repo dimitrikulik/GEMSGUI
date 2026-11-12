@@ -1823,7 +1823,7 @@
         "dimM": 2,
         "dimN": 3,
         "dyna": true,
-        "hint": "| Surface species: method codes of SACT calculation { L Q 1 2 3 4 F N I }_\n| Allocation of surface species to sorbent (end-members) { I V 0 ... 5 }_\n| Allocation of surface species to surface type { 0 ... 6 }_\n| Allocation of surface complexes to EDL plane { 0 b c d }_\n| Allocation of surface species to site type within surface type { 0 ... 6}_\n| Units in which max. surface density is given in MaSDj { n } ({ m M g } reserved) ",
+        "hint": "|Allocation of surface species to surface type (patch) { 0 1 2 3 4 5 max }_\n| Surface species: individual SACT code { L Q 1 2 3 4 F R N I }_\n| Allocation of surface species to sorbent (or its end-members) { I V 0 1 2 3 4 5 }_\n Units in which surface density is given in MaSDj { n } ( {  m M g } reserved ) ",
         "id": "o_sysatc",
         "label": "SATC_",
         "ndxs": "S",
@@ -1930,7 +1930,7 @@
         "type": "F_"
     },
     {
-        "dimM": 2,
+        "dimM": 8,
         "dimN": 3,
         "dyna": true,
         "hint": " Denticity numbers on site types for surface species [Lads][NSURFSITES] ",
@@ -2580,10 +2580,10 @@
         "type": "L_"
     },
     {
-        "dimM": 2,
+        "dimM": 4,
         "dimN": 3,
         "dyna": true,
-        "hint": "| Link indexes of surface species to: surface type { 0 ... 5 }_\n| Link index to sorbent end-member { 0 ... 5 -1 -2 }_\n| Link index to surface site on surface type { 0,...,5 }_\n| Link index to surface EDL plane { 0 b c d }_ ",
+        "hint": "| Link index of surface species to: surface type { 0 ... 3 }_\n| Link index to sorbent end-member { 0 ... 5 -1 -2 }_\n| Number of different site types bound to this surface species (1 to 4)_\n| Index of farthest EIL plane (reserved) { 0 to 3 }_ ",
         "id": "o_wi_satndx",
         "label": "sati",
         "ndxs": "s",
@@ -4250,7 +4250,7 @@
         "type": "L_"
     },
     {
-        "dimM": 1,
+        "dimM": 8,
         "dimN": 3,
         "dyna": true,
         "hint": "new: denticity of surface species per surface site (site allocation) (-> L1[k]*LsISmo[k][3]] )",
@@ -8163,7 +8163,7 @@
         "dimM": 2,
         "dimN": 3,
         "dyna": true,
-        "hint": "| Surface species: method codes of SACT calculation { C N S I }_\n| Allocation of surface species to sorbent (end-members) { I V 0 ... 5 }_\n| Allocation of surface species to surface type { 0 ... 6 }_\n| Allocation of surface complexes to EDL plane { 0 b c d }_\n| Allocation of surface species to site type within surface type { 0 ... 6}_\n| Units in which max. surface density is given in MaSDj { n m M g } (reserved) ",
+        "hint": "| Allocation of surface species to surface type (patch) { 0 1 2 3 4 5 max }_\n| Surface species: individual SACT code { L Q 1 2 3 4 F R N I }_\n| Allocation of surface species to sorbent (or its end-members) { I V 0 1 2 3 4 5 }_\n Units in which surface density is given in MaSDj { n } ( {  m M g } reserved )  ",
         "id": "o_sssatc",
         "label": "tSATC_",
         "ndxs": "N",

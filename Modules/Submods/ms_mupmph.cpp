@@ -422,18 +422,19 @@ void TMulti::multi_sys_dc() {
         pm.SATX[ja][XL_EM] = -2; // main DC of the sorbent - currently not used
         break;
       }
-      // SCM Modernization: Number of different bound surface sites from XSMD
+      // SCM Modernization: Primary surface site index from XSMD (first site with denticity > 0)
       pm.SATX[ja][XL_SI] = -1;
       if (syp->XSMD) {
-        int sits = 0;
         for (int ss = 0; ss < NSURFSITE; ss++) {
           char val = syp->XSMD[jja][ss];
           if ((val >= '1' && val <= '9') || (val >= 1 && val <= 9)) {
-            sits++;
+            if (pm.SATX[ja][XL_SI] < 0)
+              pm.SATX[ja][XL_SI] = ss;
           }
         }
-        pm.SATX[ja][XL_SI] = sits;
       }
+      if (pm.SATX[ja][XL_SI] < 0)
+        pm.SATX[ja][XL_SI] = 0;
       /*
             // Checking if all sites bound to this species are on the
             // same surface type? TBD in phase2.cpp? Denticity?
@@ -450,9 +451,9 @@ void TMulti::multi_sys_dc() {
               }
             }
       */
-      pm.SATX[ja][XL_SP] = -1; // Allocation to farthest EIL plane
+      pm.SATX[ja][XL_SP] = 0; // Allocation to farthest EIL plane
       if (syp->mCDc) {
-        for (int pl = 0; pl < DMCDC; pl++) {
+        for (int pl = DMCDC - 1; pl >= 0; pl--) {
           if (fabs(syp->mCDc[jja][pl]) > 1e-6) {
             pm.SATX[ja][XL_SP] = pl;
             break;
@@ -1080,13 +1081,10 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
         jcl = -2; // main DC of the sorbent
         break;
       }
-
-      pm.SATX[ja][XL_SP] = 0; // Obsolete: plane charges now handled via mCDc
     } else {
       pm.SATT[ja] = SAT_INDEF;
       pm.SATX[ja][XL_ST] = 0;
       jcl = -1;
-      pm.SATX[ja][XL_SP] = 0;
     }
 
     // Tier 3: Loading allocation to surface sites from XSMD (species
@@ -1131,6 +1129,16 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
           pm.mCDc[ja][p] = 0.0;
       }
     }
+    // Allocation to farthest EIL plane
+    pm.SATX[ja][XL_SP] = 0;
+    if (pm.mCDc) {
+      for (int pl = DMCDC - 1; pl >= 0; pl--) {
+        if (fabs(pm.mCDc[ja][pl]) > 1e-6) {
+          pm.SATX[ja][XL_SP] = pl;
+          break;
+        }
+      }
+    }
 
     // Assigning carrier end-member DC
     if (jcl < car_c && jcl >= 0)
@@ -1142,9 +1150,11 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
 
     ist = pm.SATX[ja][XL_ST];
     isi = pm.SATX[ja][XL_SI];
-    if (pm.D && ist >= 0 && ist < MNST && isi >= 0 && isi < MNST) {
+    if (pm.D && ist >= 0 && ist < MNST && isi >= 0 && isi < NSURFSITES) {
       pm.D[isi][ist] = 0.0;    // cleaning the totals for sites
-      pm.XFTS[isi][ist] = 0.0; // cleaning the totals for species
+    }
+    if (pm.XFTS && ka >= 0 && ka < pm.FIa && ist >= 0 && ist < MNST) {
+      pm.XFTS[ka][ist] = 0.0; // cleaning the totals for species
     }
     // Convert surface density from 1/nm2 to mkmol/g using specific surface
     // area Aalp   (now obsolete)

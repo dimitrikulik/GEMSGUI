@@ -1278,33 +1278,10 @@ void TSyst::unpackData() {
       }
     }
 
-    // SCM Modernization: Tier 3 surface species data
-    for (i = 0; i < STat->ssp->DM[4]; i++) // dca dcomp ON adsorption
-    {
-      ind = Prf->indDC(STat->ssp->dca[i]) - (mup->Ls - mup->Lads);
-      if (ind < 0 || ind >= mup->Lads)
-        continue;
-      if (sy.PSATT != S_OFF && sy.SATC && STat->ssp->SATC) {
-        for (int kk = 0; kk < MNCAS; kk++) // SCM Modernization: MNCAS=4
-          sy.SATC[ind][kk] = STat->ssp->SATC[i][kk]; // DC SACT codes etc.
-      }
-      if (sy.PMaSdj != S_OFF) {
-        if (sy.MASDJ && STat->ssp->MASDJ) {
-          for (int kk = 0; kk < DNFCN; kk++) // SCM Modernization: DNFCN=4
-            sy.MASDJ[ind][kk] =
-                STat->ssp->MASDJ[i][kk]; // DC species parameters
-        }
-        if (sy.XSMD && STat->ssp->XSMD) {
-          for (int kk = 0; kk < NSURFSITE;
-               kk++) // SCM Modernization: NSURFSITE=8
-            sy.XSMD[ind][kk] = STat->ssp->XSMD[i][kk]; // species denticity map
-        }
-        if (sy.mCDc && STat->ssp->mCDc) {
-          for (int kk = 0; kk < DMCDC; kk++) // SCM Modernization: DMCDC=4
-            sy.mCDc[ind][kk] = STat->ssp->mCDc[i][kk]; // DC charges on planes
-        }
-      }
-    }
+    // SCM Modernization: Tier 3 surface species parameters (SATC, MASDJ, XSMD, mCDc)
+    // are intrinsic to the Phase definition and are not persisted in TSysEq.
+    // They are already loaded and name-matched accurately by phase_data_load() -> sorption_data_load().
+    // Overwriting them from STat->ssp is avoided as STat->ssp may contain stale or shifted data.
   } else {
     phase_data_load();
   }

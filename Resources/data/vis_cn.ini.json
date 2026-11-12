@@ -2391,7 +2391,7 @@
                         "label": "sati",
                         "lenth": 4,
                         "locus": "+t-i",
-                        "maxM": 1,
+                        "maxM": 4,
                         "maxN": 30,
                         "type": "F_NUM"
                     },
@@ -2439,7 +2439,7 @@
                         "label": "xSMd",
                         "lenth": 8,
                         "locus": "+t-i",
-                        "maxM": 1,
+                        "maxM": 8,
                         "maxN": 30,
                         "type": "F_NUM"
                     },
@@ -4533,7 +4533,7 @@
                         "label": "sati",
                         "lenth": 4,
                         "locus": "+t-i",
-                        "maxM": 1,
+                        "maxM": 4,
                         "maxN": 30,
                         "type": "F_NUM"
                     },
@@ -9427,7 +9427,7 @@
                         "label": "xSMd_",
                         "lenth": 6,
                         "locus": "+t-i",
-                        "maxM": 1,
+                        "maxM": 8,
                         "maxN": 20,
                         "type": "F_STRING"
                     }

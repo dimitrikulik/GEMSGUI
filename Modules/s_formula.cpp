@@ -569,11 +569,11 @@ void TFormula::fixup_ics( char* ICs )
 void TFormula::TestIC( const char* key, int N, char *ICsym )
 {
     uint i;
-    int jj=-1;
     char ICS[MAXICNAME+MAXSYMB+10];
 
     for( i=0; i<aCn.size(); i++ )
     {
+        int jj=-1;
         memset( ICS, ' ', MAXICNAME+MAXSYMB );
         strncpy( ICS, aCn[i].c_str(), MAXICNAME+MAXSYMB );
         ICS[MAXICNAME+MAXSYMB] = 0;
@@ -644,7 +644,7 @@ size_t TFormula::Fmwtz( double &Z, double &mW, double &eS, short *lAn )
         ICs[MAXICNAME+MAXSYMB]=0;
         ICs[MAXICNAME+MAXSYMB+1]=0;
         fixup_ics( ICs );
-        if( aIC->GetDB() && aIC->GetDB()->Rtest( ICs, 0 ) == NONE_ )
+        if( aIC->GetDB() && aIC->GetDB()->Rtest( ICs, 0 ) != ONEF_ )
         {
             if( ICs[MAXICNAME] == IC_ADDIT )
                 ICs[MAXICNAME] = IC_SSITE;
@@ -688,7 +688,7 @@ size_t TFormula::Fmwtz( double &Z, double &mW, double &eS, short *lAn, double &N
         ICs[MAXICNAME+MAXSYMB]=0;
         ICs[MAXICNAME+MAXSYMB+1]=0;
         fixup_ics( ICs );
-        if( aIC->GetDB() && aIC->GetDB()->Rtest( ICs, 0 ) == NONE_ )
+        if( aIC->GetDB() && aIC->GetDB()->Rtest( ICs, 0 ) != ONEF_ )
         {
             if( ICs[MAXICNAME] == IC_ADDIT )
                 ICs[MAXICNAME] = IC_SSITE;
@@ -721,13 +721,13 @@ size_t TFormula::Fmwtz( double &Z, double &mW, double &eS, short *lAn, double &N
 void TFormula::Stm_line( int N, double *Sml, char *ICsym, short *ICval )
 {
     size_t i, ii;
-    int jj=-1;
     char ICS[MAXICNAME+MAXSYMB+10];
     char *icsp = ICS;
 
     fillValue( Sml, 0., N);
     for( i=0; i<aCn.size(); i++ )
     {
+        int jj=-1;
         memset( ICS, ' ', MAXICNAME+MAXSYMB );
         strncpy( ICS, aCn[i].c_str(), MAXICNAME+MAXSYMB );
         ICS[MAXICNAME+MAXSYMB] = 0;
