@@ -166,11 +166,11 @@ BASE_PARAM dfBase[5] = {
         0,     /* DT */ -30000,     /* PLLG */ 1,       /* PE */
         7000,                                           /* IIM */
         1000., /* DG */ 1e-13,      /* DHB */ 1e-20,    /* DS */
-        3e-5,  /* DK */ 0.01,       /* DF */ 0.01,      /* DFM */
+        1e-5,  /* DK */ 0.01,       /* DF */ 0.01,      /* DFM */
         1e-5,  /* DFYw */ 1e-5,     /* DFYaq */ 1e-5,   /* DFYid */
         1e-5,  /* DFYr,*/ 1e-5,     /* DFYh,*/ 1e-5,    /* DFYc,*/
         1e-6,  /* DFYs, */ 1e-17,   /* DB */ 1.0,       /* AG */
-        -0.01, /* DGC */ 1.0,       /* GAR */ 1000.,    /* GAH */
+        0.,    /* DGC */ 1.0,       /* GAR */ 1000.,    /* GAH */
         1e-3,  /* GAS */ 12.044,    /* DNS */ 1e-13,    /* XwMin, */
         1e-13, /* ScMin, */ 1e-33,  /* DcMin, */ 1e-20, /* PhMin, */
         1e-5,  /* ICmin */ 1e-10,   /* EPS */ 1e-3,     /* IEPS */
@@ -222,7 +222,7 @@ BASE_PARAM dfBase[5] = {
         1e-5,   /* DFYw */ 1e-5,     /* DFYaq */ 1e-5,   /* DFYid */
         1e-5,   /* DFYr,*/ 1e-5,     /* DFYh,*/ 1e-5,    /* DFYc,*/
         1e-6,   /* DFYs, */ 1e-17,   /* DB */ 1.,        /* AG */
-        -0.001, /* DGC */ 1.0,       /* GAR */ 1000.,    /* GAH */
+        0.,     /* DGC */ 1.0,       /* GAR */ 1000.,    /* GAH */
         1e-3,   /* GAS */ 12.044,    /* DNS */ 1e-13,    /* XwMin, */
         1e-13,  /* ScMin, */ 1e-33,  /* DcMin, */ 1e-20, /* PhMin, */
         1e-5,   /* ICmin */ 1e-10,   /* EPS */ 1e-3,     /* IEPS */
