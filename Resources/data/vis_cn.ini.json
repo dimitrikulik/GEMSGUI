@@ -5626,33 +5626,49 @@
                         "type": "F_FLOAT"
                     },
                     {
+                        "label": "eimLl",
+                        "lenth": 12,
+                        "locus": "+t+i",
+                        "maxM": 1,
+                        "maxN": 6,
+                        "type": "F_STRING"
+                    },
+                    {
+                        "label": "eimPl",
+                        "lenth": 8,
+                        "locus": "-l+i",
+                        "maxM": 12,
+                        "maxN": 1,
+                        "type": "F_STRING"
+                    },
+                    {
                         "label": "FSI_t",
-                        "lenth": 6,
+                        "lenth": 9,
                         "locus": "+b+i",
                         "maxM": 1,
                         "maxN": 8,
                         "type": "F_FLOAT"
                     },
                     {
-                        "label": "PhDCC",
-                        "lenth": "_phDCC",
-                        "locus": "+b+i",
+                        "label": "smcSl",
+                        "lenth": 12,
+                        "locus": "+t+i",
                         "maxM": 1,
-                        "maxN": 30,
-                        "type": "F_CHECKBOX"
+                        "maxN": 8,
+                        "type": "F_STRING"
                     },
                     {
-                        "label": "pDC_v_",
-                        "lenth": 26,
-                        "locus": "+t-i",
-                        "maxM": 1,
-                        "maxN": 30,
+                        "label": "smcSpl",
+                        "lenth": 9,
+                        "locus": "-l+i",
+                        "maxM": 4,
+                        "maxN": 1,
                         "type": "F_STRING"
                     },
                     {
                         "label": "CDc",
                         "lenth": 7,
-                        "locus": "+t+i",
+                        "locus": "+b+i",
                         "maxM": 4,
                         "maxN": 30,
                         "type": "F_FLOAT"
@@ -5668,7 +5684,7 @@
                     {
                         "label": "PhDCC",
                         "lenth": "_phDCC",
-                        "locus": "+b+i",
+                        "locus": "+t+i",
                         "maxM": 1,
                         "maxN": 30,
                         "type": "F_CHECKBOX"
@@ -5682,19 +5698,59 @@
                         "type": "F_STRING"
                     },
                     {
+                        "label": "smcDl",
+                        "lenth": 8,
+                        "locus": "-l+i",
+                        "maxM": 8,
+                        "maxN": 1,
+                        "type": "F_STRING"
+                    },
+                    {
                         "label": "SAT_C",
                         "lenth": "_phSAT",
-                        "locus": "+t+i",
+                        "locus": "+b+i",
                         "maxM": 4,
                         "maxN": 30,
                         "type": "F_CHECKBOX"
                     },
                     {
                         "label": "xSmD",
-                        "lenth": 3,
+                        "lenth": 9,
                         "locus": "+t+i",
                         "maxM": 8,
                         "maxN": 30,
+                        "type": "F_STRING"
+                    },
+                    {
+                        "label": "PhDCC",
+                        "lenth": "_phDCC",
+                        "locus": "+t+i",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_CHECKBOX"
+                    },
+                    {
+                        "label": "pDC_v_",
+                        "lenth": 26,
+                        "locus": "+t-i",
+                        "maxM": 1,
+                        "maxN": 30,
+                        "type": "F_STRING"
+                    },
+                    {
+                        "label": "smcDsl",
+                        "lenth": 9,
+                        "locus": "-l+i",
+                        "maxM": 4,
+                        "maxN": 1,
+                        "type": "F_STRING"
+                    },
+                    {
+                        "label": "smcSl",
+                        "lenth": 9,
+                        "locus": "-T+i",
+                        "maxM": 8,
+                        "maxN": 1,
                         "type": "F_STRING"
                     },
                     {

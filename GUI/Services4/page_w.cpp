@@ -104,7 +104,7 @@ void TCPage::AddFields( bool info )
         
        cnt = 1;
        while( (ii+cnt) < getFieldCnt() && 
-               ( rInfo.aFieldInfo[ii+cnt]->place == Tied ||
+               ( rInfo.aFieldInfo[ii+cnt]->isTiedPlace() ||
                      rInfo.aFieldInfo[ii+cnt]->place == Sticked ||
                      rInfo.aFieldInfo[ii+cnt]->place == UndeTabl ) )
        {
@@ -164,6 +164,7 @@ void TCPage::RedrawFields()
                        y=10;
                        break;
         case Tied:
+        case TiedT:
         case Right:
                      x += oldColSize;
                         break;
@@ -208,6 +209,7 @@ void TCPage::RedrawFields()
         case First:
             break;
         case Tied:
+        case TiedT:
         case Right:
         case Fixed:
         case NextP:

@@ -332,14 +332,18 @@ typedef struct {        // Description of PHASE record (old part)
   char (*umpcl)[MAXDCNAME]; /// uptake kinetic model parameters comment list
                             /// [numpC]
   //
-  char (*smcDl)[MAXDCNAME]; // new: sorption model parameters comment list per
-                            // DC [nIsoC]
-  char (*smcSl)[MAXDCNAME]; // new: sorption model parameters comment list per
-                            // site [nIsoS]
-  char (*eimPl)[MAXDCNAME]; // new: EIL model CD parameters comment list per DC
-                            // [nCDc]
-  char (*eimLl)[MAXDCNAME]; // new: EIL model parameters comment list per layer
-                            // [nEIp]  provisionally []
+  char (*smcDsl)[MAXDCNAME]; // Tier 3 DC SATC column comment list [MNCAS]
+  char (*smcDl)[MAXDCNAME];  // Tier 3 sorption/CD model parameters comment list
+                             // per DC column [DMCDC+DNFCN=8] or [nIsoC]
+  char (*smcSl)[MAXDCNAME];  // Tier 2 name comments for sorption site types
+                             // [NSURFSITE=8]
+  char (*smcSpl)[MAXDCNAME]; // new: Tier 2 sorption site parameter comment list
+                             // [NFSIT]
+
+  char (*eimPl)[MAXDCNAME]; // Tier 1 surface type parameters comment list
+                            // [NSCMC+NMSDT+NCAZP+NCIEC=12] or [DMCDC]
+  char (*eimLl)[MAXDCNAME]; // Tier 1 surface types / EIL layer comment list
+                            // [MNST=4] or [nEIp]
                             //
   char *DCC, // DC classes { TESKWL GVCHNI JMFD QPR <0-9>  AB  XYZ O } [nDC]
       *DCS,  // Source of input data for DC { r d } d-DCOMP r-REACT    [nDC]
@@ -401,6 +405,7 @@ protected:
   // void makeICompList( const char *caption, TCStringArray& aIclist );
   void DetNumbCatAn(TCStringArray &aDclist);
   void LoadDCC();
+  void ensureSorptionCommentLists();
   void set_def_comments(bool clearall, const char *old_sol,
                         const char *old_kin);
 

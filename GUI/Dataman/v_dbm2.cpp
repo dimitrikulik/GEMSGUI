@@ -323,6 +323,7 @@ int TDataBase::getrec( RecEntry& rep, GemDataStream& f, RecHead& rh )
             strncmp( rh.endm, MARKRECHEAD, 2 ) ||
             (rh.Nobj != nOD && (nOD+frstOD-1) != o_tpstr  && 
              (rh.Nobj+frstOD-1) != o_phsdval  &&
+             (rh.Nobj+frstOD-1) != o_phlicu   &&
              (rh.Nobj+frstOD-1) != o_stdic  && (nOD+frstOD-1) != o_sptext ) )
         Error( GetKeywd(),"Record header format error");
     f.getline( key, KeyLen()+KeyNumFlds(), MARKRKEY);
@@ -668,6 +669,7 @@ time_t TDataBase::GetTime( uint i )
             strncmp( rh.endm, MARKRECHEAD, 2 ) ||
             (rh.Nobj != nOD && (nOD+frstOD-1) != o_tpstr  && 
              (rh.Nobj+frstOD-1) != o_phsdval  &&
+             (rh.Nobj+frstOD-1) != o_phlicu   &&
              (rh.Nobj+frstOD-1) != o_stdic  && (nOD+frstOD-1) != o_sptext ) )
         Error( GetKeywd(), "PDB record header format error");
     status =  UNDF_;

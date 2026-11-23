@@ -29,7 +29,10 @@
 #include "service.h"
 #include "v_mod.h"
 #include "visor.h"
+#include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <unordered_map>
 
 int rkeycmp(const void *e1, const void *e2);
 int rkeycmp(const void *e1, const void *e2) {
@@ -214,14 +217,27 @@ void TPhase::ods_link(int q) {
   aObj[o_phrprcl]->SetDim(ph[q].nPRk, 1);
   aObj[o_phumpcl]->SetPtr(ph[q].umpcl);
   aObj[o_phumpcl]->SetDim(1, ph[q].numpC);
+  const bool hasSurfComments =
+      (ph[q].PFsuT == S_ON || ph[q].PFsuT == S_REM);
+  aObj[o_phsmcdsl]->SetPtr(ph[q].smcDsl);
+  aObj[o_phsmcdsl]->SetDim(1, hasSurfComments ? MNCAS : 0);
   aObj[o_phsmcdl]->SetPtr(ph[q].smcDl);
-  aObj[o_phsmcdl]->SetDim(1, ph[q].nIsoC);
+  aObj[o_phsmcdl]->SetDim(1, hasSurfComments ? (DMCDC + DNFCN) : ph[q].nIsoC);
   aObj[o_phsmcsl]->SetPtr(ph[q].smcSl);
-  aObj[o_phsmcsl]->SetDim(1, ph[q].nIsoS);
+  if (hasSurfComments)
+    aObj[o_phsmcsl]->SetDim(NSURFSITE, 1);
+  else
+    aObj[o_phsmcsl]->SetDim(1, ph[q].nIsoS);
+  aObj[o_phsmcspl]->SetPtr(ph[q].smcSpl);
+  aObj[o_phsmcspl]->SetDim(1, hasSurfComments ? NFSIT : 0);
   aObj[o_pheimpl]->SetPtr(ph[q].eimPl);
-  aObj[o_pheimpl]->SetDim(1, DMCDC);
+  aObj[o_pheimpl]->SetDim(
+      1, hasSurfComments ? (NSCMC + NMSDT + NCAZP + NCIEC) : DMCDC);
   aObj[o_pheimll]->SetPtr(ph[q].eimLl);
-  aObj[o_pheimll]->SetDim(1, ph[q].nEIp);
+  if (hasSurfComments)
+    aObj[o_pheimll]->SetDim(MNST, 1);
+  else
+    aObj[o_pheimll]->SetDim(1, ph[q].nEIp);
 
   aObj[o_phlphc2]->SetPtr(ph[q].lPhC);
   aObj[o_phlphc2]->SetDim(ph[q].nlPh, 1);
@@ -320,8 +336,10 @@ void TPhase::dyn_set(int q) {
   ph[q].rpkcl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phrpkcl]->GetPtr());
   ph[q].rprcl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phrprcl]->GetPtr());
   ph[q].umpcl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phumpcl]->GetPtr());
+  ph[q].smcDsl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcdsl]->GetPtr());
   ph[q].smcDl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcdl]->GetPtr());
   ph[q].smcSl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcsl]->GetPtr());
+  ph[q].smcSpl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcspl]->GetPtr());
   ph[q].eimPl = static_cast<char (*)[MAXDCNAME]>(aObj[o_pheimpl]->GetPtr());
   ph[q].eimLl = static_cast<char (*)[MAXDCNAME]>(aObj[o_pheimll]->GetPtr());
   ph[q].lPhC = static_cast<char *>(aObj[o_phlphc2]->GetPtr());
@@ -393,8 +411,10 @@ void TPhase::dyn_kill(int q) {
   ph[q].rpkcl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phrpkcl]->Free());
   ph[q].rprcl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phrprcl]->Free());
   ph[q].umpcl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phumpcl]->Free());
+  ph[q].smcDsl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcdsl]->Free());
   ph[q].smcDl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcdl]->Free());
   ph[q].smcSl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcsl]->Free());
+  ph[q].smcSpl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcspl]->Free());
   ph[q].eimPl = static_cast<char (*)[MAXDCNAME]>(aObj[o_pheimpl]->Free());
   ph[q].eimLl = static_cast<char (*)[MAXDCNAME]>(aObj[o_pheimll]->Free());
   ph[q].lPhC = static_cast<char *>(aObj[o_phlphc2]->Free());
@@ -528,41 +548,83 @@ void TPhase::dyn_new(int q) {
   //  ph[q].tprn = static_cast<char *>(aObj[ o_phtprn ]->Free();
 
   // new record 06/06/12
+  const bool hasSurfComments =
+      (ph[q].PFsuT == S_ON || ph[q].PFsuT == S_REM);
+  constexpr int kTier1ParamCols = NSCMC + NMSDT + NCAZP + NCIEC; // 12
+  constexpr int kTier3ParamCols = DMCDC + DNFCN;                 // 8
+
   if (ph[q].PEIpc == S_ON) {
     ph[q].EIpc =
         static_cast<float *>(aObj[o_pheipc]->Alloc(ph[q].nEIl, ph[q].nEIp, F_));
+  } else {
+    ph[q].EIpc = static_cast<float *>(aObj[o_pheipc]->Free());
+  }
+  if (hasSurfComments) {
+    ph[q].eimLl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_pheimll]->Alloc(MNST, 1, MAXDCNAME));
+  } else if (ph[q].PEIpc == S_ON) {
     ph[q].eimLl = static_cast<char (*)[MAXDCNAME]>(
         aObj[o_pheimll]->Alloc(1, ph[q].nEIp, MAXDCNAME));
   } else {
-    ph[q].EIpc = static_cast<float *>(aObj[o_pheipc]->Free());
     ph[q].eimLl = static_cast<char (*)[MAXDCNAME]>(aObj[o_pheimll]->Free());
   }
+
   if (ph[q].PCDc == S_ON) {
     ph[q].mCDc = static_cast<float (*)[DMCDC]>(
         aObj[o_phmcdc]->Alloc(ph[q].nDC, DMCDC, F_));
+  } else {
+    ph[q].mCDc = static_cast<float (*)[DMCDC]>(aObj[o_phmcdc]->Free());
+  }
+  if (hasSurfComments) {
+    ph[q].eimPl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_pheimpl]->Alloc(1, kTier1ParamCols, MAXDCNAME));
+  } else if (ph[q].PCDc == S_ON) {
     ph[q].eimPl = static_cast<char (*)[MAXDCNAME]>(
         aObj[o_pheimpl]->Alloc(1, DMCDC, MAXDCNAME));
   } else {
-    ph[q].mCDc = static_cast<float (*)[DMCDC]>(aObj[o_phmcdc]->Free());
     ph[q].eimPl = static_cast<char (*)[MAXDCNAME]>(aObj[o_pheimpl]->Free());
   }
+
   if (ph[q].PIsoC == S_ON) {
     ph[q].IsoP =
         static_cast<float *>(aObj[o_phisop]->Alloc(ph[q].nDC, ph[q].nIsoC, F_));
+  } else {
+    ph[q].IsoP = static_cast<float *>(aObj[o_phisop]->Free());
+  }
+  if (hasSurfComments) {
+    ph[q].smcDl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_phsmcdl]->Alloc(1, kTier3ParamCols, MAXDCNAME));
+  } else if (ph[q].PIsoC == S_ON) {
     ph[q].smcDl = static_cast<char (*)[MAXDCNAME]>(
         aObj[o_phsmcdl]->Alloc(1, ph[q].nIsoC, MAXDCNAME));
   } else {
-    ph[q].IsoP = static_cast<float *>(aObj[o_phisop]->Free());
     ph[q].smcDl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcdl]->Free());
   }
+
   if (ph[q].PIsoS == S_ON) {
     ph[q].IsoS = static_cast<float *>(
         aObj[o_phisos]->Alloc(ph[q].nSiT, ph[q].nIsoS, F_));
+  } else {
+    ph[q].IsoS = static_cast<float *>(aObj[o_phisos]->Free());
+  }
+  if (hasSurfComments) {
+    ph[q].smcSl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_phsmcsl]->Alloc(NSURFSITE, 1, MAXDCNAME));
+  } else if (ph[q].PIsoS == S_ON) {
     ph[q].smcSl = static_cast<char (*)[MAXDCNAME]>(
         aObj[o_phsmcsl]->Alloc(1, ph[q].nIsoS, MAXDCNAME));
   } else {
-    ph[q].IsoS = static_cast<float *>(aObj[o_phisos]->Free());
     ph[q].smcSl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcsl]->Free());
+  }
+
+  if (hasSurfComments) {
+    ph[q].smcDsl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_phsmcdsl]->Alloc(1, MNCAS, MAXDCNAME));
+    ph[q].smcSpl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_phsmcspl]->Alloc(1, NFSIT, MAXDCNAME));
+  } else {
+    ph[q].smcDsl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcdsl]->Free());
+    ph[q].smcSpl = static_cast<char (*)[MAXDCNAME]>(aObj[o_phsmcspl]->Free());
   }
   if (ph[q].PsDiS == S_ON) {
     ph[q].XSMD = static_cast<char (*)[NSURFSITE]>(
@@ -817,8 +879,10 @@ void TPhase::set_def(int q) {
   ph[q].rpkcl = nullptr;
   ph[q].rprcl = nullptr;
   ph[q].umpcl = nullptr;
+  ph[q].smcDsl = nullptr;
   ph[q].smcDl = nullptr;
   ph[q].smcSl = nullptr;
+  ph[q].smcSpl = nullptr;
   ph[q].eimPl = nullptr;
   ph[q].eimLl = nullptr;
   ph[q].lPhC = nullptr;
@@ -835,7 +899,10 @@ void TPhase::set_def(int q) {
 }
 
 // Input necessary data and links objects
-void TPhase::RecInput(const char *key) { TCModule::RecInput(key); }
+void TPhase::RecInput(const char *key) {
+  TCModule::RecInput(key);
+  ensureSorptionCommentLists();
+}
 
 static TCStringArray aDclist;
 static TCStringArray aPhlist;
@@ -933,6 +1000,143 @@ void TPhase::MakeQuery() {
   php->nSkr = aDcSkrl.size();
 }
 
+namespace {
+
+struct OldPhaseDCData {
+  short nDC = 0;
+  short nscM = 0;
+  short ndqf = 0;
+  short nrcp = 0;
+  short nIsoC = 0;
+  short numpC = 0;
+  std::vector<char> SM;
+  std::vector<char> DCS;
+  std::vector<char> DCC;
+  std::vector<float> scoef;
+  std::vector<float> DQFc;
+  std::vector<float> rcpc;
+  std::vector<float> IsoP;
+  std::vector<float> umpCon;
+  std::vector<char> lICu;
+  std::vector<float> mCDc;
+  std::vector<float> MASDJ;
+  std::vector<char> SATC;
+  std::vector<char> XSMD;
+};
+
+OldPhaseDCData captureOldPhaseDCData(const PHASE *php) {
+  OldPhaseDCData old;
+  if (!php || php->nDC <= 0 || !php->SM || !php->DCS)
+    return old;
+
+  old.nDC = php->nDC;
+  old.nscM = php->nscM;
+  old.ndqf = php->ndqf;
+  old.nrcp = php->nrcp;
+  old.nIsoC = php->nIsoC;
+  old.numpC = php->numpC;
+
+  old.SM.assign(reinterpret_cast<const char *>(php->SM),
+                reinterpret_cast<const char *>(php->SM) +
+                    static_cast<size_t>(old.nDC) * DC_RKLEN);
+  old.DCS.assign(php->DCS, php->DCS + old.nDC);
+  if (php->DCC)
+    old.DCC.assign(php->DCC, php->DCC + old.nDC);
+
+  if (php->Psco == S_ON && php->scoef && old.nscM > 0)
+    old.scoef.assign(php->scoef, php->scoef + static_cast<size_t>(old.nDC) * old.nscM);
+  if (php->Pdqf == S_ON && php->DQFc && old.ndqf > 0)
+    old.DQFc.assign(php->DQFc, php->DQFc + static_cast<size_t>(old.nDC) * old.ndqf);
+  if (php->Prcp == S_ON && php->rcpc && old.nrcp > 0)
+    old.rcpc.assign(php->rcpc, php->rcpc + static_cast<size_t>(old.nDC) * old.nrcp);
+  if (php->PIsoC == S_ON && php->IsoP && old.nIsoC > 0)
+    old.IsoP.assign(php->IsoP, php->IsoP + static_cast<size_t>(old.nDC) * old.nIsoC);
+  if (php->PumpCon == S_ON && php->umpCon && old.numpC > 0)
+    old.umpCon.assign(php->umpCon, php->umpCon + static_cast<size_t>(old.nDC) * old.numpC);
+  if (php->PumpCon == S_ON && php->lICu)
+    old.lICu.assign(reinterpret_cast<const char *>(php->lICu),
+                    reinterpret_cast<const char *>(php->lICu) +
+                        static_cast<size_t>(old.nDC) * MAXICNAME);
+  if (php->PCDc == S_ON && php->mCDc)
+    old.mCDc.assign(reinterpret_cast<const float *>(php->mCDc),
+                    reinterpret_cast<const float *>(php->mCDc) +
+                        static_cast<size_t>(old.nDC) * DMCDC);
+  if ((php->PFsuT == S_ON || php->PFsuT == S_REM) && php->MASDJ)
+    old.MASDJ.assign(reinterpret_cast<const float *>(php->MASDJ),
+                     reinterpret_cast<const float *>(php->MASDJ) +
+                         static_cast<size_t>(old.nDC) * DNFCN);
+  if ((php->PFsuT == S_ON || php->PFsuT == S_REM) && php->SATC)
+    old.SATC.assign(reinterpret_cast<const char *>(php->SATC),
+                    reinterpret_cast<const char *>(php->SATC) +
+                        static_cast<size_t>(old.nDC) * MNCAS);
+  if (php->PsDiS == S_ON && php->XSMD)
+    old.XSMD.assign(reinterpret_cast<const char *>(php->XSMD),
+                    reinterpret_cast<const char *>(php->XSMD) +
+                        static_cast<size_t>(old.nDC) * NSURFSITE);
+  return old;
+}
+
+std::vector<int> buildOldDCIndexMap(const PHASE *php, const OldPhaseDCData &old,
+                                    bool clearAll) {
+  std::vector<int> mapIdx(static_cast<size_t>(std::max<short>(0, php->nDC)), -1);
+  if (clearAll || old.nDC <= 0 || old.SM.empty() || old.DCS.empty())
+    return mapIdx;
+
+  std::unordered_map<std::string, int> oldByKey;
+  oldByKey.reserve(static_cast<size_t>(old.nDC));
+  for (int i = 0; i < old.nDC; ++i) {
+    std::string k(&old.SM[static_cast<size_t>(i) * DC_RKLEN], DC_RKLEN - 1);
+    k.push_back(old.DCS[static_cast<size_t>(i)]);
+    oldByKey.emplace(std::move(k), i);
+  }
+  for (int j = 0; j < php->nDC; ++j) {
+    std::string k(php->SM[j], DC_RKLEN - 1);
+    k.push_back(php->SM[j][DC_RKLEN - 1]); // holds 'd' or 'r' before LoadDCC()
+    auto it = oldByKey.find(k);
+    if (it != oldByKey.end())
+      mapIdx[static_cast<size_t>(j)] = it->second;
+  }
+  return mapIdx;
+}
+
+void remapDCFloatRows(float *dst, int nDC, int newCols,
+                      const std::vector<float> &oldBuf, int oldCols,
+                      const std::vector<int> &oldIdxForNew) {
+  if (!dst || nDC <= 0 || newCols <= 0)
+    return;
+  const bool hasOld = !oldBuf.empty() && oldCols > 0;
+  const int copyCols = hasOld ? std::min(oldCols, newCols) : 0;
+  for (int j = 0; j < nDC; ++j) {
+    float *row = dst + static_cast<size_t>(j) * newCols;
+    std::fill(row, row + newCols, FLOAT_EMPTY);
+    int oldIdx = oldIdxForNew[static_cast<size_t>(j)];
+    if (hasOld && oldIdx >= 0) {
+      const float *src = oldBuf.data() + static_cast<size_t>(oldIdx) * oldCols;
+      std::copy(src, src + copyCols, row);
+    }
+  }
+}
+
+void remapDCCharRows(char *dst, int nDC, int cols,
+                     const std::vector<char> &oldBuf, char fillCh,
+                     const std::vector<int> &oldIdxForNew) {
+  if (!dst || nDC <= 0 || cols <= 0)
+    return;
+  const bool hasOld = !oldBuf.empty();
+  for (int j = 0; j < nDC; ++j) {
+    char *row = dst + static_cast<size_t>(j) * cols;
+    int oldIdx = oldIdxForNew[static_cast<size_t>(j)];
+    if (hasOld && oldIdx >= 0) {
+      const char *src = oldBuf.data() + static_cast<size_t>(oldIdx) * cols;
+      std::copy(src, src + cols, row);
+    } else {
+      std::fill(row, row + cols, fillCh);
+    }
+  }
+}
+
+} // namespace
+
 // Remake/Create mode: rebuild Phase record structure before calculations
 int TPhase::RecBuild(const char *key, int mode) {
   /// TCStringArray aDclist;
@@ -955,6 +1159,8 @@ int TPhase::RecBuild(const char *key, int mode) {
 
   strncpy(old_sol, php->sol_t, 6);
   strncpy(old_kin, php->kin_t, 8);
+
+  const OldPhaseDCData oldDCData = captureOldPhaseDCData(php);
 
   // build old selection keys
   aDclist.clear();
@@ -1065,8 +1271,53 @@ AGAIN_SETUP:
   if (php->nDC >= 2) // >= may change behavior !
     qsort(php->SM[0], php->nDC, DC_RKLEN, rkeycmp);
 
+  const std::vector<int> oldIdxForNew =
+      buildOldDCIndexMap(php, oldDCData, ret == VF3_1);
+
+  // Preserve DCC for matched DCs and mark newly inserted DCs for LoadDCC()
+  if (php->DCC) {
+    for (int j = 0; j < php->nDC; ++j) {
+      int oldIdx = oldIdxForNew[static_cast<size_t>(j)];
+      if (oldIdx >= 0 && !oldDCData.DCC.empty())
+        php->DCC[j] = oldDCData.DCC[static_cast<size_t>(oldIdx)];
+      else
+        php->DCC[j] = A_NUL;
+    }
+  }
+
   // Load DC classes from records and set to DCC
   LoadDCC();
+
+  // Remap nDC-row parameter arrays by DC key and fill inserted rows empty
+  if (php->Psco == S_ON)
+    remapDCFloatRows(php->scoef, php->nDC, php->nscM, oldDCData.scoef,
+                     oldDCData.nscM, oldIdxForNew);
+  if (php->Pdqf == S_ON)
+    remapDCFloatRows(php->DQFc, php->nDC, php->ndqf, oldDCData.DQFc,
+                     oldDCData.ndqf, oldIdxForNew);
+  if (php->Prcp == S_ON)
+    remapDCFloatRows(php->rcpc, php->nDC, php->nrcp, oldDCData.rcpc,
+                     oldDCData.nrcp, oldIdxForNew);
+  if (php->PIsoC == S_ON)
+    remapDCFloatRows(php->IsoP, php->nDC, php->nIsoC, oldDCData.IsoP,
+                     oldDCData.nIsoC, oldIdxForNew);
+  if (php->PumpCon == S_ON)
+    remapDCFloatRows(php->umpCon, php->nDC, php->numpC, oldDCData.umpCon,
+                     oldDCData.numpC, oldIdxForNew);
+  if (php->PCDc == S_ON)
+    remapDCFloatRows(reinterpret_cast<float *>(php->mCDc), php->nDC, DMCDC,
+                     oldDCData.mCDc, DMCDC, oldIdxForNew);
+  if (php->PFsuT == S_ON || php->PFsuT == S_REM) {
+    remapDCFloatRows(reinterpret_cast<float *>(php->MASDJ), php->nDC, DNFCN,
+                     oldDCData.MASDJ, DNFCN, oldIdxForNew);
+    if (ret != VF3_1 && !oldDCData.SATC.empty()) {
+      remapDCCharRows(reinterpret_cast<char *>(php->SATC), php->nDC, MNCAS,
+                      oldDCData.SATC, CHAR_EMPTY, oldIdxForNew);
+    }
+  }
+  if (php->PsDiS == S_ON)
+    remapDCCharRows(reinterpret_cast<char *>(php->XSMD), php->nDC, NSURFSITE,
+                    oldDCData.XSMD, CHAR_EMPTY, oldIdxForNew);
 
   if (php->PlPhl != S_OFF) {
     for (int i = 0; i < php->nlPh; i++) {
@@ -1095,8 +1346,15 @@ AGAIN_SETUP:
     for (int j = 0; j < php->nDC;
          j++) // Set default selection of elements for end members
     {
-      memcpy(php->lICu[j], "Tr       ", MAXICNAME);
-      php->lICu[j][MAXICNAME - 1] = '\0';
+      int oldIdx = oldIdxForNew[static_cast<size_t>(j)];
+      if (oldIdx >= 0 && !oldDCData.lICu.empty()) {
+        memcpy(php->lICu[j],
+               oldDCData.lICu.data() + static_cast<size_t>(oldIdx) * MAXICNAME,
+               MAXICNAME);
+      } else {
+        memcpy(php->lICu[j], "Tr       ", MAXICNAME);
+        php->lICu[j][MAXICNAME - 1] = '\0';
+      }
     }
   }
 
@@ -1173,15 +1431,17 @@ AGAIN_SETUP:
     }
     if (php->PphC == PH_SORPTION || php->PphC == PH_POLYEL ||
         php->PphC == PH_ADSSBEIL) {
-      for (int j = 0; j < php->nDC; j++) {
-        if (php->SATC) {
-          php->SATC[j][SURSP_ALLOC_SURFTYPE] =
-              CST_0; // default - 0 surface type
-          php->SATC[j][SURSP_INDIV_SACT_CODE] =
-              SACT_LAN_COMP; // default Langmuir comp.
-          php->SATC[j][SURSP_ALLOC_SORBENT_EM] =
-              CCA_VOL; // default per whole sorbent
-          php->SATC[j][SURSP_COV_DENS_UNITS] = SDU_N; // default - 'n': 1/nm2
+      if (ret == VF3_1 || oldDCData.SATC.empty()) {
+        for (int j = 0; j < php->nDC; j++) {
+          if (php->SATC) {
+            php->SATC[j][SURSP_ALLOC_SURFTYPE] =
+                CST_0; // default - 0 surface type
+            php->SATC[j][SURSP_INDIV_SACT_CODE] =
+                SACT_LAN_COMP; // default Langmuir comp.
+            php->SATC[j][SURSP_ALLOC_SORBENT_EM] =
+                CCA_VOL; // default per whole sorbent
+            php->SATC[j][SURSP_COV_DENS_UNITS] = SDU_N; // default - 'n': 1/nm2
+          }
         }
       }
       php->PFsuT = S_ON;
@@ -1594,13 +1854,16 @@ bool TPhase::CompressRecord(int nDCused, TCIntArray &DCused,
                    php->nIsoC);
       if (php->PsDiS == S_ON)
         copyValues(&php->XSMD[nDCnew][0], &php->XSMD[ii][0], NSURFSITE);
-      if (php->PumpCon == S_ON)
+      if (php->PumpCon == S_ON) {
         copyValues(php->umpCon + nDCnew * php->numpC,
                    php->umpCon + ii * php->numpC, php->numpC);
+        if (php->lICu)
+          memcpy(php->lICu[nDCnew], php->lICu[ii], MAXICNAME);
+      }
       if (php->Pdqf == S_ON)
         copyValues(php->DQFc + nDCnew * php->ndqf, php->DQFc + ii * php->ndqf,
                    php->ndqf);
-      if (php->Pdqf == S_ON)
+      if (php->Prcp == S_ON)
         copyValues(php->rcpc + nDCnew * php->nrcp, php->rcpc + ii * php->nrcp,
                    php->nrcp);
 
@@ -1636,13 +1899,16 @@ bool TPhase::CompressRecord(int nDCused, TCIntArray &DCused,
     if (php->PsDiS == S_ON)
       php->XSMD = static_cast<char (*)[NSURFSITE]>(
           aObj[o_phxsmd]->Alloc(php->nDC, NSURFSITE, A_));
-    if (php->PumpCon == S_ON)
+    if (php->PumpCon == S_ON) {
       php->umpCon = static_cast<float *>(
           aObj[o_phumpcon]->Alloc(php->nDC, php->numpC, F_));
+      php->lICu = static_cast<char (*)[MAXICNAME]>(
+          aObj[o_phlicu]->Alloc(php->nDC, 1, MAXICNAME));
+    }
     if (php->Pdqf == S_ON)
       php->DQFc =
           static_cast<float *>(aObj[o_phdqfc]->Alloc(php->nDC, php->ndqf, F_));
-    if (php->Pdqf == S_ON)
+    if (php->Prcp == S_ON)
       php->rcpc =
           static_cast<float *>(aObj[o_phrcpc]->Alloc(php->nDC, php->nrcp, F_));
   }

@@ -887,8 +887,8 @@ void TVisor::defaultCFG()
     unsigned char phase_rkfrm[5] =
         { MAXSYMB, MAXPHSYMB, MAXPHNAME, MAXSYMB, MAXPHGROUP };
     rt.push_back( std::make_shared<TDataBase>(rt.size(), "phase", true, true,
-                                             o_phstr, 22+38/*13/06/13*/, 0, 5, phase_rkfrm));
-    rt.back()->updateJsonOD(o_phsolt, o_phlicu);
+                                             o_phstr, 22+40/*23/11/26*/, 0, 5, phase_rkfrm));
+    rt.back()->updateJsonOD(o_phsolt, o_phsmcspl);
 
     // RT_SYSEQ default
     unsigned char syseq_rkfrm[8] = { MAXMUNAME, MAXTDPCODE, MAXSYSNAME,

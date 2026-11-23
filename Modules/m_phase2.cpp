@@ -27,7 +27,9 @@
 #include "s_formula.h"
 #include "service.h"
 #include "visor.h"
+#include <algorithm>
 #include <cmath>
+#include <cstring>
 
 int rkeycmp(const void *e1, const void *e2);
 
@@ -1933,6 +1935,102 @@ void TPhase::set_def_comments(bool clearall, const char *old_sol,
         break;
       }
     }
+
+  ensureSorptionCommentLists();
+}
+
+namespace {
+
+bool isCommentBlank(const char *s, size_t maxLen) {
+  if (!s)
+    return true;
+  for (size_t i = 0; i < maxLen && s[i] != '\0'; ++i) {
+    if (s[i] != ' ' && s[i] != CHAR_EMPTY && s[i] != A_NUL)
+      return false;
+  }
+  return true;
+}
+
+void setCommentIfBlank(char *dst, const char *defText) {
+  if (!dst || !isCommentBlank(dst, MAXDCNAME))
+    return;
+  std::memset(dst, ' ', MAXDCNAME);
+  size_t len = std::min(std::strlen(defText), static_cast<size_t>(MAXDCNAME - 1));
+  std::memcpy(dst, defText, len);
+  dst[MAXDCNAME - 1] = '\0';
+}
+
+} // namespace
+
+void TPhase::ensureSorptionCommentLists() {
+  if (php->PFsuT != S_ON && php->PFsuT != S_REM)
+    return;
+
+  constexpr int kTier1ParamCols = NSCMC + NMSDT + NCAZP + NCIEC; // 12
+  constexpr int kTier3ParamCols = DMCDC + DNFCN;                 // 8
+
+  if (!php->eimLl || aObj[o_pheimll]->GetNS() != MNST ||
+      aObj[o_pheimll]->GetMS() != 1) {
+    php->eimLl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_pheimll]->Alloc(MNST, 1, MAXDCNAME));
+  }
+  if (!php->eimPl || aObj[o_pheimpl]->GetNS() != 1 ||
+      aObj[o_pheimpl]->GetMS() != kTier1ParamCols) {
+    php->eimPl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_pheimpl]->Alloc(1, kTier1ParamCols, MAXDCNAME));
+  }
+  if (!php->smcSl || aObj[o_phsmcsl]->GetNS() != NSURFSITE ||
+      aObj[o_phsmcsl]->GetMS() != 1) {
+    php->smcSl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_phsmcsl]->Alloc(NSURFSITE, 1, MAXDCNAME));
+  }
+  if (!php->smcSpl || aObj[o_phsmcspl]->GetNS() != 1 ||
+      aObj[o_phsmcspl]->GetMS() != NFSIT) {
+    php->smcSpl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_phsmcspl]->Alloc(1, NFSIT, MAXDCNAME));
+  }
+  if (!php->smcDl || aObj[o_phsmcdl]->GetNS() != 1 ||
+      aObj[o_phsmcdl]->GetMS() != kTier3ParamCols) {
+    php->smcDl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_phsmcdl]->Alloc(1, kTier3ParamCols, MAXDCNAME));
+  }
+  if (!php->smcDsl || aObj[o_phsmcdsl]->GetNS() != 1 ||
+      aObj[o_phsmcdsl]->GetMS() != MNCAS) {
+    php->smcDsl = static_cast<char (*)[MAXDCNAME]>(
+        aObj[o_phsmcdsl]->Alloc(1, MNCAS, MAXDCNAME));
+  }
+
+  static constexpr const char *kSurfTypeDefs[MNST] = {
+      "SurfType0", "SurfType1", "SurfType2", "SurfType3"};
+  for (int i = 0; i < MNST; ++i)
+    setCommentIfBlank(php->eimLl[i], kSurfTypeDefs[i]);
+
+  static constexpr const char *kTier1ParamDefs[kTier1ParamCols] = {
+      "EIL_mod",  "SACT_mod", "f_SA",     "TCE_A1",   "TCE_A2",   "TCE_A3",
+      "C1_Fm2",   "C2_Fm2",   "C3_Fm2",   "f_zeta",   "sig0_nm2", "IEC_eqkg"};
+  for (int i = 0; i < kTier1ParamCols; ++i)
+    setCommentIfBlank(php->eimPl[i], kTier1ParamDefs[i]);
+
+  static constexpr const char *kSiteTypeDefs[NSURFSITE] = {
+      "SiteType0", "SiteType1", "SiteType2", "SiteType3",
+      "SiteType4", "SiteType5", "SiteType6", "SiteType7"};
+  for (int i = 0; i < NSURFSITE; ++i)
+    setCommentIfBlank(php->smcSl[i], kSiteTypeDefs[i]);
+
+  static constexpr const char *kTier2ParamDefs[NFSIT] = {
+      "Den_nm2", "Cap_molkg", "SurfT_idx", "Reserved"};
+  for (int i = 0; i < NFSIT; ++i)
+    setCommentIfBlank(php->smcSpl[i], kTier2ParamDefs[i]);
+
+  static constexpr const char *kTier3ParamDefs[kTier3ParamCols] = {
+      "z_A_0", "z_B_1", "z_C_2", "z_bal", "MaxDen", "SACT_p1", "SACT_p2", "SACT_p3"};
+  for (int i = 0; i < kTier3ParamCols; ++i)
+    setCommentIfBlank(php->smcDl[i], kTier3ParamDefs[i]);
+
+  static constexpr const char *kTier3SatcDefs[MNCAS] = {
+      "SurfT_idx", "SACT_mod", "Sorb_all", "Dens_unit"};
+  for (int i = 0; i < MNCAS; ++i)
+    setCommentIfBlank(php->smcDsl[i], kTier3SatcDefs[i]);
 }
 
 // ----------------- End of m_phase2.cpp -------------------------

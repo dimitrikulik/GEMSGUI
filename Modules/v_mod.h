@@ -1053,6 +1053,8 @@ enum phase_objects { // PHASE
   o_phapcon,
   o_phascp,
   o_phlicu,
+  o_phsmcdsl,
+  o_phsmcspl,
 
   // work
   o_ph_w_lsc,

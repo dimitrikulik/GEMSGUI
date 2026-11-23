@@ -43,7 +43,7 @@ enum eEdit { eYes='+', eNo='-', eParam='?' };
 enum ePlaceMode { First='*', Fixed='+',
                   Right='r', Down='d',
                   NextP='n', SkipLine='b',
-                  Tied = 't', Sticked = 's',
+                  Tied = 't', TiedT = 'T', Sticked = 's',
                   Under='u',  UndeTabl = 'l',
                   MutableB = 'm' };
 
@@ -75,6 +75,11 @@ struct FieldInfo
               int h = DEF_N_BROWSE);
     explicit FieldInfo( int anO, eFieldType fT, int np, bool lb,
                ePlaceMode pl, eEdit e, eShowType sT, int w, int h);
+
+    bool isTransposed() const { return place == TiedT; }
+    bool isTiedPlace() const { return place == Tied || place == TiedT; }
+    int dispNS() const { return isTransposed() ? pObj->GetMS() : pObj->GetNS(); }
+    int dispMS() const { return isTransposed() ? pObj->GetNS() : pObj->GetMS(); }
 
     void toDAT(std::ostream& os);
     void fromDAT(std::istream& os);	// must be protected

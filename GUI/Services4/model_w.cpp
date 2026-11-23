@@ -55,16 +55,16 @@ TObjectModel::TObjectModel( const QList<FieldInfo>	aFlds,  QObject * parent ):
 
 int TObjectModel::rCount() const
 {
-    int deltaN = 0, sizeN = flds[0].pObj->GetNS();
+    int deltaN = 0, sizeN = flds[0].dispNS();
     for(int  ii=1; ii< flds.count(); ii++)
     {
-        if(  flds[ii].place == Tied )
-            sizeN = std::max( sizeN, flds[ii].pObj->GetNS() );
+        if(  flds[ii].isTiedPlace() )
+            sizeN = std::max( sizeN, flds[ii].dispNS() );
 
         if(  flds[ii].place == Sticked || flds[ii].place == UndeTabl )
         {
             deltaN += sizeN;
-            sizeN = flds[ii].pObj->GetNS();
+            sizeN = flds[ii].dispNS();
         }
     }
     return deltaN + sizeN;
@@ -87,7 +87,7 @@ int TObjectModel::cCount() const
         {   ii++;  }
     }
 
-    int currentdeltaM = 0, deltaM = 0, sizeM = flds[ii].pObj->GetMS();
+    int currentdeltaM = 0, deltaM = 0, sizeM = flds[ii].dispMS();
     ii++;
     for(  ; ii< flds.count(); ii++)
     {
@@ -98,11 +98,11 @@ int TObjectModel::cCount() const
             sizeM =0;
         }
         if(  flds[ii].place == Sticked || flds[ii].place == UndeTabl )
-            sizeM = std::max( sizeM, flds[ii].pObj->GetMS() );
-        if(  flds[ii].place == Tied )
+            sizeM = std::max( sizeM, flds[ii].dispMS() );
+        if(  flds[ii].isTiedPlace() )
         {
             currentdeltaM += sizeM;
-            sizeM = flds[ii].pObj->GetMS();
+            sizeM = flds[ii].dispMS();
         }
     }
     return std::max(deltaM, currentdeltaM+sizeM );
@@ -125,19 +125,19 @@ int TObjectModel::getObjFromModel( int row, int col,
         {   ii++;  }
     }
 
-    int deltaN = 0, sizeN = flds[ii].pObj->GetNS();
-    int fuldeltaM = 0, deltaM = 0,sizeM = flds[ii].pObj->GetMS();
+    int deltaN = 0, sizeN = flds[ii].dispNS();
+    int fuldeltaM = 0, deltaM = 0,sizeM = flds[ii].dispMS();
 
     nO = iN = iM = -1;
 
     iistart = ii;
     for( ; ii< flds.count(); ii++)
     {
-        if( ii > iistart && flds[ii].place == Tied )
+        if( ii > iistart && flds[ii].isTiedPlace() )
         {
             deltaM += sizeM;
-            sizeM = flds[ii].pObj->GetMS();
-            sizeN = std::max( sizeN, flds[ii].pObj->GetNS() );
+            sizeM = flds[ii].dispMS();
+            sizeN = std::max( sizeN, flds[ii].dispNS() );
         }
         if( flds[ii].place == UndeTabl )
         {
@@ -148,15 +148,17 @@ int TObjectModel::getObjFromModel( int row, int col,
         if( ii > iistart && ( flds[ii].place == Sticked || flds[ii].place == UndeTabl ) )
         {
             deltaN += sizeN;
-            sizeN = flds[ii].pObj->GetNS();
-            sizeM = std::max( sizeM, flds[ii].pObj->GetMS() );
+            sizeN = flds[ii].dispNS();
+            sizeM = std::max( sizeM, flds[ii].dispMS() );
         }
-        if( ( deltaN + flds[ii].pObj->GetNS() > row ) &&
-                ( deltaM + flds[ii].pObj->GetMS() > col ) )
+        if( ( deltaN + flds[ii].dispNS() > row ) &&
+                ( deltaM + flds[ii].dispMS() > col ) )
         {
             nO =  flds[ii].nO;
             iN = row - deltaN;
             iM = col - deltaM;
+            if( flds[ii].isTransposed() )
+                std::swap( iN, iM );
             if( iN < 0 || iM < 0 )
             {
                 nO = -1;
@@ -166,9 +168,9 @@ int TObjectModel::getObjFromModel( int row, int col,
             {
                 // deltaM += fuldeltaM;
                 sel->N1 = std::max(deltaN, sel->N1 );
-                sel->N2 = std::min(deltaN + flds[ii].pObj->GetNS()-1, sel->N2 );
+                sel->N2 = std::min(deltaN + flds[ii].dispNS()-1, sel->N2 );
                 sel->M1 = std::max(deltaM, sel->M1 );
-                sel->M2 = std::min(deltaM + flds[ii].pObj->GetMS()-1, sel->M2 );
+                sel->M2 = std::min(deltaM + flds[ii].dispMS()-1, sel->M2 );
                 /*if( to_calc == 1 )
                {
                  sel->N1 -= deltaN;
@@ -309,17 +311,17 @@ QVariant TObjectModel::headerData( int section, Qt::Orientation orientation, int
             break;
         if( orientation == Qt::Horizontal )
         {
-            if( flds[ii].label && aObj[nO]->GetNS() > 1  )
+            if( flds[ii].label && flds[ii].dispNS() > 1  )
             {
                 return getHorizontalLabel(aObj[nO].get(), iM);
             }
         }
         else
         {
-            if( flds[ii].label && iN == 0  && aObj[nO]->GetNS() == 1) // only line objects
+            if( flds[ii].label && iN == 0  && flds[ii].dispNS() == 1) // only line objects
                 return aObj[nO]->GetKeywd();
             else
-                if( aObj[nO]->GetNS() > 1 ) // only multi
+                if( flds[ii].dispNS() > 1 ) // only multi
                     return QVariant(iN);
         }
         break;
@@ -328,7 +330,7 @@ QVariant TObjectModel::headerData( int section, Qt::Orientation orientation, int
             return QSize(0,0);
         if( orientation == Qt::Horizontal )
         {
-            if( flds[ii].label && aObj[nO]->GetNS() > 1 )
+            if( flds[ii].label && flds[ii].dispNS() > 1 )
             {
                 auto label = getHorizontalLabel(aObj[nO].get(), iM);
                 int label_size = (label.size()+1)*pVisorImp->getCharWidth();
@@ -340,9 +342,9 @@ QVariant TObjectModel::headerData( int section, Qt::Orientation orientation, int
         }
         else //if( orientation == Qt::Vertical )
         {
-            if( flds[ii].label && iN == 0  && aObj[nO]->GetNS() == 1) // only line objects
+            if( flds[ii].label && iN == 0  && flds[ii].dispNS() == 1) // only line objects
                 return QSize( wdF(ftString, 7, eNo ), htF(flds[ii].fType, flds[ii].maxN));
-            else  if( aObj[nO]->GetNS() > 1 ) // only multi
+            else  if( flds[ii].dispNS() > 1 ) // only multi
                 return QSize( wdF(ftString, 5, eNo ), htF(flds[ii].fType, flds[ii].maxN));
             else
                 return QSize( 0, htF(flds[ii].fType, flds[ii].maxN));
@@ -468,8 +470,8 @@ void TObjectTable::getObjectSize( int& rowSize, int& colSize )
         if( flds[1].pObj->GetMS() >= flds[2].pObj->GetMS()+flds[3].pObj->GetMS())
         {   ii++;  }
     }
-    int sizeN = flds[ii].pObj->GetNS();
-    int sizeM = flds[ii].pObj->GetMS();
+    int sizeN = flds[ii].dispNS();
+    int sizeM = flds[ii].dispMS();
 
     // scroling for TextEdit fields
     //22/04/2010
@@ -497,13 +499,13 @@ void TObjectTable::getObjectSize( int& rowSize, int& colSize )
     ii++;
     for( ; ii< flds.count(); ii++)
     {
-        if(  flds[ii].place == Tied )
+        if(  flds[ii].isTiedPlace() )
         {
-            sizeN = std::max( sizeN, flds[ii].pObj->GetNS() );
+            sizeN = std::max( sizeN, flds[ii].dispNS() );
             col_ii += sizeM;
-            sizeM = flds[ii].pObj->GetMS();
+            sizeM = flds[ii].dispMS();
 
-            if(flds[ii].pObj->GetNS() == 0 ||sizeM ==0 )
+            if(flds[ii].dispNS() == 0 ||sizeM ==0 )
                 continue;
 
             if(fullrowSize == 0 || fullcolSize == 0) // first not empty
@@ -528,11 +530,11 @@ void TObjectTable::getObjectSize( int& rowSize, int& colSize )
 
         if(  flds[ii].place == Sticked || flds[ii].place == UndeTabl )
         {
-            sizeM = std::max( sizeM, flds[ii].pObj->GetMS() );
+            sizeM = std::max( sizeM, flds[ii].dispMS() );
             row_ii += sizeN;
-            sizeN = flds[ii].pObj->GetNS();
+            sizeN = flds[ii].dispNS();
 
-            if( flds[ii].pObj->GetMS() == 0 || sizeN ==0 )
+            if( flds[ii].dispMS() == 0 || sizeN ==0 )
                 continue;
 
             rowSize += ( verticalHeader()->sectionSize( row_ii ) * std::min(abs(flds[ii].maxN), sizeN ) );
