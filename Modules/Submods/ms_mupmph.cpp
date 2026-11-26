@@ -114,6 +114,10 @@ void TMulti::MultiSystemInit() {
   if (N != pm.N)
     vfMessage(window(), "Multi make error: N != pm.N",
               "Please, press the BCC button first!");
+  if (pm.FWGTS) {
+    for (int k = 0; k < pm.FIs; k++)
+      pm.FWGTS[k] = 0.0;
+  }
 NEXT2:
   // loading data for DCs (dependent components)
   multi_sys_dc();
