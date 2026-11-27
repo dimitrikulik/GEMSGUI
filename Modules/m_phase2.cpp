@@ -744,6 +744,35 @@ void TPhase::MakeSublatticeLists(const TCStringArray &form_array) {
 #define s(i, j) php->scoef[(j) + (i) * nsc]
 // #define sit(i,j) php->pnc[(j)+(i)*nAn] // not used SD 11/12/2008
 
+namespace {
+
+bool isCommentBlank(const char *s, size_t maxLen) {
+  if (!s)
+    return true;
+  for (size_t i = 0; i < maxLen && s[i] != '\0'; ++i) {
+    if (s[i] != ' ' && s[i] != CHAR_EMPTY && s[i] != A_NUL)
+      return false;
+  }
+  return true;
+}
+
+void setCommentText(char *dst, const char *text) {
+  if (!dst || !text)
+    return;
+  std::memset(dst, ' ', MAXDCNAME);
+  size_t len = std::min(std::strlen(text), static_cast<size_t>(MAXDCNAME - 1));
+  std::memcpy(dst, text, len);
+  dst[MAXDCNAME - 1] = '\0';
+}
+
+void setCommentIfBlank(char *dst, const char *defText) {
+  if (!dst || !isCommentBlank(dst, MAXDCNAME))
+    return;
+  setCommentText(dst, defText);
+}
+
+} // namespace
+
 // Recalc record structure
 void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
   int i, pa0 = 0, Kielland = 0;
@@ -924,31 +953,165 @@ void TPhase::CalcPhaseRecord(/*bool getDCC*/) {
           /*   php->MASDJ[i][PI_DEN] = Masdj0;  // Temporarily disabled
              php->MASDJ[i][PI_P1] = Fi;
              php->MASDJ[i][PI_P2] = cN;
-             php->MASDJ[i][PI_P3] = 0.0f;
-             if (php->mCDc) {
-               php->mCDc[i][0] = a0;
-               php->mCDc[i][1] = bp;
-               php->mCDc[i][2] = 0.0f;
-               php->mCDc[i][3] = Z;
-             } */
+             php->MASDJ[i][PI_P3] = 0.0f; */
         } else { //  Sorbent has no data for surface charges
           php->MASDJ[i][PI_DEN] = FLOAT_EMPTY;
           php->MASDJ[i][PI_P1] = FLOAT_EMPTY;
           php->MASDJ[i][PI_P2] = FLOAT_EMPTY;
           php->MASDJ[i][PI_P3] = FLOAT_EMPTY;
-          if (php->mCDc) {
-            php->mCDc[i][0] = FLOAT_EMPTY;
-            php->mCDc[i][1] = FLOAT_EMPTY;
-            php->mCDc[i][2] = FLOAT_EMPTY;
-            php->mCDc[i][3] = FLOAT_EMPTY;
-          }
         }
       }
-      // SCM Modernization: transferred data to php->mCDc (charge allocation)
-      // array
+      if (php->mCDc) {
+        if (!(php->DCC[i] == DC_SUR_CARRIER || php->DCC[i] == DC_SUR_MINAL ||
+              php->DCC[i] == DC_PEL_CARRIER)) {
+          bool anySet = false;
+          float sum = 0.0f;
+          for (int p = CHARGE_ON_A; p <= CHARGE_ON_C; ++p) {
+            if (!IsFloatEmpty(php->mCDc[i][p])) {
+              sum += php->mCDc[i][p];
+              anySet = true;
+            }
+          }
+          php->mCDc[i][CHARGE_BAL] = anySet ? sum : FLOAT_EMPTY;
+        } else {
+          for (int p = 0; p < DMCDC; ++p)
+            php->mCDc[i][p] = FLOAT_EMPTY;
+        }
+      }
+      // SCM Modernization: transferred data and charge balance to php->mCDc
     }
 
   } // i
+
+  if ((php->PphC == PH_SORPTION || php->PphC == PH_POLYEL ||
+       php->PphC == PH_ADSSBEIL || php->PphC == PH_ADSORPT ||
+       php->PphC == PH_IONEX) &&
+      (php->PFsuT == S_ON || php->PFsuT == S_REM)) {
+    ensureSorptionCommentLists();
+
+    // Clean up unused surface types (SC_UNUSED / SC_NOT_USED)
+    if (php->SCMC) {
+      const int nSurfRows =
+          std::min<int>(MNST, static_cast<int>(aObj[o_phscmc]->GetNS()));
+      for (int sut = 0; sut < nSurfRows; ++sut) {
+        const char eilm = php->SCMC[sut][SCMC_EILM_CODE];
+        if (eilm == SC_UNUSED || eilm == SC_NOT_USED) {
+          if (php->MASDT && sut < static_cast<int>(aObj[o_phmsdt]->GetNS())) {
+            for (int c = 0; c < NMSDT; ++c)
+              php->MASDT[sut][c] = FLOAT_EMPTY;
+          }
+          if (php->CapT && sut < static_cast<int>(aObj[o_phcapt]->GetNS())) {
+            for (int c = 0; c < NCAZP; ++c)
+              php->CapT[sut][c] = FLOAT_EMPTY;
+          }
+          if (php->eimLl && sut < static_cast<int>(aObj[o_pheimll]->GetNS())) {
+            setCommentText(php->eimLl[sut], "none");
+          }
+        }
+      }
+    }
+
+    // Clean up inactive site types (density and capacity both 0 or FLOAT_EMPTY)
+    if (php->FsiT) {
+      auto isZeroOrEmpty = [](float v) {
+        return IsFloatEmpty(v) || approximatelyZero(v);
+      };
+      const int nSiteRows =
+          std::min<int>(NSURFSITE, static_cast<int>(aObj[o_phfsit]->GetNS()));
+      for (int sit = 0; sit < nSiteRows; ++sit) {
+        if (isZeroOrEmpty(php->FsiT[sit][FSIT_S_DENSITY]) &&
+            isZeroOrEmpty(php->FsiT[sit][FSIT_S_CAPACITY])) {
+          for (int c = 0; c < NFSIT; ++c)
+            php->FsiT[sit][c] = FLOAT_EMPTY;
+          if (php->smcSl && sit < static_cast<int>(aObj[o_phsmcsl]->GetNS())) {
+            setCommentText(php->smcSl[sit], "none");
+          }
+          if (php->XSMD && sit < static_cast<int>(aObj[o_phxsmd]->GetMS())) {
+            const int nXsmdRows =
+                std::min<int>(php->nDC, static_cast<int>(aObj[o_phxsmd]->GetNS()));
+            for (int ja = 0; ja < nXsmdRows; ++ja)
+              php->XSMD[ja][sit] = CHAR_EMPTY;
+          }
+        }
+      }
+    }
+
+    // Check XSMD bonds belong to a single surface type and sync SATC[ja][0]
+    if (php->XSMD && php->FsiT) {
+      const int nRows =
+          std::min<int>(php->nDC, static_cast<int>(aObj[o_phxsmd]->GetNS()));
+      const int nCols = std::min<int>(
+          {NSURFSITE, static_cast<int>(aObj[o_phxsmd]->GetMS()),
+           static_cast<int>(aObj[o_phfsit]->GetNS())});
+      std::string warnLines;
+      for (int ja = 0; ja < nRows; ++ja) {
+        if (php->DCC && (php->DCC[ja] == DC_SUR_CARRIER ||
+                         php->DCC[ja] == DC_SUR_MINAL ||
+                         php->DCC[ja] == DC_PEL_CARRIER))
+          continue;
+
+        int common_st = -1;
+        bool conflict = false;
+        bool invalidSite = false;
+        std::string allocDetail;
+        for (int sit = 0; sit < nCols; ++sit) {
+          const char val = php->XSMD[ja][sit];
+          const bool hasBond =
+              (val >= '1' && val <= '9') || (val >= 1 && val <= 9);
+          if (!hasBond)
+            continue;
+
+          const float st_f = php->FsiT[sit][FSIT_S_SURTYPE];
+          if (IsFloatEmpty(st_f)) {
+            invalidSite = true;
+            allocDetail += " site " + std::to_string(sit) + "->empty";
+            continue;
+          }
+          const int site_st = static_cast<int>(std::lround(st_f));
+          if (site_st < 0 || site_st >= MNST) {
+            invalidSite = true;
+            allocDetail += " site " + std::to_string(sit) + "->SurfType " +
+                           std::to_string(site_st);
+            continue;
+          }
+          allocDetail += " site " + std::to_string(sit) + "->SurfType " +
+                         std::to_string(site_st);
+          if (common_st < 0)
+            common_st = site_st;
+          else if (site_st != common_st)
+            conflict = true;
+        }
+
+        if (conflict || invalidSite) {
+          std::string spName(php->SM[ja], php->SM[ja] + DC_RKLEN);
+          while (!spName.empty() &&
+                 (spName.back() == ' ' || spName.back() == '\0'))
+            spName.pop_back();
+          if (conflict) {
+            warnLines += "- " + spName + ": bonds span multiple surface types (" +
+                         allocDetail + ")\n";
+          } else {
+            warnLines += "- " + spName +
+                         ": invalid or missing FsiT surface type index (" +
+                         allocDetail + ")\n";
+          }
+        } else if (common_st >= 0 && php->SATC &&
+                   ja < static_cast<int>(aObj[o_phsatc]->GetNS())) {
+          php->SATC[ja][SURSP_ALLOC_SURFTYPE] =
+              static_cast<char>(CST_0 + common_st);
+        }
+      }
+      if (!warnLines.empty()) {
+        vfMessage(
+            window(), GetName(),
+            "Invalid surface species site allocation in XSMD:\n"
+            "All bonds of a surface species must be with site types allocated "
+            "on the same surface type (FsiT column 2).\n\n" +
+                warnLines,
+            vfWarn);
+      }
+    }
+  }
 
   //=====================================================================================
 
@@ -1938,29 +2101,6 @@ void TPhase::set_def_comments(bool clearall, const char *old_sol,
 
   ensureSorptionCommentLists();
 }
-
-namespace {
-
-bool isCommentBlank(const char *s, size_t maxLen) {
-  if (!s)
-    return true;
-  for (size_t i = 0; i < maxLen && s[i] != '\0'; ++i) {
-    if (s[i] != ' ' && s[i] != CHAR_EMPTY && s[i] != A_NUL)
-      return false;
-  }
-  return true;
-}
-
-void setCommentIfBlank(char *dst, const char *defText) {
-  if (!dst || !isCommentBlank(dst, MAXDCNAME))
-    return;
-  std::memset(dst, ' ', MAXDCNAME);
-  size_t len = std::min(std::strlen(defText), static_cast<size_t>(MAXDCNAME - 1));
-  std::memcpy(dst, defText, len);
-  dst[MAXDCNAME - 1] = '\0';
-}
-
-} // namespace
 
 void TPhase::ensureSorptionCommentLists() {
   if (php->PFsuT != S_ON && php->PFsuT != S_REM)

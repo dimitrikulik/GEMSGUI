@@ -740,6 +740,20 @@ void TSyst::PhaseExit() {
   mark_ic_to_bc();
 }
 
+namespace {
+inline void recalcMcdcRowBal(float row[DMCDC]) {
+  bool anySet = false;
+  float sum = 0.0f;
+  for (int p = CHARGE_ON_A; p <= CHARGE_ON_C; ++p) {
+    if (!IsFloatEmpty(row[p])) {
+      sum += row[p];
+      anySet = true;
+    }
+  }
+  row[CHARGE_BAL] = anySet ? sum : FLOAT_EMPTY;
+}
+} // namespace
+
 // System test functions ( chek system arrays )
 void TSyst::SyTest() {
   RMULTS *mup = TRMults::sm->GetMU();
@@ -755,6 +769,11 @@ void TSyst::SyTest() {
     sy.Icl[mup->N - 1] = S_ON;
   if (sy.PE == S_OFF && mup->ICC[mup->N - 1] == IC_CHARGE)
     sy.Icl[mup->N - 1] = S_OFF;
+
+  if (sy.mCDc && mup->Lads > 0) {
+    for (long int ja = 0; ja < mup->Lads; ++ja)
+      recalcMcdcRowBal(sy.mCDc[ja]);
+  }
 
   mark_ic_to_dc();
   mark_dc_to_ph();
@@ -1136,6 +1155,7 @@ void TSyst::sorption_data_load(TPhase *aPH, int kph) {
       if (sy.mCDc && aPH->php->mCDc) {
         for (kk = 0; kk < DMCDC; kk++) // SCM Modernization: DMCDC=4
           sy.mCDc[ja][kk] = aPH->php->mCDc[jp][kk];
+        recalcMcdcRowBal(sy.mCDc[ja]);
       }
     } /* end j */
   }

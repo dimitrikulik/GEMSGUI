@@ -354,11 +354,15 @@ void TMulti::multi_sys_dc() {
       }
 
       if (syp->mCDc && pm.mCDc) {
-        for (kk = 0; kk < DMCDC; kk++)
+        for (kk = CHARGE_ON_A; kk <= CHARGE_ON_C; kk++) {
           if (!IsFloatEmpty(syp->mCDc[jja][kk]))
             pm.mCDc[ja][kk] = syp->mCDc[jja][kk];
           else
             pm.mCDc[ja][kk] = 0.0;
+        }
+        pm.mCDc[ja][CHARGE_BAL] = pm.mCDc[ja][CHARGE_ON_A] +
+                                  pm.mCDc[ja][CHARGE_ON_B] +
+                                  pm.mCDc[ja][CHARGE_ON_C];
       }
     }
     if (syp->PSATT != S_OFF) { // Loading codes of isotherms & SACT calculation
@@ -457,8 +461,9 @@ void TMulti::multi_sys_dc() {
       */
       pm.SATX[ja][XL_SP] = 0; // Allocation to farthest EIL plane
       if (syp->mCDc) {
-        for (int pl = DMCDC - 1; pl >= 0; pl--) {
-          if (fabs(syp->mCDc[jja][pl]) > 1e-6) {
+        for (int pl = CHARGE_ON_C; pl >= CHARGE_ON_A; pl--) {
+          if (!IsFloatEmpty(syp->mCDc[jja][pl]) &&
+              fabs(syp->mCDc[jja][pl]) > 1e-6) {
             pm.SATX[ja][XL_SP] = pl;
             break;
           }
@@ -1126,17 +1131,20 @@ void TMulti::ph_sur_site_type_assign(int k, int jb, int je, int car_l[],
 
     // Tier 3: Loading mCDc (multi-plane charge allocation)
     if (syp->mCDc && pm.mCDc) {
-      for (int p = 0; p < DMCDC; p++) {
+      for (int p = CHARGE_ON_A; p <= CHARGE_ON_C; p++) {
         if (!IsFloatEmpty(syp->mCDc[jja][p]))
           pm.mCDc[ja][p] = syp->mCDc[jja][p];
         else
           pm.mCDc[ja][p] = 0.0;
       }
+      pm.mCDc[ja][CHARGE_BAL] = pm.mCDc[ja][CHARGE_ON_A] +
+                                pm.mCDc[ja][CHARGE_ON_B] +
+                                pm.mCDc[ja][CHARGE_ON_C];
     }
     // Allocation to farthest EIL plane
     pm.SATX[ja][XL_SP] = 0;
     if (pm.mCDc) {
-      for (int pl = DMCDC - 1; pl >= 0; pl--) {
+      for (int pl = CHARGE_ON_C; pl >= CHARGE_ON_A; pl--) {
         if (fabs(pm.mCDc[ja][pl]) > 1e-6) {
           pm.SATX[ja][XL_SP] = pl;
           break;
